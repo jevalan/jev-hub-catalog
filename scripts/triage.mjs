@@ -2,11 +2,13 @@ import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { readJson } from "./lib/json.mjs";
 import { CATALOG, TRIAGE_CACHE } from "./lib/paths.mjs";
-import { signal } from "./lib/triage-signals.mjs";
+import { signal, NOT_SURFACE } from "./lib/triage-signals.mjs";
 
 const API = "https://api.github.com";
 const RAW = "https://raw.githubusercontent.com";
 const MANIFESTS = ["package.json", "Cargo.toml", "pyproject.toml"];
+const MANIFEST_LIMIT = 5;
+const VENDORED = /(^|\/)(node_modules|vendor|third_party)\//i;
 const BRANCHES = ["main", "master"];
 
 export const cacheKey = (repo) => repo.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -39,11 +41,19 @@ export async function fetchTree(repo, branch) {
   return { status: "ok", state: "ok", tree: (body.tree || []).filter((e) => e.type === "blob").map((e) => e.path) };
 }
 
-/** Manifiestos por CDN cruda: no consumen el límite de la API. */
-export async function fetchManifests(repo, branch) {
+/** Manifiestos por CDN cruda: no consumen el límite de la API. Se leen los que
+ * el árbol declare, no solo los de la raíz: un paquete anidado (sidecar/) declara
+ * ahí sus scripts, y quedarse con la raíz perdería su CLI. */
+export async function fetchManifests(repo, branch, tree = []) {
+  const candidates = tree
+    .filter((p) => MANIFESTS.includes(p.split("/").pop()) && !NOT_SURFACE.test(p) && !VENDORED.test(p))
+    .sort((a, b) => a.split("/").length - b.split("/").length)
+    .slice(0, MANIFEST_LIMIT);
   const out = {};
-  for (const name of MANIFESTS) {
-    const res = await fetch(`${RAW}/${repo}/${branch}/${name}`);
+  for (const path of candidates) {
+    const name = path.split("/").pop();
+    if (name in out) continue; // el más cercano a la raíz gana
+    const res = await fetch(`${RAW}/${repo}/${branch}/${path}`);
     if (!res.ok) continue;
     const text = await res.text();
     out[name] = name.endsWith(".json") ? JSON.parse(text) : text;
@@ -60,7 +70,7 @@ export async function fetchEntry(repo) {
       last = "gone";
       continue;
     }
-    return { state: "ok", branch, tree, manifests: await fetchManifests(repo, branch) };
+    return { state: "ok", branch, tree, manifests: await fetchManifests(repo, branch, tree) };
   }
   return { state: last };
 }

@@ -585,13 +585,13 @@ Expected: FAIL — `ENOENT: no such file or directory, open '.../data/assessment
 | --- | --- | --- | ---: | --- | --- | --- | --- | --- | --- | --- |
 | `RiskAverseTech/toolgate` | true | research | 2 | yes | inferred | exec | cli, mcp, hook, lib | node | typesafe, openrouter | any |
 | `qkal/Canny` | true | agents | 121 | yes | review | exec | cli | node | typesafe | any |
-| `Brainwires/jevwire` | true | agents | 21 | yes | interfaces | exec | cli, mcp, lib | node | typesafe | any |
-| `GhalebDweikat/winnow` | true | agents | 102 | no | context | n_a | mcp, cli | python | none | any |
-| `tamaratran/fast-jev-compaction` | true | agents | 7458 | no | context | n_a | lib | node | typesafe | any |
+| `Brainwires/jevwire` | true | agents | 21 | yes | interfaces | exec | cli, mcp, hook, lib | node | typesafe | any |
+| `GhalebDweikat/winnow` | true | agents | 102 | no | context | n_a | cli, mcp, hook, lib | python | none | any |
+| `tamaratran/fast-jev-compaction` | true | agents | 7458 | no | context | n_a | hook, lib | node | typesafe | any |
 | `shitianfang/wakegate` | false | null | null | no | inferred | n_a | lib | node | none | any |
 | `Yaxin9Luo/spending-effort-with-jev` | true | agents | 6 | no | routing | n_a | hook | node | typesafe | any |
-| `ruban-24/switchboard` | true | agents | 15 | no | routing | n_a | cli | node | typesafe, openrouter | any |
-| `Dicklesworthstone/skillranker` | true | agents | 128 | yes | routing | exec | cli | rust | typesafe | unix |
+| `ruban-24/switchboard` | true | agents | 15 | no | routing | n_a | cli, lib | node | typesafe, openrouter | any |
+| `Dicklesworthstone/skillranker` | true | agents | 128 | yes | routing | exec | cli, lib | rust | typesafe | unix |
 | `JoaquinRuiz/medula` | false | null | null | yes | inferred | http | http, lib | python | openrouter | any |
 | `typesafe-ai/typesafe-sdk-js` | true | official | 269 | no | inferred | n_a | lib | node | none | any |
 | `typesafe-ai/typesafe-sdk-python` | true | official | 272 | no | inferred | n_a | lib | python | none | any |
@@ -1043,11 +1043,13 @@ import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { readJson } from "./lib/json.mjs";
 import { CATALOG, TRIAGE_CACHE } from "./lib/paths.mjs";
-import { signal } from "./lib/triage-signals.mjs";
+import { signal, NOT_SURFACE } from "./lib/triage-signals.mjs";
 
 const API = "https://api.github.com";
 const RAW = "https://raw.githubusercontent.com";
 const MANIFESTS = ["package.json", "Cargo.toml", "pyproject.toml"];
+const MANIFEST_LIMIT = 5;
+const VENDORED = /(^|\/)(node_modules|vendor|third_party)\//i;
 const BRANCHES = ["main", "master"];
 
 export const cacheKey = (repo) => repo.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
@@ -1080,11 +1082,19 @@ export async function fetchTree(repo, branch) {
   return { status: "ok", state: "ok", tree: (body.tree || []).filter((e) => e.type === "blob").map((e) => e.path) };
 }
 
-/** Manifiestos por CDN cruda: no consumen el límite de la API. */
-export async function fetchManifests(repo, branch) {
+/** Manifiestos por CDN cruda: no consumen el límite de la API. Se leen los que
+ * el árbol declare, no solo los de la raíz: un paquete anidado (sidecar/) declara
+ * ahí sus scripts, y quedarse con la raíz perdería su CLI. */
+export async function fetchManifests(repo, branch, tree = []) {
+  const candidates = tree
+    .filter((p) => MANIFESTS.includes(p.split("/").pop()) && !NOT_SURFACE.test(p) && !VENDORED.test(p))
+    .sort((a, b) => a.split("/").length - b.split("/").length)
+    .slice(0, MANIFEST_LIMIT);
   const out = {};
-  for (const name of MANIFESTS) {
-    const res = await fetch(`${RAW}/${repo}/${branch}/${name}`);
+  for (const path of candidates) {
+    const name = path.split("/").pop();
+    if (name in out) continue; // el más cercano a la raíz gana
+    const res = await fetch(`${RAW}/${repo}/${branch}/${path}`);
     if (!res.ok) continue;
     const text = await res.text();
     out[name] = name.endsWith(".json") ? JSON.parse(text) : text;
@@ -1098,7 +1108,7 @@ export async function fetchEntry(repo) {
     const { state, tree } = await fetchTree(repo, branch);
     if (state === "rate_limited" || state === "pending") return { state };
     if (state === "gone") { last = "gone"; continue; }
-    return { state: "ok", branch, tree, manifests: await fetchManifests(repo, branch) };
+    return { state: "ok", branch, tree, manifests: await fetchManifests(repo, branch, tree) };
   }
   return { state: last };
 }
@@ -1242,6 +1252,10 @@ const pyLibrary = (manifests, tree) =>
 const rustLibrary = (manifests, tree) => /\[lib\]/.test(manifests["Cargo.toml"] || "") || has(tree, "src/lib.rs");
 const rustBin = (manifests) => /\[\[bin\]\]/.test(manifests["Cargo.toml"] || "");
 const pyScripts = (manifests) => /\[project\.scripts\]|console_scripts/.test(manifests["pyproject.toml"] || "");
+// Los ficheros de prueba no son superficie del proyecto: un server.py dentro de
+// tests/fixtures es un doble, no un servicio que se pueda invocar. Los
+// workspaces de bench/ son entradas de un benchmark, no un paquete del repo.
+export const NOT_SURFACE = /(^|\/)(tests?|fixtures?|examples?|__tests__|benchs?|benchmarks?)\//i;
 
 /**
  * Deduce las superficies invocables del árbol y de los manifiestos. Pura a
@@ -1255,11 +1269,11 @@ export function signal(tree, manifests = {}) {
 
   if (has(tree, ".claude-plugin/plugin.json") || has(tree, ".claude-plugin/marketplace.json")) found.add("hook");
   if (has(tree, "hooks/hooks.json") || some(tree, /(^|\/)hooks\/[^/]+\.(ts|tsx|js|json)$/)) found.add("hook");
-  if (has(tree, ".mcp.json") || some(tree, /(^|\/)mcp[_-]?server\.py$/) || some(tree, /(^|\/)src\/mcp\.ts$/)) found.add("mcp");
+  if (has(tree, ".mcp.json") || some(tree, /(^|\/)mcp[_-]?server\.py$/) || some(tree, /(^|\/)mcp\.(mjs|js|ts)$/) || some(tree, /(^|\/)src\/mcp\.ts$/)) found.add("mcp");
 
   if (bin(manifests) || rustBin(manifests) || pyScripts(manifests)) found.add("cli");
   if (jsLibrary(manifests) || pyLibrary(manifests, tree) || rustLibrary(manifests, tree)) found.add("lib");
-  if (some(tree, /(^|\/)(server|servidor)\.py$/)) found.add("http");
+  if (some(tree.filter((p) => !NOT_SURFACE.test(p)), /(^|\/)(server|servidor)\.py$/)) found.add("http");
 
   const callable = ORDER.filter((c) => found.has(c));
   if (callable.length === 0) return { callable: ["none"], form_hint: "n_a" };

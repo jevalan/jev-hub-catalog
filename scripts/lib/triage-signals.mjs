@@ -15,6 +15,10 @@ const pyLibrary = (manifests, tree) =>
 const rustLibrary = (manifests, tree) => /\[lib\]/.test(manifests["Cargo.toml"] || "") || has(tree, "src/lib.rs");
 const rustBin = (manifests) => /\[\[bin\]\]/.test(manifests["Cargo.toml"] || "");
 const pyScripts = (manifests) => /\[project\.scripts\]|console_scripts/.test(manifests["pyproject.toml"] || "");
+// Los ficheros de prueba no son superficie del proyecto: un server.py dentro de
+// tests/fixtures es un doble, no un servicio que se pueda invocar. Los
+// workspaces de bench/ son entradas de un benchmark, no un paquete del repo.
+export const NOT_SURFACE = /(^|\/)(tests?|fixtures?|examples?|__tests__|benchs?|benchmarks?)\//i;
 
 /**
  * Deduce las superficies invocables del árbol y de los manifiestos. Pura a
@@ -28,11 +32,11 @@ export function signal(tree, manifests = {}) {
 
   if (has(tree, ".claude-plugin/plugin.json") || has(tree, ".claude-plugin/marketplace.json")) found.add("hook");
   if (has(tree, "hooks/hooks.json") || some(tree, /(^|\/)hooks\/[^/]+\.(ts|tsx|js|json)$/)) found.add("hook");
-  if (has(tree, ".mcp.json") || some(tree, /(^|\/)mcp[_-]?server\.py$/) || some(tree, /(^|\/)src\/mcp\.ts$/)) found.add("mcp");
+  if (has(tree, ".mcp.json") || some(tree, /(^|\/)mcp[_-]?server\.py$/) || some(tree, /(^|\/)mcp\.(mjs|js|ts)$/) || some(tree, /(^|\/)src\/mcp\.ts$/)) found.add("mcp");
 
   if (bin(manifests) || rustBin(manifests) || pyScripts(manifests)) found.add("cli");
   if (jsLibrary(manifests) || pyLibrary(manifests, tree) || rustLibrary(manifests, tree)) found.add("lib");
-  if (some(tree, /(^|\/)(server|servidor)\.py$/)) found.add("http");
+  if (some(tree.filter((p) => !NOT_SURFACE.test(p)), /(^|\/)(server|servidor)\.py$/)) found.add("http");
 
   const callable = ORDER.filter((c) => found.has(c));
   if (callable.length === 0) return { callable: ["none"], form_hint: "n_a" };
