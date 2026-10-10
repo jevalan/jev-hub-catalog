@@ -1,0 +1,19 @@
+{
+  "name": "jevalon-hub-scout",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Mapa de adaptabilidad del ecosistema Jev a jevalon: qué proyectos puede servir el hub, con qué forma y a qué coste.",
+  "type": "module",
+  "scripts": {
+    "fit": "node scripts/import-fit.mjs",
+    "validate": "node scripts/validate.mjs",
+    "build": "node scripts/build.mjs",
+    "triage": "node scripts/triage.mjs",
+    "fixtures": "node scripts/make-fixtures.mjs",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "CC0-1.0"
+}
