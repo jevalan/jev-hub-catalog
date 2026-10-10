@@ -152,7 +152,7 @@ export function writeJson(path, value) {
     "build": "node scripts/build.mjs",
     "triage": "node scripts/triage.mjs",
     "fixtures": "node scripts/make-fixtures.mjs",
-    "test": "node --test tests/"
+    "test": "node --test"
   },
   "engines": {
     "node": ">=20"
@@ -1262,7 +1262,7 @@ Expected: PASS, 3 tests.
 
 - [ ] **Step 4: Run test to verify it passes**
 
-Run: `node --test tests/`
+Run: `node --test`
 Expected: PASS, todos los ficheros: json, catalog, fit-parse, fit, cohort-a, validate, build, triage, triage-signals
 
 - [ ] **Step 5: Commit**
