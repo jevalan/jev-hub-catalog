@@ -873,7 +873,8 @@ Expected: FAIL — `Cannot find module '../scripts/build.mjs'`
 
 ```javascript
 // scripts/build.mjs
-import { readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { dirname } from "node:path";
 import { readJson } from "./lib/json.mjs";
 import { ASSESSMENTS, CATALOG, README, SITE, TEMPLATE } from "./lib/paths.mjs";
 
@@ -884,8 +885,11 @@ const byCohortThenStars = (a, b) => a.cohort.localeCompare(b.cohort) || (b.stars
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 export function coverage(assessments, catalog) {
-  const visible = new Set(catalog.projects.filter((p) => !p.gone).map((p) => (p.repo || "").toLowerCase()));
-  const total = visible.size;
+  const shown = catalog.projects.filter((p) => !p.gone);
+  // El total son entradas, no repos distintos: 96 entradas no tienen repo y
+  // colapsarían en un mismo valor vacío dentro del conjunto.
+  const total = shown.length;
+  const visible = new Set(shown.map((p) => (p.repo || "").toLowerCase()));
   const triaged = assessments.filter((a) => a.evidence === "static").length;
   const evaluated = assessments.filter((a) => a.evidence === "measured").length;
   // Solo lo que está en el catálogo descuenta del total: médula y wakegate están
@@ -945,6 +949,7 @@ if (process.argv[1] && process.argv[1].endsWith("build.mjs")) {
   const { assessments } = readJson(ASSESSMENTS);
   const catalog = readJson(CATALOG);
   writeFileSync(README, buildReadme(assessments, catalog));
+  mkdirSync(dirname(SITE), { recursive: true });
   writeFileSync(SITE, buildSite(assessments, catalog, readFileSync(TEMPLATE, "utf8")));
   const c = coverage(assessments, catalog);
   console.log(`build: ${c.triaged} triadas, ${c.evaluated} evaluadas, ${c.untouched} sin tocar, de ${c.total}`);
