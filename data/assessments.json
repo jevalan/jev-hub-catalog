@@ -130,12 +130,12 @@
       "stars": 15,
       "language": "TypeScript",
       "decision": "no",
-      "fit": "routing",
+      "fit": "domain",
       "form": "n_a",
       "callable": ["cli", "lib"],
       "cost": { "runtime": "node", "requires_key": ["typesafe", "openrouter"], "host": "any" },
       "evidence": "static",
-      "verdict": "Lanzador/proxy para claude y codex: su clasificador es interno y no publica una superficie de decisión que el hub pueda enrutar.",
+      "verdict": "Lanzador/proxy para claude y codex: su clasificador es interno y no publica una superficie de decisión que el hub pueda enrutar. El documento clasificador lo sitúa en tareas de dominio, no en routing, aunque su función sea elegir modelo.",
       "blockers": []
     },
     {

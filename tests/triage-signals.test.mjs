@@ -35,3 +35,13 @@ test("a manifest with only an exports field is a library", () => {
 test("an empty tree yields no surface at all", () => {
   assert.deepEqual(signal([], {}).callable, ["none"]);
 });
+
+test("a plugin manifest alone is not a hook: the hook is the hooks/ module", () => {
+  const onlyManifest = signal([".claude-plugin/plugin.json", "plugin/commands/review.md"], {});
+  assert.deepEqual(onlyManifest.callable, ["none"]);
+});
+
+test("a hooks or mcp module under a test path is a fixture, not a surface", () => {
+  const fixtureTree = ["tests/fixtures/hooks/hooks.json", "tests/mcp.js", "bench/tasks/x/server.py"];
+  assert.deepEqual(signal(fixtureTree, {}).callable, ["none"]);
+});

@@ -8,8 +8,10 @@ const API = "https://api.github.com";
 const RAW = "https://raw.githubusercontent.com";
 const MANIFESTS = ["package.json", "Cargo.toml", "pyproject.toml"];
 const MANIFEST_LIMIT = 5;
-const VENDORED = /(^|\/)(node_modules|vendor|third_party)\//i;
-const BRANCHES = ["main", "master"];
+const VENDORED = /(^|\/)(node_modules|vendor|third_party|dist|target|\.venv)\//i;
+// HEAD primero: el árbol sale de la referencia por defecto del repo. Probar solo
+// main/master marcaría como desaparecido cualquier repo con rama `dev` o `trunk`.
+export const BRANCHES = ["HEAD", "main", "master"];
 
 export const cacheKey = (repo) => repo.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
@@ -19,6 +21,11 @@ export function describeStatus(status) {
   if (status === 403 || status === 429) return "rate_limited";
   return "pending";
 }
+
+/** Solo un estado terminal se guarda. Un 500, un token caducado o un timeout no
+ * pueden quedar grabados como "sin superficie": la caché se reanuda. */
+export const shouldCache = (entry) => entry.state === "ok" || entry.state === "gone";
+export const shouldStop = (entry) => entry.state === "rate_limited" || entry.state === "pending";
 
 export function planTargets(catalog) {
   return catalog.projects
@@ -61,18 +68,24 @@ export async function fetchManifests(repo, branch, tree = []) {
   return out;
 }
 
+/** Un fallo de red o un JSON roto no abortan la tanda: se tratan como estado no
+ * terminal, así que la próxima ejecución los reintenta. */
 export async function fetchEntry(repo) {
-  let last = "gone";
-  for (const branch of BRANCHES) {
-    const { state, tree } = await fetchTree(repo, branch);
-    if (state === "rate_limited" || state === "pending") return { state };
-    if (state === "gone") {
-      last = "gone";
-      continue;
+  try {
+    let last = "gone";
+    for (const branch of BRANCHES) {
+      const { state, tree } = await fetchTree(repo, branch);
+      if (state === "rate_limited" || state === "pending") return { state };
+      if (state === "gone") {
+        last = "gone";
+        continue;
+      }
+      return { state: "ok", branch, tree, manifests: await fetchManifests(repo, branch, tree) };
     }
-    return { state: "ok", branch, tree, manifests: await fetchManifests(repo, branch, tree) };
+    return { state: last };
+  } catch {
+    return { state: "pending" };
   }
-  return { state: last };
 }
 
 async function main() {
@@ -91,10 +104,11 @@ async function main() {
       continue;
     }
     const entry = await fetchEntry(target.repo);
-    if (entry.state === "rate_limited") {
-      console.warn(`límite de la API en ${target.repo}: vuelve a ejecutar, la caché es reanudable`);
+    if (shouldStop(entry)) {
+      console.warn(`estado no terminal (${entry.state}) en ${target.repo}: vuelve a ejecutar, la caché es reanudable`);
       break;
     }
+    if (!shouldCache(entry)) continue;
     const surface = entry.state === "ok" ? signal(entry.tree, entry.manifests) : { callable: ["none"], form_hint: "n_a" };
     writeFileSync(
       file,

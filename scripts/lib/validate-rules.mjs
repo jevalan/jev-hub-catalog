@@ -31,13 +31,17 @@ const CALLABLE = new Set(["cli", "mcp", "http", "hook", "lib", "none"]);
 const EVIDENCE = new Set(["static", "measured"]);
 const COHORTS = new Set(["A", "B", "C"]);
 const HOSTS = new Set(["any", "unix", "windows"]);
-// Una ruta de esta máquina no tiene nada que hacer en un veredicto publicado.
-const ABSOLUTE_PATH = /(?:^|[^A-Za-z])(?:[A-Za-z]:\\|\/(?:home|Users|workspace)\/)/;
+// Una ruta de esta máquina no tiene nada que hacer en un veredicto publicado, ni
+// con barra invertida ni con barra normal.
+const ABSOLUTE_PATH = /(?:^|[^A-Za-z])(?:[A-Za-z]:[\\/]|\/(?:home|Users|workspace)\/)/;
+const TEXT_FIELDS = ["repo", "name", "verdict", "capability"];
 
-export function validateAssessments(assessments, catalog, hasRun) {
+export function validateAssessments(assessments, catalog, hasRun, fit = {}) {
   const errors = [];
   const seen = new Map();
   const known = new Set(catalog.projects.map((p) => (p.repo || "").toLowerCase()).filter(Boolean));
+  const fitIds = new Set((fit.groups || []).map((g) => g.id));
+  const memberOf = fit.members || {};
 
   assessments.forEach((a, i) => {
     const where = `assessments[${i}] ${a.repo || "(sin repo)"}`;
@@ -57,18 +61,36 @@ export function validateAssessments(assessments, catalog, hasRun) {
     if (!Array.isArray(cost.requires_key)) errors.push(`${where}: requires_key debe ser lista`);
     if (!HOSTS.has(cost.host)) errors.push(`${where}: cost.host inválido "${cost.host}"`);
 
-    if (a.evidence === "measured" && !(a.run && hasRun(a.repo))) errors.push(`${where}: evidence measured sin run`);
+    // La forma del campo y su existencia en disco se comprueban por separado: un
+    // predicado inyectado no debe poder dar por bueno un veredicto sin `run`.
+    const declaresRun = typeof a.run === "string" && a.run.trim().length > 0;
+    if (a.evidence === "measured" && !(declaresRun && hasRun(a.run))) {
+      errors.push(`${where}: evidence measured sin run que exista`);
+    }
     if (a.form === "n_a" && !(a.verdict || "").trim()) errors.push(`${where}: form n_a sin verdict que lo explique`);
+
+    // El eje fit lo fija el documento clasificador para sus miembros; fuera de él
+    // solo cabe "inferred".
+    if (a.fit !== "inferred") {
+      if (fitIds.size && !fitIds.has(a.fit)) errors.push(`${where}: fit "${a.fit}" no es un grupo del documento`);
+      else if (!fitIds.size && typeof a.fit !== "string") errors.push(`${where}: fit debe ser un grupo o "inferred"`);
+    }
+    const documented = memberOf[Object.keys(memberOf).find((k) => k.toLowerCase() === key)];
+    if (documented && documented !== a.fit) {
+      errors.push(`${where}: fit "${a.fit}" contradice al documento, que dice "${documented}"`);
+    }
 
     if (a.in_catalog === true && !known.has(key)) errors.push(`${where}: dice estar en el catálogo y no está`);
     if (a.in_catalog === false && known.has(key)) errors.push(`${where}: dice no estar en el catálogo y sí está`);
-    if (a.fit !== "inferred" && typeof a.fit !== "string") errors.push(`${where}: fit debe ser un grupo o "inferred"`);
 
-    if (ABSOLUTE_PATH.test(a.verdict || "")) errors.push(`${where}: verdict contiene una ruta absoluta de la máquina`);
+    const texts = [...TEXT_FIELDS.map((f) => a[f]), ...(Array.isArray(a.blockers) ? a.blockers : [])];
+    if (texts.some((t) => typeof t === "string" && ABSOLUTE_PATH.test(t))) {
+      errors.push(`${where}: contiene una ruta absoluta de la máquina`);
+    }
   });
   return errors;
 }
 
 export function validateAll({ assessments, fit, catalog, hasRun }) {
-  return [...validateFit(fit, catalog), ...validateAssessments(assessments, catalog, hasRun)];
+  return [...validateFit(fit, catalog), ...validateAssessments(assessments, catalog, hasRun, fit)];
 }

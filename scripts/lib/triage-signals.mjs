@@ -15,28 +15,32 @@ const pyLibrary = (manifests, tree) =>
 const rustLibrary = (manifests, tree) => /\[lib\]/.test(manifests["Cargo.toml"] || "") || has(tree, "src/lib.rs");
 const rustBin = (manifests) => /\[\[bin\]\]/.test(manifests["Cargo.toml"] || "");
 const pyScripts = (manifests) => /\[project\.scripts\]|console_scripts/.test(manifests["pyproject.toml"] || "");
+
 // Los ficheros de prueba no son superficie del proyecto: un server.py dentro de
 // tests/fixtures es un doble, no un servicio que se pueda invocar. Los
 // workspaces de bench/ son entradas de un benchmark, no un paquete del repo.
-export const NOT_SURFACE = /(^|\/)(tests?|fixtures?|examples?|__tests__|benchs?|benchmarks?)\//i;
+export const NOT_SURFACE = /(^|\/)(tests?|fixtures?|examples?|__tests__|benchs?|benches|benchmarks?)\//i;
 
 /**
  * Deduce las superficies invocables del árbol y de los manifiestos. Pura a
  * propósito: el mismo trío da siempre la misma respuesta, así que la
  * calibración corre offline contra fixtures congelados.
- * `http` es la señal más débil (un servidor no siempre se ve en las rutas) y
- * el veredicto humano la corrige.
+ *
+ * Un manifiesto de plugin (`.claude-plugin/`) no basta para `hook`: hay plugins
+ * que solo añaden comandos. Lo que engancha con el host es el módulo bajo
+ * `hooks/`. Y `http` sigue siendo la señal más débil (un servidor no siempre se
+ * ve en las rutas); el veredicto humano la corrige.
  */
 export function signal(tree, manifests = {}) {
   const found = new Set();
+  const own = tree.filter((p) => !NOT_SURFACE.test(p));
 
-  if (has(tree, ".claude-plugin/plugin.json") || has(tree, ".claude-plugin/marketplace.json")) found.add("hook");
-  if (has(tree, "hooks/hooks.json") || some(tree, /(^|\/)hooks\/[^/]+\.(ts|tsx|js|json)$/)) found.add("hook");
-  if (has(tree, ".mcp.json") || some(tree, /(^|\/)mcp[_-]?server\.py$/) || some(tree, /(^|\/)mcp\.(mjs|js|ts)$/) || some(tree, /(^|\/)src\/mcp\.ts$/)) found.add("mcp");
+  if (has(own, "hooks/hooks.json") || some(own, /(^|\/)hooks\/[^/]+\.(ts|tsx|js|json)$/)) found.add("hook");
+  if (has(own, ".mcp.json") || some(own, /(^|\/)mcp[_-]?server\.py$/) || some(own, /(^|\/)mcp\.(mjs|js|ts)$/)) found.add("mcp");
 
   if (bin(manifests) || rustBin(manifests) || pyScripts(manifests)) found.add("cli");
   if (jsLibrary(manifests) || pyLibrary(manifests, tree) || rustLibrary(manifests, tree)) found.add("lib");
-  if (some(tree.filter((p) => !NOT_SURFACE.test(p)), /(^|\/)(server|servidor)\.py$/)) found.add("http");
+  if (some(own, /(^|\/)(server|servidor)\.py$/)) found.add("http");
 
   const callable = ORDER.filter((c) => found.has(c));
   if (callable.length === 0) return { callable: ["none"], form_hint: "n_a" };

@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readJson } from "../scripts/lib/json.mjs";
 import { CATALOG } from "../scripts/lib/paths.mjs";
-import { cacheKey, describeStatus, planTargets } from "../scripts/triage.mjs";
+import { BRANCHES, cacheKey, describeStatus, planTargets, shouldCache, shouldStop } from "../scripts/triage.mjs";
 
 const catalog = readJson(CATALOG);
 
@@ -32,4 +32,25 @@ test("HTTP statuses map to the four states that matter", () => {
   assert.equal(describeStatus(403), "rate_limited");
   assert.equal(describeStatus(429), "rate_limited");
   assert.equal(describeStatus(500), "pending");
+});
+
+test("only terminal states reach the resumable cache", () => {
+  assert.equal(shouldCache({ state: "ok" }), true);
+  assert.equal(shouldCache({ state: "gone" }), true);
+  // Un 500 o un token caducado no puede quedar grabado como "sin superficie":
+  // la caché se reanuda, no se envenena.
+  assert.equal(shouldCache({ state: "pending" }), false);
+  assert.equal(shouldCache({ state: "rate_limited" }), false);
+});
+
+test("transient states stop the batch instead of being recorded", () => {
+  assert.equal(shouldStop({ state: "pending" }), true);
+  assert.equal(shouldStop({ state: "rate_limited" }), true);
+  assert.equal(shouldStop({ state: "ok" }), false);
+  assert.equal(shouldStop({ state: "gone" }), false);
+});
+
+test("the tree comes from the repository's own default ref, not from a guess", () => {
+  assert.equal(BRANCHES[0], "HEAD");
+  assert.deepEqual(BRANCHES.slice(1), ["main", "master"]);
 });

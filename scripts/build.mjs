@@ -1,13 +1,18 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import { readJson } from "./lib/json.mjs";
-import { ASSESSMENTS, CATALOG, README, SITE, TEMPLATE } from "./lib/paths.mjs";
+import { ASSESSMENTS, CATALOG, FIT, README, SITE, TEMPLATE } from "./lib/paths.mjs";
+import { hasRun } from "./lib/runs.mjs";
+import { validateAll } from "./lib/validate-rules.mjs";
 
 const EVIDENCE_LABEL = { static: "estático", measured: "medido" };
 const costLabel = (cost) =>
   `${cost.runtime}${cost.requires_key.length ? ` + ${cost.requires_key.join("/")}` : ""}`;
 const byCohortThenStars = (a, b) => a.cohort.localeCompare(b.cohort) || (b.stars || 0) - (a.stars || 0);
 const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+// `replace` interpreta `$&` y compañía en la cadena de reemplazo: con un
+// veredicto que las contenga, el HTML saldría mutilado.
+const insertRows = (html, rows) => html.replace("{{ROWS}}", () => rows);
 
 export function coverage(assessments, catalog) {
   const shown = catalog.projects.filter((p) => !p.gone);
@@ -21,6 +26,13 @@ export function coverage(assessments, catalog) {
   // analizados pero no viven ahí, y contarlos como "tocados" falsearía el reparto.
   const inCatalog = assessments.filter((a) => visible.has(a.repo.toLowerCase())).length;
   return { total, triaged, evaluated, inCatalog, untouched: Math.max(0, total - inCatalog) };
+}
+
+/** Publicar exige pasar el validador: así un veredicto medido sin run no puede
+ * salir al README ni al sitio por la puerta de atrás. */
+export function assertPublishable({ assessments, fit, catalog, hasRun: runExists }) {
+  const errors = validateAll({ assessments, fit, catalog, hasRun: runExists });
+  if (errors.length) throw new Error(`no se publica: ${errors.length} problema(s)\n  - ${errors.join("\n  - ")}`);
 }
 
 export function buildReadme(assessments, catalog) {
@@ -65,14 +77,20 @@ export function buildSite(assessments, catalog, template) {
         `<tr><td><code>${esc(a.repo)}</code></td><td>${esc(a.decision)}</td><td>${esc(a.form)}</td><td>${esc(a.callable.join(", "))}</td><td>${esc(costLabel(a.cost))}</td><td>${esc(EVIDENCE_LABEL[a.evidence])}</td><td>${esc(a.verdict)}</td></tr>`,
     )
     .join("\n");
-  return template
-    .replaceAll("{{COVERAGE}}", `${c.triaged} triadas (${c.inCatalog} en el catálogo) · ${c.evaluated} evaluadas · ${c.untouched} sin tocar`)
-    .replace("{{ROWS}}", rows);
+  return insertRows(
+    template.replaceAll(
+      "{{COVERAGE}}",
+      `${c.triaged} triadas (${c.inCatalog} en el catálogo) · ${c.evaluated} evaluadas · ${c.untouched} sin tocar`,
+    ),
+    rows,
+  );
 }
 
 if (process.argv[1] && process.argv[1].endsWith("build.mjs")) {
   const { assessments } = readJson(ASSESSMENTS);
+  const fit = readJson(FIT);
   const catalog = readJson(CATALOG);
+  assertPublishable({ assessments, fit, catalog, hasRun });
   writeFileSync(README, buildReadme(assessments, catalog));
   mkdirSync(dirname(SITE), { recursive: true });
   writeFileSync(SITE, buildSite(assessments, catalog, readFileSync(TEMPLATE, "utf8")));

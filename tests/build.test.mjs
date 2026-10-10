@@ -2,11 +2,12 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { readJson } from "../scripts/lib/json.mjs";
-import { ASSESSMENTS, CATALOG, TEMPLATE } from "../scripts/lib/paths.mjs";
-import { buildReadme, buildSite, coverage } from "../scripts/build.mjs";
+import { ASSESSMENTS, CATALOG, FIT, TEMPLATE } from "../scripts/lib/paths.mjs";
+import { assertPublishable, buildReadme, buildSite, coverage } from "../scripts/build.mjs";
 
 const { assessments } = readJson(ASSESSMENTS);
 const catalog = readJson(CATALOG);
+const fit = readJson(FIT);
 const readme = buildReadme(assessments, catalog);
 const site = buildSite(assessments, catalog, readFileSync(TEMPLATE, "utf8"));
 
@@ -29,4 +30,18 @@ test("every generated verdict carries its evidence label and its repo", () => {
 test("the site substitutes every placeholder", () => {
   assert.equal(/\{\{[A-Z_]+\}\}/.test(site), false);
   assert.match(site, /<title>Hub Scout<\/title>/);
+});
+
+test("build refuses to publish a verdict the validator rejects", () => {
+  const bad = structuredClone(assessments);
+  bad[0] = { ...bad[0], evidence: "measured", run: undefined };
+  assert.throws(
+    () => assertPublishable({ assessments: bad, fit, catalog, hasRun: () => true }),
+    /measured/,
+    "un medido sin run no puede publicarse",
+  );
+});
+
+test("build accepts the shipped data", () => {
+  assert.doesNotThrow(() => assertPublishable({ assessments, fit, catalog, hasRun: () => false }));
 });

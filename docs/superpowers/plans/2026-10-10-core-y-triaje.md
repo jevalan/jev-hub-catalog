@@ -590,7 +590,7 @@ Expected: FAIL — `ENOENT: no such file or directory, open '.../data/assessment
 | `tamaratran/fast-jev-compaction` | true | agents | 7458 | no | context | n_a | hook, lib | node | typesafe | any |
 | `shitianfang/wakegate` | false | null | null | no | inferred | n_a | lib | node | none | any |
 | `Yaxin9Luo/spending-effort-with-jev` | true | agents | 6 | no | routing | n_a | hook | node | typesafe | any |
-| `ruban-24/switchboard` | true | agents | 15 | no | routing | n_a | cli, lib | node | typesafe, openrouter | any |
+| `ruban-24/switchboard` | true | agents | 15 | no | domain | n_a | cli, lib | node | typesafe, openrouter | any |
 | `Dicklesworthstone/skillranker` | true | agents | 128 | yes | routing | exec | cli, lib | rust | typesafe | unix |
 | `JoaquinRuiz/medula` | false | null | null | yes | inferred | http | http, lib | python | openrouter | any |
 | `typesafe-ai/typesafe-sdk-js` | true | official | 269 | no | inferred | n_a | lib | node | none | any |
