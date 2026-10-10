@@ -290,6 +290,8 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { parseFit, GROUPS } from "../scripts/lib/fit-parse.mjs";
 
+// El parser exige las siete secciones: un documento mutilado se reporta en vez
+// de producir un fit.json a medias. La fixture, por tanto, trae las siete.
 const DOC = `# Clasificación
 
 ## Estrellas de GitHub
@@ -301,16 +303,51 @@ const DOC = `# Clasificación
 
 - [b](https://github.com/owner/b) — **1 ⭐**
 
+## Revisión y verificación (1)
+- [c](https://github.com/owner/c) — **1 ⭐**
+
 ## Contexto y memoria (1)
-- [c](https://github.com/owner/c) — **3 ⭐**
+- [d](https://github.com/owner/d) — **1 ⭐**
+
+## Seguridad y gates (1)
+- [e](https://github.com/owner/e) — **1 ⭐**
+
+## Supervisión y coordinación (1)
+- [f](https://github.com/owner/f) — **1 ⭐**
+
+## Interfaces Jev y harnesses generales (1)
+- [g](https://github.com/owner/g) — **1 ⭐**
+
+## Tareas de dominio (1)
+- [h](https://github.com/owner/h) — **1 ⭐**
 `;
 
 test("it reads the groups, their members and skips the stars section", () => {
   const { groups, members, errors } = parseFit(DOC);
   assert.deepEqual(errors, []);
   assert.equal("otro/lista" in members, false);
-  assert.deepEqual(members, { "owner/a": "routing", "owner/b": "routing", "owner/c": "context" });
+  assert.deepEqual(members, {
+    "owner/a": "routing",
+    "owner/b": "routing",
+    "owner/c": "review",
+    "owner/d": "context",
+    "owner/e": "gates",
+    "owner/f": "supervision",
+    "owner/g": "interfaces",
+    "owner/h": "domain",
+  });
   assert.deepEqual(groups.find((g) => g.id === "routing").count, 2);
+});
+
+test("the decision flag marks the five groups that carry a decision", () => {
+  const { groups } = parseFit(DOC);
+  const deciding = groups.filter((g) => g.decision).map((g) => g.id);
+  assert.deepEqual(deciding, ["routing", "review", "context", "gates", "supervision"]);
+});
+
+test("a missing section is reported, not silently dropped", () => {
+  const { errors } = parseFit(DOC.replace("## Tareas de dominio (1)", "## Otra cosa (1)"));
+  assert.equal(errors.some((e) => e.includes("domain")), true);
 });
 
 test("a section whose count does not match its entries is an error, not a silent pass", () => {
@@ -476,7 +513,7 @@ test("a foreign member and a wrong count are both rejected", () => {
 ```
 
 Run: `node --test tests/fit.test.mjs tests/fit-parse.test.mjs`
-Expected: PASS, 6 tests
+Expected: PASS, 8 tests
 
 - [ ] **Step 5: Commit**
 
