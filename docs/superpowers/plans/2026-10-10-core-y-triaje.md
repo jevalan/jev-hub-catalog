@@ -12,7 +12,7 @@
 
 ## Global Constraints
 
-- Repositorio en `E:/workspace/personal/jev/jevalon-hub-scout`. Solo lee `../jev-awesome`; no lo modifica.
+- Repositorio en `E:/workspace/personal/jev/jevalon-hub-scout`. **Solo lee** el árbol de análisis, que vive fuera y en otra unidad (`G:/dev/jev/jev-awesome`, movido desde `E:` por falta de espacio); nunca lo modifica. Toda ruta hacia él pasa por `SOURCES` en `scripts/lib/paths.mjs`, con `SCOUT_SOURCES` como override.
 - **Cero dependencias.** Sin `dependencies` ni `devDependencies`. Sin `npm install`. Solo stdlib de Node.
 - Node ≥ 20 (`engines.node`), ESM (`.mjs`), 2 espacios, comillas dobles, punto y coma.
 - **`README.md` y `site/index.html` son generados.** No se editan a mano.
@@ -42,6 +42,7 @@ Cinco condiciones que la spec implica y que ningún test de tarea ejercita por s
 | --- | --- |
 | `package.json` | Scripts npm, sin dependencias |
 | `.gitignore` | `site/index.html`, `data/triage-cache/` |
+| `scripts/pin-catalog.mjs` | Escribe `data/catalog.json` desde el árbol de análisis |
 | `data/catalog.json` | Snapshot pinneado del universo, con `source` y `updated` |
 | `data/fit.json` | Los 7 grupos y su pertenencia (`members`, 305 claves) |
 | `data/assessments.json` | Los veredictos. Aquí: los 13 de la cohorte A |
@@ -186,7 +187,8 @@ git commit -m "feat: add the scout skeleton and canonical JSON helpers"
 ### Task 2: Snapshot del universo
 
 **Files:**
-- Create: `data/catalog.json`
+- Create: `scripts/pin-catalog.mjs`
+- Create: `data/catalog.json` (generado por el pineador)
 - Test: `tests/catalog.test.mjs`
 
 **Interfaces:**
@@ -226,24 +228,28 @@ test("toolgate is present but NOT in agents", () => {
 Run: `node --test tests/catalog.test.mjs`
 Expected: FAIL — `ENOENT: no such file or directory, open '.../data/catalog.json'`
 
-- [ ] **Step 3: Copy the snapshot, adding its provenance**
+- [ ] **Step 3: Pin the snapshot with a script, not a one-liner**
 
-`cp` no existe en este shell; usa Node:
+Nada de rutas absolutas dentro del comando: el origen sale de `SOURCES`, y así el día que el árbol se mueva se cambia en un sitio (`SCOUT_SOURCES`).
 
-```bash
-mkdir -p data
-node -e "
-const fs = require('fs');
-const src = 'E:/workspace/personal/jev/jev-awesome/awesome-jev/data/projects.json';
-const out = 'E:/workspace/personal/jev/jevalon-hub-scout/data/catalog.json';
-const d = JSON.parse(fs.readFileSync(src, 'utf8'));
-const pinned = { updated: d.updated, source: 'jev-awesome/awesome-jev/data/projects.json', categories: d.categories, projects: d.projects };
-fs.writeFileSync(out, JSON.stringify(pinned, null, 2) + '\n');
-console.log('catalog.json:', pinned.projects.length, 'entradas, corte', pinned.updated);
-"
+```javascript
+// scripts/pin-catalog.mjs
+import { readJson, writeJson } from "./lib/json.mjs";
+import { CATALOG, SOURCE_CATALOG, SOURCES } from "./lib/paths.mjs";
+
+const { updated, categories, projects } = readJson(SOURCE_CATALOG);
+// Sin rutas de máquina en data/: solo la etiqueta de origen.
+writeJson(CATALOG, {
+  updated,
+  source: "jev-awesome/awesome-jev/data/projects.json",
+  categories,
+  projects,
+});
+console.log(`catalog.json: ${projects.length} entradas, corte ${updated}, desde ${SOURCES}`);
 ```
 
-Esperado: `catalog.json: 1351 entradas, corte 2026-10-07`
+Run: `node scripts/pin-catalog.mjs`
+Expected: `catalog.json: 1351 entradas, corte 2026-10-07, desde G:/dev/jev/jev-awesome`
 
 - [ ] **Step 4: Run test to verify it passes**
 
@@ -380,12 +386,10 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { writeJson } from "./lib/json.mjs";
 import { parseFit } from "./lib/fit-parse.mjs";
-import { FIT, ROOT } from "./lib/paths.mjs";
+import { FIT, SOURCE_FIT_DOC } from "./lib/paths.mjs";
 
 const flag = process.argv.find((a) => a.startsWith("--doc="));
-const doc = flag
-  ? resolve(flag.slice(6))
-  : resolve(ROOT, "..", "jev-awesome", "docs", "agents-tooling-clasificacion.md");
+const doc = flag ? resolve(flag.slice(6)) : SOURCE_FIT_DOC;
 
 const { groups, members, errors } = parseFit(readFileSync(doc, "utf8"));
 if (errors.length) {
