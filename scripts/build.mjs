@@ -1,7 +1,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import { readJson } from "./lib/json.mjs";
-import { ASSESSMENTS, CATALOG, FIT, README, SITE, TEMPLATE } from "./lib/paths.mjs";
+import { ASSESSMENTS, CATALOG, FIT, README, SHELF, SITE, TEMPLATE } from "./lib/paths.mjs";
 import { hasRun } from "./lib/runs.mjs";
 import { validateAll } from "./lib/validate-rules.mjs";
 
@@ -30,12 +30,38 @@ export function coverage(assessments, catalog) {
 
 /** Publicar exige pasar el validador: así un veredicto medido sin run no puede
  * salir al README ni al sitio por la puerta de atrás. */
-export function assertPublishable({ assessments, fit, catalog, hasRun: runExists }) {
-  const errors = validateAll({ assessments, fit, catalog, hasRun: runExists });
+export function assertPublishable({ assessments, fit, catalog, hasRun: runExists, shelf }) {
+  const errors = validateAll({ assessments, fit, catalog, hasRun: runExists, shelf });
   if (errors.length) throw new Error(`no se publica: ${errors.length} problema(s)\n  - ${errors.join("\n  - ")}`);
 }
 
-export function buildReadme(assessments, catalog) {
+/** Entradas visibles por categoría aparcada o candidata; las `gone` no cuentan. */
+export function shelfSummary(shelf, catalog) {
+  return shelf.categories.map((c) => ({
+    ...c,
+    count: catalog.projects.filter((p) => p.category === c.category && !p.gone).length,
+  }));
+}
+
+const shelfSection = (shelf, catalog) => {
+  const rows = shelfSummary(shelf, catalog);
+  if (!rows.length) return "";
+  const parked = rows.filter((r) => r.status === "parked");
+  const candidates = rows.filter((r) => r.status === "candidate");
+  return `
+## Aparcado
+
+Aparcar no es descartar: son categorías que hoy no aportan al hub, con el motivo y lo que tendría que cambiar para volver a mirarlas.
+
+| Categoría | Entradas | Por qué no aporta hoy | Cuándo revisarla |
+| --- | --- | --- | --- |
+${parked.map((r) => `| \`${r.category}\` | ${r.count} | ${r.reason} | ${r.revisit_when} |`).join("\n")}
+
+Candidatas, pendientes de evaluar: ${candidates.map((r) => `\`${r.category}\` (${r.count})`).join(", ")}.
+`;
+};
+
+export function buildReadme(assessments, catalog, shelf = { categories: [] }) {
   const c = coverage(assessments, catalog);
   const rows = [...assessments]
     .sort(byCohortThenStars)
@@ -65,7 +91,7 @@ Un veredicto **triado** sale de leer el código; uno **medido** sale de ejecutar
 | Proyecto | Decisión | Forma | Invocable | Coste | Evidencia | Veredicto |
 | --- | --- | --- | --- | --- | --- | --- |
 ${rows}
-`;
+${shelfSection(shelf, catalog)}`;
 }
 
 export function buildSite(assessments, catalog, template) {
@@ -90,8 +116,9 @@ if (process.argv[1] && process.argv[1].endsWith("build.mjs")) {
   const { assessments } = readJson(ASSESSMENTS);
   const fit = readJson(FIT);
   const catalog = readJson(CATALOG);
-  assertPublishable({ assessments, fit, catalog, hasRun });
-  writeFileSync(README, buildReadme(assessments, catalog));
+  const shelf = readJson(SHELF);
+  assertPublishable({ assessments, fit, catalog, hasRun, shelf });
+  writeFileSync(README, buildReadme(assessments, catalog, shelf));
   mkdirSync(dirname(SITE), { recursive: true });
   writeFileSync(SITE, buildSite(assessments, catalog, readFileSync(TEMPLATE, "utf8")));
   const c = coverage(assessments, catalog);

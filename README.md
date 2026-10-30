@@ -30,3 +30,18 @@ Un veredicto **triado** sale de leer el código; uno **medido** sale de ejecutar
 | `RiskAverseTech/toolgate` | yes | exec | cli, mcp, hook, lib | node + typesafe/openrouter | medido | Ya adaptado en jevalan como capacidad tool.risk (`node ${TOOLGATE_CLI} decide`). El CLI imprime veredicto, motivo, origen y probabilidades, y el hub mapea no-opinion a abstain y fail-mode a error. Medido de punta a punta sin claves (v0.16.0 tras el hub de jevalan): la regla estática decide y valida contra el esquema, el modo de fallo llega como error provider_failed y nunca como permiso, y entrada o versión incorrectas no llegan al especialista. NO medido: las decisiones que dependen del modelo (allow/ask con probabilidades), el plazo agotado y el coste. |
 | `shitianfang/wakegate` | no | n_a | lib | node | estático | Librería pura (shouldWake), sin plugin ni CLI ni MCP. jevalan ya cubre la misma decisión con el flujo agent-wakeup, que además no arrastra runtime. |
 | `JoaquinRuiz/medula` | yes | http | http, lib | python + openrouter | estático | Servidor local con SQLite y app de demostración: encajaría como proveedor http, pero arrastra su propio estado de escrituras y su andamiaje de laboratorio. |
+
+## Aparcado
+
+Aparcar no es descartar: son categorías que hoy no aportan al hub, con el motivo y lo que tendría que cambiar para volver a mirarlas.
+
+| Categoría | Entradas | Por qué no aporta hoy | Cuándo revisarla |
+| --- | --- | --- | --- |
+| `games` | 85 | Son simulaciones y juegos: hoy no hay una decisión tipada que el hub de jevalan pueda servir con ellas. | Si jevalan quiere capacidades de simulación o de evaluación en entornos con reglas. Potencial alto: mirar la primera. |
+| `demos` | 133 | Demostraciones y playgrounds: ilustran el uso de Jev, pero rara vez exponen una superficie invocable estable. | Si hace falta un banco de casos reales de uso, o patrones que reutilizar como capacidad. |
+| `articles` | 53 | Artículos e hilos: no son software, casi ninguno tiene repo. | Si se quiere extraer patrones de decisión de la literatura para diseñar capacidades nuevas. |
+| `lists` | 39 | Otras listas awesome: sirven de fuente de descubrimiento, no de capacidad. | Cuando se quiera ampliar el universo con proyectos que awesome-jev aún no recoja. |
+| `official` | 20 | Documentación y recursos oficiales de TypeSafe: contexto de referencia, no capacidades a servir. | Cuando cambie el contrato del modelo o aparezcan nuevos primitivos que el hub deba soportar. |
+| `sdks` | 100 | SDKs y clientes del modelo: son el transporte hacia Jev, no una decisión que servir. | Si jevalan necesita clientes en otros lenguajes, o reutilizar su manejo de errores y reintentos. |
+
+Candidatas, pendientes de evaluar: `agents` (303), `research` (284), `apps` (163), `integrations` (49), `browser` (111).

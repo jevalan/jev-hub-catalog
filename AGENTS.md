@@ -33,7 +33,7 @@ Cero dependencias: **no hay `npm install`**, solo stdlib de Node (≥ 20), ESM
 (`.mjs`).
 
 ```bash
-npm test                       # node --test, 54 pruebas, todo offline
+npm test                       # node --test, 66 pruebas, todo offline
 node --test tests/triage.test.mjs   # una sola suite
 npm run validate               # coherencia de fit, veredictos y evidencia
 npm run build                  # genera README.md y site/index.html (falla si validate falla)
@@ -105,6 +105,14 @@ contenga rutas absolutas de la máquina** (ni con `/` ni con `\`).
 `data/fit.json` → 7 grupos con recuento y `members` (solo las 305 entradas de
 `category === "agents"`). Los grupos con decisión son `routing`, `review`,
 `context`, `gates`, `supervision`.
+
+`data/shelf.json` → `{ updated, categories: [...] }`. Aparca o marca como
+candidata una **categoría entera** del catálogo (no entradas sueltas):
+`status` ∈ `parked` \| `candidate`, `reason` obligatorio y, si es `parked`,
+`revisit_when` también. **Aparcar no es descartar**: no uses `form: "n_a"` ni
+`decision: "no"` para categorías que pueden valer a futuro (`games` es la primera
+a mirar). No toca `assessments.json` ni los invariantes; `build` lo publica en
+la sección «Aparcado» del README.
 
 ## Invariantes numéricos (los tests los fijan)
 

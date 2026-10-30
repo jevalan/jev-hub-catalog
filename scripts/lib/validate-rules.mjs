@@ -91,6 +91,36 @@ export function validateAssessments(assessments, catalog, hasRun, fit = {}) {
   return errors;
 }
 
-export function validateAll({ assessments, fit, catalog, hasRun }) {
-  return [...validateFit(fit, catalog), ...validateAssessments(assessments, catalog, hasRun, fit)];
+const SHELF_STATUS = new Set(["parked", "candidate"]);
+
+/**
+ * Cabe señalar que aparcar no es descartar: una categoría aparcada declara por
+ * qué no aporta hoy y qué tendría que cambiar para volver a mirarla. Sin esa
+ * condición de vuelta, "aparcado" sería un "no" con mejor prensa.
+ */
+export function validateShelf(shelf, catalog) {
+  const errors = [];
+  const known = new Set(catalog.projects.map((p) => p.category));
+  const seen = new Set();
+  (shelf.categories || []).forEach((c, i) => {
+    const where = `shelf.categories[${i}] ${c.category || "(sin categoría)"}`;
+    if (!known.has(c.category)) errors.push(`${where}: la categoría no está en el catálogo`);
+    if (seen.has(c.category)) errors.push(`${where}: categoría duplicada`);
+    seen.add(c.category);
+    if (!SHELF_STATUS.has(c.status)) errors.push(`${where}: status inválido "${c.status}"`);
+    if (!(c.reason || "").trim()) errors.push(`${where}: falta reason`);
+    if (c.status === "parked" && !(c.revisit_when || "").trim()) errors.push(`${where}: parked sin revisit_when`);
+    if ([c.reason, c.revisit_when].some((t) => typeof t === "string" && ABSOLUTE_PATH.test(t))) {
+      errors.push(`${where}: contiene una ruta absoluta de la máquina`);
+    }
+  });
+  return errors;
+}
+
+export function validateAll({ assessments, fit, catalog, hasRun, shelf = { categories: [] } }) {
+  return [
+    ...validateFit(fit, catalog),
+    ...validateAssessments(assessments, catalog, hasRun, fit),
+    ...validateShelf(shelf, catalog),
+  ];
 }

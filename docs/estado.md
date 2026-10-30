@@ -24,7 +24,7 @@ npm run triage -- --limit=N    # 1 llamada API por repo, con caché reanudable
 npm run fixtures               # congela los árboles de la cohorte A
 node scripts/probe.mjs --repo <o/r> --capability <cap> --jevalan <bin> --capabilities <dir> --cli <cli>
                                # mide un especialista exec sin claves y escribe runs/<fecha>-<repo>/
-npm test                       # 47 pruebas
+npm test                       # 66 pruebas
 npm run build                  # genera README.md y site/index.html
 ```
 
@@ -84,13 +84,75 @@ toolgate.
   del usuario), y un shim para medir Canny y jevwire (skillranker está bloqueado en
   Windows).
 - **Fase 4 — publicación.**
-- **Triaje de los 1231 objetivos restantes**, con `GITHUB_TOKEN`.
+- **Veredictos de la capa 2 (en curso, ver «Punto de retoma»).**
 - **Menores aplazados** (documentados en el plan, no arreglados): `esc()` no
   escapa comillas; `cost.runtime` sin validar y `callable` acepta mezclas;
   `truncated: true` de GitHub se ignora; los manifiestos se desduplican por
   nombre; `parseFit` cuenta cualquier URL de GitHub de una sección; y ningún
   test cubre la selección de `fetchManifests` ni la máquina de estados de
   `fetchEntry`.
+
+## Punto de retoma (2026-10-30)
+
+### Hecho en esta sesión
+
+- **Triaje completo:** 1244 de 1244 objetivos en `data/triage-cache/` (1227 `ok`,
+  17 `gone`), sin ficheros corruptos. Se hizo con el token de `gh`
+  (`GITHUB_TOKEN="$(gh auth token)" npm run triage`), que no se guarda en ningún
+  fichero. Un apagón dejó un JSON cortado a mitad de escritura: si vuelve a
+  ocurrir, hay que comprobar que ninguno de la caché esté truncado antes de
+  relanzar, porque `existsSync` lo daría por bueno.
+- **Estantería de categorías:** `data/shelf.json` más `validateShelf`, `shelfSummary`
+  y la sección «Aparcado» del README, con `tests/shelf.test.mjs`. Aparca `games`,
+  `demos`, `articles`, `lists`, `official` y `sdks`; deja como candidatas `agents`,
+  `research`, `apps`, `integrations` y `browser`. **Aparcar no es descartar:**
+  cada categoría aparcada declara qué tendría que cambiar para volver a mirarla.
+  `games` queda anotada como la primera a revisar.
+
+### Qué significa «superficie»
+
+Es la forma en que se puede llamar a un proyecto desde fuera, y es lo que
+`signal()` deduce del árbol de ficheros sin ejecutar nada (campo `callable`):
+`cli`, `mcp`, `http`, `hook`, `lib` o `none`. «Con superficie» es `callable` distinto
+de `none`; «invocable por proceso» es tener `cli`, `mcp` o `http`, que es lo que
+`probe.mjs` puede lanzar. **Es una pista, no un veredicto:** un `cli` puede ser un
+instalador y no una decisión tipada, `none` puede ser un falso negativo (sobre
+todo en `http`), y el detector está calibrado solo con las 13 de la cohorte A.
+
+### Lo que dejó el triaje
+
+Repos de `agents` por grupo de `fit` con decisión (los de `interfaces` y `domain`
+no tienen decisión que servir):
+
+| Grupo | Repos | Con superficie | Con `cli`/`mcp`/`http` |
+| --- | --- | --- | --- |
+| `routing` | 80 | 52 | 27 |
+| `review` | 38 | 25 | 18 |
+| `gates` | 25 | 18 | 12 |
+| `context` | 26 | 16 | 7 |
+| `supervision` | 4 | 3 | 3 |
+
+Son **67** candidatos medibles sin claves entre los cinco grupos. Por categoría
+candidata, con superficie: `research` 172 de 275, `agents` 190 de 299, `apps` 86
+de 159, `browser` 50 de 109, `integrations` 19 de 45. De `games`, 34 de 76.
+
+### Pendiente, por orden
+
+1. **Commit** de la estantería (está sin commitear: `data/shelf.json`,
+   `tests/shelf.test.mjs`, cambios en `build.mjs`, `validate.mjs`,
+   `validate-rules.mjs`, `paths.mjs`, `README.md` y docs). En inglés, Conventional
+   Commits.
+2. **Veredictos de `routing`** (27 con `cli`/`mcp`/`http` primero), **leyendo el
+   código de cada uno**: el triaje solo ordena por dónde empezar. Cada veredicto
+   entra en `data/assessments.json` con `cohort: "B"`, `evidence: "static"` y su
+   `fit`. Después `review`, `gates`, `context` y `supervision`.
+3. **Muestrear** `research`, `apps`, `integrations` y `browser` para ver si hay veta,
+   y revisar `games` cuando toque.
+4. **Decidir si se repinea el catálogo:** el triaje halló 17 `gone` y el invariante
+   dice 11, es decir, 6 repos borrados desde que se congeló. Repinear obliga a
+   actualizar a la vez tests, `AGENTS.md`, este documento y el plan.
+5. **Sitio:** `site/index.html` no muestra todavía la sección «Aparcado», solo el
+   README.
 
 ## Cinco cosas que se aprendieron y están en el código
 

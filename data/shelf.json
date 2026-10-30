@@ -1,0 +1,66 @@
+{
+  "updated": "2026-10-30",
+  "categories": [
+    {
+      "category": "games",
+      "status": "parked",
+      "reason": "Son simulaciones y juegos: hoy no hay una decisión tipada que el hub de jevalan pueda servir con ellas.",
+      "revisit_when": "Si jevalan quiere capacidades de simulación o de evaluación en entornos con reglas. Potencial alto: mirar la primera."
+    },
+    {
+      "category": "demos",
+      "status": "parked",
+      "reason": "Demostraciones y playgrounds: ilustran el uso de Jev, pero rara vez exponen una superficie invocable estable.",
+      "revisit_when": "Si hace falta un banco de casos reales de uso, o patrones que reutilizar como capacidad."
+    },
+    {
+      "category": "articles",
+      "status": "parked",
+      "reason": "Artículos e hilos: no son software, casi ninguno tiene repo.",
+      "revisit_when": "Si se quiere extraer patrones de decisión de la literatura para diseñar capacidades nuevas."
+    },
+    {
+      "category": "lists",
+      "status": "parked",
+      "reason": "Otras listas awesome: sirven de fuente de descubrimiento, no de capacidad.",
+      "revisit_when": "Cuando se quiera ampliar el universo con proyectos que awesome-jev aún no recoja."
+    },
+    {
+      "category": "official",
+      "status": "parked",
+      "reason": "Documentación y recursos oficiales de TypeSafe: contexto de referencia, no capacidades a servir.",
+      "revisit_when": "Cuando cambie el contrato del modelo o aparezcan nuevos primitivos que el hub deba soportar."
+    },
+    {
+      "category": "sdks",
+      "status": "parked",
+      "reason": "SDKs y clientes del modelo: son el transporte hacia Jev, no una decisión que servir.",
+      "revisit_when": "Si jevalan necesita clientes en otros lenguajes, o reutilizar su manejo de errores y reintentos."
+    },
+    {
+      "category": "agents",
+      "status": "candidate",
+      "reason": "Agent tooling con eje fit ya clasificado; los grupos routing, review, context, gates y supervision tienen decisión que servir."
+    },
+    {
+      "category": "research",
+      "status": "candidate",
+      "reason": "La categoría más grande tras agents; hace falta muestrear para ver si hay veta de capacidades."
+    },
+    {
+      "category": "apps",
+      "status": "candidate",
+      "reason": "Aplicaciones construidas sobre Jev; algunas encapsularán una decisión reutilizable. Pendiente de muestreo."
+    },
+    {
+      "category": "integrations",
+      "status": "candidate",
+      "reason": "Integraciones con otros ecosistemas; probable superficie invocable (cli/mcp/http). Pendiente de muestreo."
+    },
+    {
+      "category": "browser",
+      "status": "candidate",
+      "reason": "Browser y computer use: decisiones de acción sobre una interfaz. Pendiente de muestreo."
+    }
+  ]
+}
