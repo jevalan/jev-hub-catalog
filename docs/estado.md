@@ -48,9 +48,9 @@ validador lo comprueba.
 
 ## Estado publicado hoy
 
-34 triadas · 1 evaluada (33 de las 35 analizadas están en el catálogo) · 1307 sin
-tocar, de 1340 entradas visibles. 22 son de la cohorte B: cinco de `routing` y
-diecisiete de `review`; este recuento crece con cada tanda. **Solo toolgate se ha medido**, y sin claves: la
+55 triadas · 1 evaluada (54 de las 56 analizadas están en el catálogo) · 1286 sin
+tocar, de 1340 entradas visibles. 43 son de la cohorte B: 26 de `routing` y 17 de
+`review`; este recuento crece con cada tanda. **Solo toolgate se ha medido**, y sin claves: la
 regla estática, el modo de fallo (que llega como `error`, nunca como permiso), la
 validación de entrada y versión y el descubrimiento con su digest. No se midió lo
 que depende del modelo (allow/ask con probabilidades), el plazo agotado ni el
@@ -139,19 +139,17 @@ de 159, `browser` 50 de 109, `integrations` 19 de 45. De `games`, 34 de 76.
 
 ### Pendiente, por orden
 
-1. **Commit** de la estantería (está sin commitear: `data/shelf.json`,
-   `tests/shelf.test.mjs`, cambios en `build.mjs`, `validate.mjs`,
-   `validate-rules.mjs`, `paths.mjs`, `README.md` y docs). En inglés, Conventional
-   Commits.
-2. **Veredictos de `routing`** (27 con `cli`/`mcp`/`http` primero; hechos 5 de
-   26 sin contar skillranker: JevRouter, skill-router, pi-jev, jev-router y
-   jev-code; siguen los 21 por estrellas desde dirien/jev-router). Criterio
-   fijado en la primera tanda: un launcher, proxy o SDK que decide dentro de su
-   propio proceso es `n_a`. `review` está completo (los 17 con superficie invocable por proceso). Sus
+1. **Hecho:** commit de la estantería.
+2. **Veredictos de `routing` y `review`: hechos** los 27 y los 17 con
+   `cli`/`mcp`/`http` (skillranker ya era de la cohorte A). Criterio fijado:
+   un launcher, proxy o SDK que decide dentro de su propio proceso es `n_a`; un
+   genérico con política de confianza (`proceed`/`review`, exit de «dudó») es
+   `yes`, y un cliente de transporte puro, `n_a`. En `review`, las
    herramientas devuelven colecciones: una colección con puntuación o
    probabilidad tipada por ítem es `yes`; sin salida documentada o con solo un
-   escalar sin umbral, `unclear`. Esos cinco son evidencia de README y árbol, sin
-   leer el código que imprime la salida. **Leyendo el
+   escalar sin umbral, `unclear`. Todo es evidencia de README y árbol, con
+   alguna sección más leída en los dudosos, sin leer el código que imprime la
+   salida. Siguen `gates`, `context` y `supervision`. **Leyendo el
    código de cada uno**: el triaje solo ordena por dónde empezar. Cada veredicto
    entra en `data/assessments.json` con `cohort: "B"`, `evidence: "static"` y su
    `fit`. Después `review`, `gates`, `context` y `supervision`.
