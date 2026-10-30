@@ -473,6 +473,143 @@
       "evidence": "static",
       "verdict": "Es un SDK para construir decisiones y un agente de código interactivo, no una decisión que servir. El instalador solo cubre macOS y Linux y el paquete no está en npm.",
       "blockers": []
+    },
+    {
+      "repo": "mizchi/jev-lint",
+      "name": "jev-lint",
+      "cohort": "B",
+      "in_catalog": true,
+      "catalog_category": "agents",
+      "stars": 117,
+      "language": "TypeScript",
+      "decision": "yes",
+      "fit": "review",
+      "form": "exec",
+      "callable": [
+        "cli",
+        "lib"
+      ],
+      "cost": {
+        "runtime": "node",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Un matcher de ast-grep elige el código y se le pregunta una frase a cada coincidencia; devuelve la probabilidad contra un corte (`0.89 cutoff 0.56`), es decir, una decisión tipada por coincidencia. Tiene `--dry-run` que da el precio sin hacer ninguna petición, `--format github` y un código de salida pensado para hooks. Manda el código evaluado a la API. Evidencia solo de README y árbol: no se ha leído el código que imprime la salida ni verificado el esquema.",
+      "blockers": []
+    },
+    {
+      "repo": "supercorp-ai/supercov",
+      "name": "Supercov",
+      "cohort": "B",
+      "in_catalog": true,
+      "catalog_category": "agents",
+      "stars": 149,
+      "language": "Rust",
+      "decision": "yes",
+      "fit": "review",
+      "form": "exec",
+      "callable": [
+        "cli",
+        "lib"
+      ],
+      "cost": {
+        "runtime": "rust",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "`quality` puntúa cada fichero con preguntas sí/no y `quality patch` revisa solo un cambio; `security` pregunta doce comprobaciones por fichero. Documenta `--json`. Su parte de cobertura no es una decisión y queda fuera. Cuesta algo más de un céntimo por megabyte de código. Evidencia solo de README y árbol: no se ha verificado el esquema del JSON ni el código de salida.",
+      "blockers": [
+        "esquema de --json y código de salida sin verificar"
+      ]
+    },
+    {
+      "repo": "lakeday-org/perch",
+      "name": "perch",
+      "cohort": "B",
+      "in_catalog": true,
+      "catalog_category": "agents",
+      "stars": 348,
+      "language": "JavaScript",
+      "decision": "unclear",
+      "fit": "review",
+      "form": "exec",
+      "callable": [
+        "cli",
+        "mcp"
+      ],
+      "cost": {
+        "runtime": "node",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Escanea un repositorio entero y saca una tabla de hallazgos con severidad y confianza; `perch check <id>` vuelve a preguntar por uno solo, que sí sería un sí/no. El README no documenta salida JSON y los códigos de salida viven en una web externa, así que no se sabe si cabe en el modelo de outcome. Acepta `PERCH_API_KEY` y cualquier endpoint System One, o `perch login` contra Perch Cloud. Evidencia solo de README y árbol.",
+      "blockers": [
+        "sin salida JSON documentada",
+        "códigos de salida solo en la documentación externa"
+      ]
+    },
+    {
+      "repo": "NiazMorshed2007/jev-review",
+      "name": "jev-review (NiazMorshed2007)",
+      "cohort": "B",
+      "in_catalog": true,
+      "catalog_category": "agents",
+      "stars": 235,
+      "language": "TypeScript",
+      "decision": "unclear",
+      "fit": "review",
+      "form": "exec",
+      "callable": [
+        "mcp"
+      ],
+      "cost": {
+        "runtime": "node",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Un único tool MCP, `jev_review`, que devuelve una puntuación de 1 a 10 con confianza por dimensión de calidad. No da pasa/falla y el README evita a propósito una nota global: es una señal escalar que interpreta el agente, así que no hay un umbral que el hub pueda aplicar. Arrastra estado (`previousEvaluation`) y se distribuye desde GitHub, no desde npm. Necesitaría un wrapper que hable MCP.",
+      "blockers": [
+        "sin umbral ni pasa/falla: solo puntuaciones escalares",
+        "wrapper MCP necesario"
+      ]
+    },
+    {
+      "repo": "keeltrace/hermes-nerve",
+      "name": "hermes-jev",
+      "cohort": "B",
+      "in_catalog": true,
+      "catalog_category": "agents",
+      "stars": 35,
+      "language": "Python",
+      "decision": "no",
+      "fit": "review",
+      "form": "n_a",
+      "callable": [
+        "cli",
+        "lib"
+      ],
+      "cost": {
+        "runtime": "python",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Es un plugin supervisor que vive dentro de Hermes, que conserva la autoridad de parar o seguir. Lo único de CLI es `nerve ui` y `experience reconcile`, que no son una decisión que servir. Como winnow, no expone una petición que entre y un veredicto que salga.",
+      "blockers": []
     }
   ]
 }
