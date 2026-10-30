@@ -4,7 +4,7 @@
     {
       "category": "games",
       "status": "parked",
-      "reason": "Son simulaciones y juegos: hoy no hay una decisión tipada que el hub de jevalan pueda servir con ellas.",
+      "reason": "Son sobre todo entornos donde Jev juega (Mario, Snake, Tetris, ajedrez, robots simulados): consumen la decisión en cada tick, no la ofrecen, y hoy no hay una decisión tipada que el hub de jevalan pueda servir con ellos. Hay tres excepciones mal archivadas aquí que sí se evalúan como capacidades: jev-harness, gg-friggin-ez y jev-risk-check-provider.",
       "revisit_when": "Si jevalan quiere capacidades de simulación o de evaluación en entornos con reglas. Potencial alto: mirar la primera."
     },
     {

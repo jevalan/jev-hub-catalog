@@ -50,7 +50,7 @@ validador lo comprueba.
 
 ## Estado publicado hoy
 
-86 triadas · 3 evaluadas (87 de las 89 analizadas están en el catálogo) · 1253 sin
+89 triadas · 3 evaluadas (90 de las 92 analizadas están en el catálogo) · 1250 sin
 tocar, de 1340 entradas visibles. 64 son de la cohorte B: 26 de `routing`, 17 de
 `review`, 12 de `gates`, 6 de `context` y 3 de `supervision`; 12 son de la cohorte
 C (muestreo de `browser`, `research`, `apps` e `integrations`, ver «Muestreo de las
@@ -249,7 +249,7 @@ Primera pasada sobre `browser`, `research`, `apps` e `integrations`, solo leyend
 (READMEs y la caché del triaje; no se instaló ni ejecutó nada de terceros). Se
 cruzó la descripción del catálogo con la señal `callable`, se bajaron 20 READMEs y
 se leyó una quincena (de forma parcial en varios); 12 veredictos entran como cohorte **C**, `evidence: "static"` y
-`fit: "inferred"`. Los candidatos con superficie invocable por proceso son muchos
+`fit: "inferred"`; una segunda pasada sobre `games` añade 3 más (ver abajo). Los candidatos con superficie invocable por proceso son muchos
 (`research` 120, `apps` 65, `browser` 41, `integrations` 9), pero casi todos caen en
 dos clases:
 
@@ -273,7 +273,20 @@ Los `n_a` de la muestra siguen el criterio de siempre: bucles de agente de naveg
 extremo (`jev-code-reviewer`) y proxies (`jev-playwright-mcp`, que sin clave pasa todo
 sin comprobar).
 
-**Lo que queda sin muestrear:** `games` (aparcada, primera a revisar), la mayor parte
+**`games` revisada por descripciones (las 76 con repo; solo se leyeron los README de
+cinco): sigue aparcada.** Casi todo son entornos
+donde Jev *juega* (Mario, Snake, Tetris, Doom, ajedrez, robots simulados): consumen
+una decisión por tick y no la ofrecen. A falta de leerlos, el «potencial alto» que
+anotaba la estantería parece estar en eso mismo (un banco de latencia y de
+decisiones sobre opciones legales), no en una capacidad que servir. Pero hay **tres capacidades mal archivadas**, ya
+evaluadas: `ismaelsoilet/jev-harness` (puertas de calidad para agentes; falla
+abierto hacia un motor determinista, pero lo marca con `is_mock`),
+`ItisShikhar/gg-friggin-ez` (filtro de toxicidad, solo biblioteca de Node) y
+`caiovicentino/jev-risk-check-provider` (riesgo previo al pago, servicio alojado y
+de pago por x402). Quedaron sin leer `carlosedm10/agi-jev-containment` y
+`vnmoorthy/siege`, que parecen gates.
+
+**Lo que queda sin muestrear:** la mayor parte
 de los candidatos con superficie (unos 235 entre las cuatro categorías, de los que
 solo se han evaluado 12), y los linters con `--dry-run`. Medir cualquiera exige instalar código de terceros:
 `wellposed` y `snifftest` están en npm sin dependencias ni scripts de instalación,

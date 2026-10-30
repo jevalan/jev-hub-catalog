@@ -2393,6 +2393,96 @@
       "evidence": "static",
       "verdict": "Proxy MCP sobre el servidor oficial de Playwright con una capa de juicio por dentro: clasifica el estado de la página (muro de acceso, captcha, error, límite, muro de pago…), enmascara inyecciones de instrucciones, poda instantáneas por objetivo y evalúa el riesgo de las acciones antes de ejecutarlas. Decide dentro de su propio proceso, no expone una decisión. Y sin clave todo degrada a paso directo, es decir, deja pasar sin comprobar.",
       "blockers": []
+    },
+    {
+      "repo": "ismaelsoilet/jev-harness",
+      "name": "jev-harness (ismaelsoilet)",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "games",
+      "stars": 11,
+      "language": "Python",
+      "decision": "yes",
+      "fit": "inferred",
+      "form": "exec",
+      "callable": [
+        "cli",
+        "mcp",
+        "lib"
+      ],
+      "cost": {
+        "runtime": "node",
+        "requires_key": [],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Capa de decisión «System 1.5» para el bucle de calidad de un agente de código, determinista primero: triaje de fallos de test (dependencia ausente, error transitorio, defecto de lógica), ruptura de bucles de la muerte, veto de finalización, gobierno del esfuerzo de razonamiento y enrutado de modelo. Existe en Python, TypeScript y Rust, sin dependencias en el núcleo de los dos primeros. `jev-harness test-gate --log <fichero> --json` y compañía; códigos de salida 0 (seguro o saltar el LLM), 1 (abortar o defecto de lógica) y 2 (error de sintaxis o, con `--fail-closed`, error del proveedor). Cada resultado lleva un bloque `uncertainty` con margen, entropía normalizada, confianza y si escalar. Sin clave o ante un fallo del proveedor (429, 5xx, plazo, red, 401/403, respuesta ininterpretable) degrada al motor determinista y lo **marca** (`is_mock: true` más `degraded_reason`), no es un fallo silencioso; `--fail-closed` convierte esa degradación en error. No exige clave en modo local (`requires_key` vacío); la clave de un proveedor solo hace falta para el modo en vivo. Evidencia solo de README.",
+      "blockers": [
+        "por defecto falla abierto hacia el motor determinista: el shim debe leer `is_mock` o pasar `--fail-closed`",
+        "son varias puertas, no un especialista: hay que elegir cuáles servir",
+        "con el motor determinista la decisión no es de Jev",
+        "no se leyó la lista completa de subcomandos ni se midió"
+      ]
+    },
+    {
+      "repo": "ItisShikhar/gg-friggin-ez",
+      "name": "gg-friggin-ez",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "games",
+      "stars": 7,
+      "language": "TypeScript",
+      "decision": "yes",
+      "fit": "inferred",
+      "form": "exec",
+      "callable": [
+        "lib"
+      ],
+      "cost": {
+        "runtime": "node",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Filtro de blasfemias y toxicidad para Node.js sobre Jev, pensado para chat y moderación de juegos en tiempo real (50 a 500 ms): detecta léetspeak, caracteres espaciados o alargados, mezcla de escrituras y lenguas romanizadas (hindi, tamil, español, francés, chino, japonés…). `screen()` hace una sola petición y devuelve una acción según umbrales configurables (`review` 0,35, `censor` 0,6, `ban` 0,75 por defecto); `isProfane()` e `isToxic()` devuelven un booleano, y cada llamada cuesta una petición. Admite esquemas y preguntas propios. Evidencia solo de README.",
+      "blockers": [
+        "solo biblioteca de Node: hace falta un shim para invocarla por proceso",
+        "no se leyó qué hace sin clave ni si la petición falla",
+        "la acción sale de umbrales del propio paquete"
+      ]
+    },
+    {
+      "repo": "caiovicentino/jev-risk-check-provider",
+      "name": "jev-risk-check-provider",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "games",
+      "stars": 10,
+      "language": "TypeScript",
+      "decision": "yes",
+      "fit": "inferred",
+      "form": "http",
+      "callable": [
+        "http",
+        "mcp"
+      ],
+      "cost": {
+        "runtime": "hosted",
+        "requires_key": [
+          "x402-payment"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "x402check: proveedor de comprobación de riesgo previa al pago para agentes y carteras (formato de x402 PR #2422). Antes de pagar o firmar, puntúa a la contraparte con la lista OFAC SDN, fuentes de phishing y drenadores, simulación de la transacción, huellas de código de kits de drenaje, vigilancia propia de bloques de Ethereum y Base, dominios parecidos y datos on-chain, y usa Jev para detectar instrucciones inyectadas en el contexto. Cada veredicto es una atestación ES256 que dice qué comprobaciones se hicieron y qué campos solo los afirmó quien llama, y los campos afirmados nunca pueden bajar la puntuación. Es un servicio alojado en `x402check.xyz` y cada evaluación se paga (0,001 USD con créditos prepagados, 0,0035 por llamada en Base). Evidencia solo de README.",
+      "blockers": [
+        "servicio alojado de un tercero: la dirección de cartera y el contexto salen de la máquina",
+        "cada evaluación se paga con x402; no hay nivel gratuito",
+        "el hub tendría que gestionar el pago",
+        "no se leyó la forma completa del veredicto"
+      ]
     }
   ]
 }
