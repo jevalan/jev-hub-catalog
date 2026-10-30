@@ -1532,9 +1532,12 @@
         "host": "any"
       },
       "evidence": "static",
-      "verdict": "Guardia para agentes de código con un mismo conjunto de comprobaciones en tres anfitriones (extensión de Pi y hooks de Claude Code y Codex): antes de la llamada juzga intención (en tarea, fuera de tarea, inyectado, necesita contexto) y riesgo (de seguro a necesita aprobación, 0 a 2); revisa la salida de las herramientas y la respuesta final. Si Jev falla o no hay clave, pregunta al usuario y nunca permite solo. Umbrales configurables (`riskAskScore` 0.3, `riskWarnScore` 1.3, `allowThreshold` 0.8). El «ask» depende de la aprobación del anfitrión y la comprobación de salida corre después de la herramienta. Evidencia solo de README.",
+      "verdict": "Guardia para agentes de código con un mismo conjunto de comprobaciones en tres anfitriones (extensión de Pi y hooks de Claude Code y Codex): antes de la llamada juzga intención (en tarea, fuera de tarea, inyectado, necesita contexto) y riesgo (de seguro a necesita aprobación, 0 a 2); revisa la salida de las herramientas y la respuesta final. Lo que el código de `src/hook.ts` hace en `PreToolUse`: sin clave pregunta (`ask`), si Jev falla o no responde pregunta, un cambio sobre la configuración del anfitrión o la propia se deniega sin consultar a Jev, y permitir devuelve un objeto vacío (el anfitrión decide). Nunca permite por su cuenta una llamada que no pudo comprobar. Pero un evento que no es JSON legible sale en silencio con exit 0, que en este protocolo equivale a permitir, y un fallo no capturado fuera de la comprobación solo emite un aviso (`systemMessage`) con exit 0: no falla cerrado en esos dos caminos. Umbrales configurables (`riskAskScore` 0.3, `riskWarnScore` 1.3, `allowThreshold` 0.8). El «ask» depende de la aprobación del anfitrión y la comprobación de salida corre después de la herramienta. Evidencia: README y lectura del código del hook; no se ejecutó (no está en npm y exige compilar TypeScript con dependencias de desarrollo).",
       "blockers": [
-        "`ask` depende de la aprobación del anfitrión: sin humano no hay a quién preguntar"
+        "`ask` depende de la aprobación del anfitrión: sin humano no hay a quién preguntar",
+        "un evento ilegible sale en silencio con exit 0 (equivale a permitir) y un fallo no capturado solo avisa: no falla cerrado en esos caminos",
+        "sin clave solo pregunta: no decide por sí mismo, y con Jev como motor hace falta una clave de TypeSafe",
+        "no está en npm: hay que clonar y compilar para tener el hook"
       ]
     },
     {
