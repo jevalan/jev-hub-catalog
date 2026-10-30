@@ -1806,6 +1806,244 @@
       "evidence": "static",
       "verdict": "Protocolo experimental de IA basada en decisiones, con adaptador para Jev y un ejemplo ejecutable; es independiente de quien evalúa (resolvedores deterministas, otros modelos y personas usan los mismos contratos). Es una especificación y un marco para construir sistemas de decisión, no una decisión que servir. Su propio README avisa de que falta inferencia durable de producción.",
       "blockers": []
+    },
+    {
+      "repo": "agencyenterprise/jev-recipes",
+      "name": "jev-recipes",
+      "cohort": "B",
+      "in_catalog": true,
+      "catalog_category": "agents",
+      "stars": 19,
+      "language": "TypeScript",
+      "decision": "yes",
+      "fit": "context",
+      "form": "exec",
+      "callable": [
+        "cli",
+        "lib"
+      ],
+      "cost": {
+        "runtime": "node",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Más de 80 recetas de TypeScript (route, rerank, gate, grade, compare, label…), cada una una función que recibe los datos, llama a Jev y devuelve un resultado tipado con `status: \"ready\"`, o la salida de revisión cuando la elección es incierta. Hay una receta `tool-call-gate`, un evaluador instalado que repite las respuestas sin conexión para calibrar políticas de confianza y ejemplos con respuestas guardadas que no llaman a ningún modelo. No es un especialista sino un catálogo: habría que elegir qué recetas servir. `package.json` declara un `bin` que no se ha leído. Evidencia solo de README.",
+      "blockers": [
+        "son muchas recetas, no un especialista: hay que elegir cuáles servir",
+        "v0.9.17",
+        "el `bin` de package.json sin leer"
+      ]
+    },
+    {
+      "repo": "eran-broder/jev-skills",
+      "name": "jev-skills",
+      "cohort": "B",
+      "in_catalog": true,
+      "catalog_category": "agents",
+      "stars": 6,
+      "language": "TypeScript",
+      "decision": "unclear",
+      "fit": "context",
+      "form": "exec",
+      "callable": [
+        "cli",
+        "hook"
+      ],
+      "cost": {
+        "runtime": "node",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Plugin de Claude Code y Codex que saca todas las skills de la ventana de contexto y deja que Jev decida en cada turno cuáles ve el modelo (coste fijo de 0 tokens). Tiene `node dist/cli.js ask <prompt>`, que ejecuta el observador y muestra las decisiones, pero está pensado como plugin de anfitrión y no se sabe el formato de salida de `ask`. Es hermano de jev-skill-selection, que sí documenta `--json`. Evidencia solo de README.",
+      "blockers": [
+        "formato de salida de `ask` sin documentar",
+        "pensado como plugin de anfitrión"
+      ]
+    },
+    {
+      "repo": "libingzheren/Jev-Mem",
+      "name": "Jev-Mem",
+      "cohort": "B",
+      "in_catalog": true,
+      "catalog_category": "agents",
+      "stars": 175,
+      "language": "Python",
+      "decision": "no",
+      "fit": "context",
+      "form": "n_a",
+      "callable": [
+        "cli",
+        "lib"
+      ],
+      "cost": {
+        "runtime": "python",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Código del paper «Jev-Mem»: un controlador System One organiza la memoria y guía la recuperación (relaciones semánticas, temporales, causales y de entidad) y un modelo de lenguaje sintetiza la respuesta. Es un sistema de memoria: lo que entrega es evidencia recuperada y una respuesta, no un veredicto. Admite Laya local como alternativa a Jev.",
+      "blockers": []
+    },
+    {
+      "repo": "Avinash-jetwani/jevmem",
+      "name": "jevmem",
+      "cohort": "B",
+      "in_catalog": true,
+      "catalog_category": "agents",
+      "stars": 122,
+      "language": "TypeScript",
+      "decision": "no",
+      "fit": "context",
+      "form": "n_a",
+      "callable": [
+        "mcp",
+        "hook"
+      ],
+      "cost": {
+        "runtime": "node",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Guarda decisiones, reglas, bugs, tareas y enfoques fallidos de tus chats de Claude Code en `JEVMEM.md` y recupera los relevantes en la sesión siguiente. Jev decide qué guardar y el LLM escribe una línea. Entrega contenido recuperado, no un veredicto, así que no cabe en el modelo de outcome del hub, como winnow. Sus cifras (66 de 72 sesiones siguieron la decisión previa) son de su autor.",
+      "blockers": []
+    },
+    {
+      "repo": "ibrahemid/jevprune",
+      "name": "jevprune",
+      "cohort": "B",
+      "in_catalog": true,
+      "catalog_category": "agents",
+      "stars": 2,
+      "language": "TypeScript",
+      "decision": "no",
+      "fit": "context",
+      "form": "n_a",
+      "callable": [
+        "cli",
+        "hook",
+        "lib"
+      ],
+      "cost": {
+        "runtime": "node",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Filtra la salida larga de comandos para agentes según la descripción de la tarea y conserva las líneas con su texto y orden originales. Devuelve texto transformado, no un veredicto. Sin clave, o si Jev falla por plazo o la salida pasa de 16 MB, cae a reglas (40 primeras y últimas líneas más los errores con 3 de contexto) y lo declara en el pie con el motivo, así que no es un fallo silencioso. La salida completa queda en `~/.jevprune/runs/`.",
+      "blockers": []
+    },
+    {
+      "repo": "CheshiAI/Cheshi",
+      "name": "Cheshi",
+      "cohort": "B",
+      "in_catalog": true,
+      "catalog_category": "agents",
+      "stars": 18,
+      "language": "C",
+      "decision": "no",
+      "fit": "context",
+      "form": "n_a",
+      "callable": [
+        "cli"
+      ],
+      "cost": {
+        "runtime": "native",
+        "requires_key": [],
+        "host": "unix"
+      },
+      "evidence": "static",
+      "verdict": "Aplicación de escritorio en vista previa para macOS (Apple Silicon y Tahoe 26 o posterior) con memoria de conversaciones y CodeGraph, un motor local de indexado y consultas de grafo. Lo invocable es un CLI auxiliar (`cheshi-cli codegraph status --json`), no una decisión que servir.",
+      "blockers": []
+    },
+    {
+      "repo": "thruwire/foreman",
+      "name": "foreman",
+      "cohort": "B",
+      "in_catalog": true,
+      "catalog_category": "agents",
+      "stars": 697,
+      "language": "Python",
+      "decision": "no",
+      "fit": "supervision",
+      "form": "n_a",
+      "callable": [
+        "cli",
+        "lib"
+      ],
+      "cost": {
+        "runtime": "python",
+        "requires_key": [
+          "typesafe",
+          "openai"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Runtime asíncrono de Python con dos bucles concurrentes: unos agentes de código trabajan (Codex, OpenCode, Hermes o dcode) mientras un supervisor semántico los observa y juzga con probabilidades nombradas (`implementation_complete`, `requirements_satisfied`, `ready_to_finish`, `tests_sufficient`, `needs_verification`, `worker_stuck`, `work_off_track`). Esos juicios son internos del supervisor y se combinan con política en Python; no hay una petición suelta que los invoque desde fuera. Admite Jev y la API Decisions de OpenAI.",
+      "blockers": []
+    },
+    {
+      "repo": "zjunlp/JevLoop",
+      "name": "JevLoop",
+      "cohort": "B",
+      "in_catalog": true,
+      "catalog_category": "agents",
+      "stars": 22,
+      "language": "TypeScript",
+      "decision": "no",
+      "fit": "supervision",
+      "form": "n_a",
+      "callable": [
+        "cli",
+        "lib"
+      ],
+      "cost": {
+        "runtime": "node",
+        "requires_key": [],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Arnés ejecutable de bucle de agente que manda cada bifurcación (actuar, qué herramienta, si es seguro, si terminó) a un modelo de decisión (Jev o Laya) y deja al LLM solo la escritura; trae interfaz web y no necesita clave ni dependencias. Es un marco completo, no una decisión que servir. Su juez incluido es una tabla de reglas y marca sus respuestas como degradadas.",
+      "blockers": []
+    },
+    {
+      "repo": "jvsteiner/jevex",
+      "name": "jevex",
+      "cohort": "B",
+      "in_catalog": true,
+      "catalog_category": "agents",
+      "stars": 3,
+      "language": "Python",
+      "decision": "no",
+      "fit": "supervision",
+      "form": "n_a",
+      "callable": [
+        "cli",
+        "lib"
+      ],
+      "cost": {
+        "runtime": "python",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Experimento mínimo de bucle de agente donde Jev dirige el flujo de control y un modelo de chat de LangChain escribe los valores de los argumentos y la respuesta final, sobre tres servidores MCP locales con 12 herramientas. Incluye un benchmark de investigación frente a bucles nativos con LLM. Es un arnés experimental, no una decisión que servir.",
+      "blockers": []
     }
   ]
 }
