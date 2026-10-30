@@ -269,7 +269,8 @@ dos clases:
    **archivado** y recomienda LiquidAI/d1-omni-600M, lo que importa si se elige uno.
 
 Los `n_a` de la muestra siguen el criterio de siempre: bucles de agente de navegador
-(`jev-ultrafast`, de la que cuelgan casi todos los de `browser`), apps de extremo a
+(`jev-ultrafast`; por sus descripciones, lo mismo vale para la mayoría de los 41 de `browser` con
+superficie, pero solo se han leído tres de ellos), apps de extremo a
 extremo (`jev-code-reviewer`) y proxies (`jev-playwright-mcp`, que sin clave pasa todo
 sin comprobar).
 
