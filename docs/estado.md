@@ -26,7 +26,7 @@ node scripts/probe.mjs --repo <o/r> --capability <cap> --jevalan <bin> --capabil
                                # mide un especialista exec sin claves y escribe runs/<fecha>-<repo>/
 node scripts/probe-gate.mjs --repo <o/r> --cli <ruta a dist/cli.js>
                                # mide un gate de hook directamente, en un sandbox y sin claves
-npm test                       # 75 pruebas
+npm test                       # 83 pruebas
 npm run build                  # genera README.md y site/index.html
 ```
 
@@ -50,12 +50,12 @@ validador lo comprueba.
 
 ## Estado publicado hoy
 
-75 triadas · 2 evaluadas (75 de las 77 analizadas están en el catálogo) · 1265 sin
+74 triadas · 3 evaluadas (75 de las 77 analizadas están en el catálogo) · 1265 sin
 tocar, de 1340 entradas visibles. 64 son de la cohorte B: 26 de `routing`, 17 de
 `review`, 12 de `gates`, 6 de `context` y 3 de `supervision`; este recuento crece
-con cada tanda. **Se han medido dos: toolgate y jev-firewall**, los dos sin claves
-(el de jev-firewall, ejecutando su CLI directamente y sin pasar por el hub; ver
-«Medido: jev-firewall»). De toolgate se midió: la
+con cada tanda. **Se han medido tres: toolgate, jev-firewall y reflex**, todos sin
+claves (los dos últimos, ejecutando su CLI directamente y sin pasar por el hub; ver
+«Medido: jev-firewall» y «Medido: reflex»). De toolgate se midió: la
 regla estática, el modo de fallo (que llega como `error`, nunca como permiso), la
 validación de entrada y versión y el descubrimiento con su digest. No se midió lo
 que depende del modelo (allow/ask con probabilidades), el plazo agotado ni el
@@ -115,11 +115,47 @@ Tres hallazgos para quien escriba el shim:
 **No medido:** las decisiones que dependen del modelo (probabilidades y
 `ask_below`), el plazo agotado o el error de red del modelo, y el coste.
 
+## Medido: reflex
+
+Run en `runs/2026-10-30-ursuciprian-reflex/`, 28 casos en verde, también directo y
+sin claves (v0.18.2 de `@ursuciprian/reflex`, instalado en un directorio nuevo con
+`--ignore-scripts`; no declara dependencias ni scripts de instalación). Se mide por
+sus tres entradas: `reflex check "<cmd>"`, `reflex scan` y el hook
+(`hook.mjs gate.mjs --claude|--codex --mode enforce`) con el evento por stdin. Nunca
+se lanzan `run`, `setup`, `install`, `uninstall` ni `doctor`; un test lo vigila. Todo
+lo que escribe cae en su directorio de estado, dentro del sandbox, y el run lista esa
+huella (`footprint`).
+
+Reproducción: `node scripts/probe-gate.mjs --repo ursuciprian/reflex --cli
+<ruta a node_modules/@ursuciprian/reflex/scripts/reflex>`.
+
+Lo que se midió, y es lo más fuerte de todo lo medido hasta ahora: **falla cerrado
+de verdad**. Un evento ilegible o vacío, un `config.json` roto y un `command` que no
+es texto dan `ask` en Claude y `deny` en Codex, y el fallo queda en `errors.jsonl`.
+Una config mal tipada o con `mode: off` no desarma el hook instalado en enforce. Lo
+que ninguna regla conoce pregunta y nunca pasa.
+
+Hallazgos para quien escriba el shim:
+
+1. `check` sale siempre con exit 0, sea `pass`, `ask` o `deny`: hay que leer el JSON.
+   `scan` sí usa el exit (0 pasa, 2 bloquea).
+2. Permitir es **no decir nada** (hook de Claude y de Codex): un shim debe traducir el
+   silencio a `allow`, y tener claro que un hook que no responde también se ve así.
+3. Un comando vacío da `pass`, y un evento legible pero sin comando pasa en silencio,
+   mientras que uno ilegible pregunta. Las ediciones de fichero tampoco se juzgan.
+4. Codex no sabe preguntar: lo que Claude pregunta, el hook de Codex lo deniega.
+5. `dd` sobre un disco y la fork bomb salen como `ask`, no como `deny`.
+
+**No medido:** el motor con modelo (`--engine jev|laya`), el plazo agotado o el error
+de red del modelo, el coste, la conciencia de entorno, la política de equipo, el
+perfil autónomo y los hooks de Hermes, opencode y pi. Lo medido es el motor local, que
+es el de por defecto y no usa Jev.
+
 ## Lo que falta
 
 - **Fase 3 — capa medida:** `probe.mjs` existe y mide especialistas `exec` sin
-  claves, y `probe-gate.mjs` mide gates de hook; están medidos toolgate y
-  jev-firewall. Faltan: la ruta con modelo (necesita una clave del usuario), un
+  claves, y `probe-gate.mjs` mide gates de hook; están medidos toolgate,
+  jev-firewall y reflex. Faltan: la ruta con modelo (necesita una clave del usuario), un
   shim para medir Canny y jevwire (skillranker está bloqueado en Windows) y
   los demás gates y linters que fallan cerrado o traen `--dry-run`.
 - **Fase 4 — publicación.**

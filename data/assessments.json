@@ -1578,20 +1578,22 @@
       "fit": "gates",
       "form": "exec",
       "callable": [
-        "hook",
-        "cli"
+        "cli",
+        "hook"
       ],
       "cost": {
         "runtime": "node",
         "requires_key": [],
         "host": "any"
       },
-      "evidence": "static",
-      "verdict": "Hook de pre-ejecución para Claude Code, Codex CLI, opencode y pi que juzga cada comando de shell por a dónde apunta y qué cambia, con conciencia de entorno (perfil de AWS, contexto de kube, workspace de Terraform, rama), y lo deja correr, pregunta o bloquea. Una política `.reflex/policy.json` común a todo el equipo. En modo enforce falla cerrado: un hook que revienta responde `ask` en Claude Code y `deny` en Codex. Su motor local va sin clave y Jev es opcional. No se ha visto un verbo de CLI que decida una acción suelta: se invoca como hook. Solo juzga comandos de shell, no ediciones ni llamadas MCP. Evidencia solo de README.",
+      "evidence": "measured",
+      "verdict": "Puerta de pre-ejecución para comandos de shell de Claude Code, Codex, opencode y pi, con conciencia de entorno y política de equipo. Se invoca de tres maneras y las tres se midieron: `reflex check \"<cmd>\"` (un comando suelto), `reflex scan` (texto, para inyección) y el hook en enforce. Medido sin clave (v0.18.2, ejecutando el CLI directamente, sin pasar por el hub de jevalan; 28 casos): solo lectura pasa; borrado recursivo, push forzado a main y borrar en producción se deniegan; `terraform apply` sin plan pregunta; lo que ninguna regla conoce (npm publish, escribir sobre un disco, descargar y ejecutar) pregunta y nunca pasa; `scan` deja pasar texto limpio y bloquea la inyección con exit 2. Falla cerrado de verdad: un evento ilegible o vacío, un config.json roto y un `command` que no es texto dan `ask` en Claude (exit 0) y `deny` en Codex (exit 2 si el evento es ilegible), y el fallo queda anotado en su log de errores; una config mal tipada o con `mode: off` no desarma el hook instalado en enforce. Todo lo que escribe cae en su directorio de estado. Hallazgos: `check` sale siempre con exit 0 (pass, ask o deny), así que hay que leer el JSON y no el código; un `check` con comando vacío da `pass` y un evento legible pero sin comando pasa en silencio, mientras que uno ilegible pregunta; las ediciones de fichero pasan en silencio, porque solo juzga shell; y en Codex, que no sabe preguntar, lo que Claude pregunta se deniega. El motor que se midió es el local: la parte con Jev (`--engine jev`) no se midió. NO medido: decisiones con modelo, plazo agotado o error de red del modelo, coste, conciencia de entorno, política de equipo, perfil autónomo y los hooks de Hermes, opencode y pi.",
       "blockers": [
-        "se invoca como hook: sin verbo de CLI visto para una acción suelta",
-        "el motor por defecto es local y no usa Jev"
-      ]
+        "`check` sale siempre con exit 0: el shim debe leer el JSON",
+        "el motor medido es el local, sin Jev: `--engine jev` queda sin medir",
+        "un evento legible sin comando pasa en silencio; las ediciones de fichero no se juzgan"
+      ],
+      "run": "runs/2026-10-30-ursuciprian-reflex"
     },
     {
       "repo": "moezubair/check-risk",
