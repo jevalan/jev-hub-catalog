@@ -60,7 +60,7 @@ export function planTargets(catalog) {
 }
 
 const headers = () => {
-  const h = { Accept: "application/vnd.github+json", "User-Agent": "jevalan-hub-scout" };
+  const h = { Accept: "application/vnd.github+json", "User-Agent": "jev-hub-catalog" };
   if (process.env.GITHUB_TOKEN) h.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
   return h;
 };

@@ -14,6 +14,6 @@ test("writeJson round-trips through readJson and ends with a newline", () => {
 });
 
 test("paths resolve inside the repository", () => {
-  assert.equal(ROOT.endsWith("jevalan-hub-scout"), true);
+  assert.equal(ROOT.endsWith("jev-hub-catalog"), true);
   assert.equal(ASSESSMENTS, join(ROOT, "data", "assessments.json"));
 });

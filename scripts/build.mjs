@@ -45,7 +45,7 @@ export function buildReadme(assessments, catalog) {
     )
     .join("\n");
 
-  return `# jevalan hub scout
+  return `# jev hub catalog
 
 Qué proyectos del ecosistema Jev puede servir el hub de jevalan, con qué forma y a qué coste.
 Generado desde \`data/assessments.json\`. Snapshot del universo: ${catalog.updated} (${catalog.source}).

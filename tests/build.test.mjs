@@ -29,7 +29,7 @@ test("every generated verdict carries its evidence label and its repo", () => {
 
 test("the site substitutes every placeholder", () => {
   assert.equal(/\{\{[A-Z_]+\}\}/.test(site), false);
-  assert.match(site, /<title>Hub Scout<\/title>/);
+  assert.match(site, /<title>Hub Catalog<\/title>/);
 });
 
 test("build refuses to publish a verdict the validator rejects", () => {

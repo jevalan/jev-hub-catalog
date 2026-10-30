@@ -1,4 +1,4 @@
-# jevalan hub scout
+# jev hub catalog
 
 Qué proyectos del ecosistema Jev puede servir el hub de jevalan, con qué forma y a qué coste.
 Generado desde `data/assessments.json`. Snapshot del universo: 2026-10-07 (jev-awesome/awesome-jev/data/projects.json).

@@ -1,4 +1,4 @@
-# AGENTS.md — jevalan-hub-scout
+# AGENTS.md — jev-hub-catalog
 
 Guía para agentes que trabajen en este repositorio. Todo lo que sigue está
 verificado en el código actual; si algo cambia, actualiza esta guía.

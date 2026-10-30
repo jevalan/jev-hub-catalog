@@ -1,4 +1,4 @@
-# Estado de jevalan-hub-scout
+# Estado de jev-hub-catalog
 
 Resumen de lo construido, lo medido y lo que queda. Lo generado (`README.md`,
 `site/index.html`) no se edita a mano: sale de `data/assessments.json` con
