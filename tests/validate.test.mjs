@@ -39,7 +39,8 @@ test("what gets checked is the run the verdict declares, not the repo name", () 
     seen.push(run);
     return true;
   };
-  const entries = structuredClone(doc.assessments);
+  // Se parte de datos sin medir: los reales ya incluyen entradas medidas y harían ruido en `seen`.
+  const entries = structuredClone(doc.assessments).map((e) => ({ ...e, evidence: "static" }));
   entries[0] = { ...entries[0], evidence: "measured", run: "runs/2026-10-10-toolgate" };
   assert.deepEqual(validateAssessments(entries, catalog, hasRun, fit), []);
   assert.deepEqual(seen, ["runs/2026-10-10-toolgate"]);

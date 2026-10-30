@@ -1,0 +1,191 @@
+{
+  "repo": "Koushik890/jev-firewall",
+  "date": "2026-10-30",
+  "scope": "directo: se ejecuta el CLI del especialista, sin pasar por el hub de jevalan",
+  "environment": {
+    "node": "v24.8.0",
+    "specialist": "0.2.1",
+    "keys": "ninguna: entorno vacío, HOME y cwd propios; el especialista no puede llamar a ningún modelo"
+  },
+  "measured": [
+    "decisión por regla determinista (fichero protegido, payload ofuscado, lista segura)",
+    "postura por defecto sin modelo: ask, nunca allow",
+    "payload ilegible o vacío: error del proceso en `check`, bloqueo en `hook`",
+    "vocabulario de salida de `check`, `hook claude` y `hook codex`, y JEVD_CODEX_ASK=deny",
+    "log de auditoría dentro del sandbox"
+  ],
+  "not_measured": [
+    "decisiones que dependen del modelo (allow/ask/block con probabilidades y ask_below)",
+    "plazo agotado, error de red o respuesta inválida del modelo",
+    "coste y latencia con modelo",
+    "cómo trata Claude Code el valor `block` que emite el hook (no se ejecutó Claude Code)",
+    "`setup`, `install` y `doctor`, que tocan la configuración del usuario o necesitan clave"
+  ],
+  "audit": {
+    "pass": true,
+    "problems": [],
+    "entries": 12
+  },
+  "cases": [
+    {
+      "id": "safe-command-allowed",
+      "why": "Un comando de la lista segura se permite sin modelo y sin red.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "allow",
+        "reason": "user-delegated safe command"
+      }
+    },
+    {
+      "id": "protected-file-blocked",
+      "why": "Una regla determinista bloquea tocar un fichero protegido, y `check` lo señala con exit 2.",
+      "pass": true,
+      "problems": [],
+      "exit": 2,
+      "observed": {
+        "decision": "block",
+        "reason": "touches protected file: .env"
+      }
+    },
+    {
+      "id": "obfuscated-payload-blocked",
+      "why": "Un payload en base64 se descodifica antes de juzgarlo y no pasa por inocente.",
+      "pass": true,
+      "problems": [],
+      "exit": 2,
+      "observed": {
+        "decision": "block",
+        "reason": "payload is constructed at runtime (substitution or shell sink) — cannot be judged statically"
+      }
+    },
+    {
+      "id": "no-model-never-allows",
+      "why": "Sin modelo ni regla que case, la postura por defecto es preguntar: la falta de clave no es un permiso.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "ask",
+        "reason": "no decision model configured — run `jev-firewall setup` (default posture applies)"
+      }
+    },
+    {
+      "id": "destructive-without-model-never-allows",
+      "why": "Un borrado recursivo de la raíz no puede salir como permiso solo porque no haya modelo.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "ask",
+        "reason": "no decision model configured — run `jev-firewall setup` (default posture applies)"
+      }
+    },
+    {
+      "id": "unreadable-payload-is-error",
+      "why": "Un payload que no es JSON es un error del proceso (exit 1) y no produce ninguna decisión.",
+      "pass": true,
+      "problems": [],
+      "exit": 1,
+      "observed": null
+    },
+    {
+      "id": "empty-payload-is-error",
+      "why": "Una entrada vacía tampoco se interpreta como permiso.",
+      "pass": true,
+      "problems": [],
+      "exit": 1,
+      "observed": null
+    },
+    {
+      "id": "hook-claude-unreadable-fails-closed",
+      "why": "El hook, ante una línea ilegible, responde bloqueando y no deja pasar.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "block",
+        "reason": "jev-firewall: unparseable hook payload, failing closed"
+      }
+    },
+    {
+      "id": "hook-claude-rule-blocks",
+      "why": "El hook de Claude bloquea el fichero protegido. Se registra el valor literal que emite.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "block",
+        "reason": "jev-firewall: BLOCK — touches protected file: .env"
+      }
+    },
+    {
+      "id": "hook-claude-safe-allows",
+      "why": "El hook de Claude permite el comando de la lista segura.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "allow",
+        "reason": "jev-firewall: ALLOW — user-delegated safe command"
+      }
+    },
+    {
+      "id": "hook-claude-unmatched-asks",
+      "why": "El hook de Claude pregunta, y no permite, cuando no hay modelo.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "ask",
+        "reason": "jev-firewall: ASK — no decision model configured — run `jev-firewall setup` (default posture applies)"
+      }
+    },
+    {
+      "id": "hook-codex-rule-denies",
+      "why": "El hook de Codex deniega el fichero protegido.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "deny",
+        "reason": "jev-firewall: BLOCK — touches protected file: .env"
+      }
+    },
+    {
+      "id": "hook-codex-safe-is-silent",
+      "why": "Para Codex, permitir es no decir nada (`{}`): Codex procede si no hay deny.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "silent-proceed",
+        "reason": null
+      }
+    },
+    {
+      "id": "hook-codex-unmatched-asks",
+      "why": "El hook de Codex pregunta, y no se calla, cuando no hay modelo.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "ask",
+        "reason": "jev-firewall: ASK — no decision model configured — run `jev-firewall setup` (default posture applies)"
+      }
+    },
+    {
+      "id": "hook-codex-ask-as-deny",
+      "why": "Con JEVD_CODEX_ASK=deny, lo incierto escala a deny: nada incierto pasa en silencio.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "deny",
+        "reason": "jev-firewall: ASK — no decision model configured — run `jev-firewall setup` (default posture applies) [ASK escalated to deny by JEVD_CODEX_ASK=deny]"
+      }
+    }
+  ],
+  "pass": true
+}

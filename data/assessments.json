@@ -1500,11 +1500,14 @@
         ],
         "host": "any"
       },
-      "evidence": "static",
-      "verdict": "Hook PreToolUse para Claude Code y Codex: reglas deterministas más Jev, que responde exactamente `allow`, `ask` o `block` con confianza calibrada. `jev-firewall check [claude|codex] '<json>'` mete un payload de hook por el pipeline real (o por stdin) y hay un log de auditoría y un `doctor`. Falla siempre cerrado: cualquier error, sea configuración mala, modelo que revienta, payload ilegible o clave ausente, da `block` o `ask`, nunca un allow en silencio. Es el más parecido a toolgate; la salida es el envelope de hook, así que necesitaría un shim. Evidencia solo de README.",
+      "evidence": "measured",
+      "verdict": "Hook PreToolUse para Claude Code y Codex: reglas deterministas más Jev, que responde `allow`, `ask` o `block`. Medido sin clave (v0.2.1, ejecutando el CLI directamente, sin pasar por el hub de jevalan): la lista segura permite; el fichero protegido y el payload en base64 bloquean con exit 2; sin modelo ni regla que case responde `ask` y nunca `allow`, tampoco para `rm -rf /`; un payload ilegible es error (exit 1) en `check` y bloqueo en `hook`; con JEVD_CODEX_ASK=deny lo incierto escala a deny; y cada decisión queda en el log de auditoría. Hallazgos: `check` sale con exit 0 también para `ask`, así que un shim tiene que leer el JSON y no el código de salida; el hook de Claude emite `permissionDecision: \"block\"` (el de Codex emite `deny`), un valor que no se ha comprobado contra Claude Code. NO medido: las decisiones que dependen del modelo, el plazo agotado o el error de red del modelo, y el coste.",
       "blockers": [
-        "la salida es el envelope de hook: hace falta un shim a veredicto"
-      ]
+        "la salida es el envelope de hook: hace falta un shim a veredicto",
+        "`check` sale con exit 0 también para `ask`: el shim debe leer el JSON",
+        "el hook de Claude emite `block`, no `deny`: sin comprobar cómo lo trata Claude Code"
+      ],
+      "run": "runs/2026-10-30-koushik890-jev-firewall"
     },
     {
       "repo": "harshwasan/jev-sentinel",

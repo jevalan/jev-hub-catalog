@@ -24,7 +24,9 @@ npm run triage -- --limit=N    # 1 llamada API por repo, con caché reanudable
 npm run fixtures               # congela los árboles de la cohorte A
 node scripts/probe.mjs --repo <o/r> --capability <cap> --jevalan <bin> --capabilities <dir> --cli <cli>
                                # mide un especialista exec sin claves y escribe runs/<fecha>-<repo>/
-npm test                       # 66 pruebas
+node scripts/probe-gate.mjs --repo <o/r> --cli <ruta a dist/cli.js>
+                               # mide un gate de hook directamente, en un sandbox y sin claves
+npm test                       # 75 pruebas
 npm run build                  # genera README.md y site/index.html
 ```
 
@@ -48,10 +50,12 @@ validador lo comprueba.
 
 ## Estado publicado hoy
 
-76 triadas · 1 evaluada (75 de las 77 analizadas están en el catálogo) · 1265 sin
+75 triadas · 2 evaluadas (75 de las 77 analizadas están en el catálogo) · 1265 sin
 tocar, de 1340 entradas visibles. 64 son de la cohorte B: 26 de `routing`, 17 de
 `review`, 12 de `gates`, 6 de `context` y 3 de `supervision`; este recuento crece
-con cada tanda. **Solo toolgate se ha medido**, y sin claves: la
+con cada tanda. **Se han medido dos: toolgate y jev-firewall**, los dos sin claves
+(el de jev-firewall, ejecutando su CLI directamente y sin pasar por el hub; ver
+«Medido: jev-firewall»). De toolgate se midió: la
 regla estática, el modo de fallo (que llega como `error`, nunca como permiso), la
 validación de entrada y versión y el descubrimiento con su digest. No se midió lo
 que depende del modelo (allow/ask con probabilidades), el plazo agotado ni el
@@ -79,12 +83,45 @@ columna `callable` en **13/13** contra los árboles reales congelados en
 Solo uno está adaptado de verdad en jevalan: `tool.risk` servido por el CLI de
 toolgate.
 
+## Medido: jev-firewall
+
+Run en `runs/2026-10-30-koushik890-jev-firewall/`, 15 casos y la auditoría, todo en
+verde. Es una medida **directa**: ejecuta el CLI del paquete (v0.2.1 de npm) en un
+sandbox con `HOME` y cwd propios y sin ninguna clave, no a través del hub de jevalan
+(no encontré un binario de jevalan en esta máquina y jev-firewall no tiene
+capacidad declarada). No se ejecutan `setup` ni `install`, que escriben en `~/.claude` y
+`~/.codex`.
+
+Para reproducirla: instalar el paquete en un directorio nuevo y vacío con
+`npm install jev-firewall@0.2.1 --ignore-scripts` (no declara scripts de instalación)
+y lanzar `node scripts/probe-gate.mjs --repo Koushik890/jev-firewall --cli
+<ruta a node_modules/jev-firewall/dist/cli.js>`.
+
+Lo que se midió: la lista segura permite; un fichero protegido y un payload en
+base64 bloquean (`check` sale con 2); sin modelo ni regla que case la respuesta es
+`ask` y nunca `allow`, tampoco para `rm -rf /`; un payload ilegible es error (exit 1)
+en `check` y bloqueo en `hook`; `JEVD_CODEX_ASK=deny` escala lo incierto a deny; y
+cada decisión queda en el log de auditoría.
+
+Tres hallazgos para quien escriba el shim:
+
+1. `check` sale con 0 también para `ask`: hay que leer el JSON, no el código.
+2. El hook de Claude emite `permissionDecision: "block"` y el de Codex `deny`. No se
+   ha comprobado cómo trata Claude Code el valor `block`; el README del paquete
+   enseña los dos vocabularios en sitios distintos.
+3. Sin modelo, `rm -rf /` sale como `ask`, no como `block`: lo cierra el modelo o una
+   persona, no una regla.
+
+**No medido:** las decisiones que dependen del modelo (probabilidades y
+`ask_below`), el plazo agotado o el error de red del modelo, y el coste.
+
 ## Lo que falta
 
 - **Fase 3 — capa medida:** `probe.mjs` existe y mide especialistas `exec` sin
-  claves; solo toolgate está medido. Faltan: la ruta con modelo (necesita una clave
-  del usuario), y un shim para medir Canny y jevwire (skillranker está bloqueado en
-  Windows).
+  claves, y `probe-gate.mjs` mide gates de hook; están medidos toolgate y
+  jev-firewall. Faltan: la ruta con modelo (necesita una clave del usuario), un
+  shim para medir Canny y jevwire (skillranker está bloqueado en Windows) y
+  los demás gates y linters que fallan cerrado o traen `--dry-run`.
 - **Fase 4 — publicación.**
 - **Veredictos de la capa 2 (en curso, ver «Punto de retoma»).**
 - **Menores aplazados** (documentados en el plan, no arreglados): `esc()` no

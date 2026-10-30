@@ -18,9 +18,10 @@ depende de él por sus artefactos publicados, nunca al revés: el perfil del hub
 y la suite de conformidad (`cargo test -p jevalan-daemon --test conformance`).
 jevalan solo conserva dos o tres capacidades de ejemplo; el catálogo, los
 veredictos y las medidas crecen aquí. `scripts/probe.mjs` mide un especialista
-arrancando un `jevalan serve` en un sandbox sin claves. **No es un registro**:
-la spec del hub deja fuera empuje, descarga y firma. Solo toolgate está medido
-(`runs/`); lo demás es lectura de código (`static`).
+arrancando un `jevalan serve` en un sandbox sin claves, y `scripts/probe-gate.mjs`
+mide un gate de hook ejecutando su CLI directamente (sin pasar por el hub). **No es
+un registro**: la spec del hub deja fuera empuje, descarga y firma. Solo toolgate y
+jev-firewall están medidos (`runs/`); lo demás es lectura de código (`static`).
 
 Fuentes de contexto (leer antes de tocar el diseño):
 - Diseño: `docs/superpowers/specs/2026-10-10-hub-scout-design.md`
@@ -43,6 +44,8 @@ npm run fit -- --doc=<ruta>    # importa desde otro documento
 npm run fixtures               # congela los árboles de la cohorte A
 node scripts/probe.mjs --repo <o/r> --capability <cap> --jevalan <bin> --capabilities <dir> --cli <cli>
                                # mide un especialista exec sin claves y escribe runs/<fecha>-<repo>/
+node scripts/probe-gate.mjs --repo <o/r> --cli <ruta a dist/cli.js>
+                               # mide un gate de hook (jev-firewall) en un sandbox, sin hub ni claves
 node scripts/pin-catalog.mjs   # congela el universo desde el árbol de análisis
 ```
 
@@ -125,13 +128,14 @@ Cambiar estos implica actualizar tests, docs y el plan a la vez:
 - Cohorte A: **13** entradas; solo toolgate es `measured`, con su run en disco.
 - La cobertura publicada **no es un invariante fijo**: crece con cada veredicto de
   la cohorte B y los tests la derivan de `assessments.json`. Solo se fijan las
-  **1340** entradas visibles. Hoy: **76** triadas, **1** evaluada (**75** de las 77
+  **1340** entradas visibles. Hoy: **75** triadas, **2** evaluadas (**75** de las 77
   en el catálogo), **1265** sin tocar.
 
 ## Reglas inviolables (validadas por `validate-rules.mjs`)
 
 1. `evidence: "measured"` **exige** que exista el directorio `runs/<fecha>-<repo>/`
-   declarado en el campo `run`. Los runs los escribe `scripts/probe.mjs`.
+   declarado en el campo `run`. Los runs los escriben `scripts/probe.mjs` y
+   `scripts/probe-gate.mjs`; los de este último llevan `scope` («directo, sin hub»).
 2. `form: "n_a"` exige un `verdict` que explique el motivo.
 3. Ningún `repo` duplicado; `in_catalog` debe coincidir con el catálogo.
 4. El `fit` de una entrada no puede contradecir a `fit.members`.
