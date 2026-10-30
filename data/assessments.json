@@ -2483,6 +2483,508 @@
         "el hub tendría que gestionar el pago",
         "no se leyó la forma completa del veredicto"
       ]
+    },
+    {
+      "repo": "caiovicentino/jev-align",
+      "name": "jev-align",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "research",
+      "stars": 5,
+      "language": "JavaScript",
+      "decision": "yes",
+      "fit": "inferred",
+      "form": "exec",
+      "callable": [
+        "cli",
+        "lib"
+      ],
+      "cost": {
+        "runtime": "node",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Verificador calibrado de alineamiento para respuestas de modelos y planes de agente: una llamada a Jev (unos 800 ms) puntúa señales como adulación, engaño («dice que ejecutó los 47 tests y no lo hizo») o exceso de alcance, y devuelve `pass`, `flag` o `block`. `jev-align check-plan --goal <objetivo> --plan <fichero>` y una API de JavaScript (`r.verdict`); modo por lotes para corpus de trazas. Códigos de salida: 0 para `pass` o `flag`, 1 para `block`. Un fallo persistente de la llamada degrada a un `flag` estructural, nunca a una caída. Evidencia solo de README.",
+      "blockers": [
+        "el exit 0 cubre `pass` y `flag`, y un fallo persistente degrada a `flag`: el shim debe leer el veredicto, no solo el código",
+        "no se leyó el esquema de la salida JSON"
+      ]
+    },
+    {
+      "repo": "ShuhanSun/jev-oas-sentinel",
+      "name": "jev-oas-sentinel",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "research",
+      "stars": 5,
+      "language": "Python",
+      "decision": "yes",
+      "fit": "inferred",
+      "form": "exec",
+      "callable": [
+        "cli"
+      ],
+      "cost": {
+        "runtime": "python",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Compara dos documentos OpenAPI en dos capas: reglas estructurales deterministas y preguntas semánticas acotadas a Jev sobre descripciones, ejemplos, valores por defecto, reintentos, orden, paginación, autorización y semántica de errores. Jev solo devuelve decisiones tipadas y probabilidades; el código en Python decide `pass`, revisión o bloqueo. El informe conserva valores elegidos, distribuciones completas, confianza, modelo resuelto, tokens y ubicación, en JSON, Markdown y SARIF. Códigos de salida: 0 sin hallazgo bloqueante, 1 política que bloquea, 2 entrada inválida o fallo de ejecución. Los errores de la API fallan cerrado en modo de aplicación y piden revisión en modo consultivo (el predeterminado). `--dry-run` muestra qué operaciones requerirían Jev sin clave ni red. Los textos del documento se tratan como entrada no fiable. Evidencia solo de README.",
+      "blockers": [
+        "la entrada son dos documentos OpenAPI",
+        "alfa pública; el modo predeterminado es consultivo, donde un fallo pide revisión y no bloquea",
+        "proyecto independiente, sin relación con TypeSafe"
+      ]
+    },
+    {
+      "repo": "Kushwho/jev-codes",
+      "name": "jev-codes",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "research",
+      "stars": 5,
+      "language": "TypeScript",
+      "decision": "yes",
+      "fit": "inferred",
+      "form": "exec",
+      "callable": [
+        "cli"
+      ],
+      "cost": {
+        "runtime": "node",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Audita un `git diff` contra paquetes de estándares editables, hunk a hunk, con una llamada paralela a Jev por hunk; Jev no escribe código, contesta preguntas tipadas con probabilidad. `npx @kushwho/jev-codes audit --staged --json` escribe solo JSON por la salida estándar (lo humano va a stderr) y sale con 1 cuando los hallazgos alcanzan `--fail-on` (por defecto `high` en CI o con `--json`, `none` en un terminal interactivo). Trae adaptadores para varios arneses de agentes. Evidencia solo de README.",
+      "blockers": [
+        "la entrada es un diff de git con sus paquetes de estándares",
+        "en un terminal interactivo `--fail-on` es `none`: usar `--json`",
+        "no se leyó qué hace si Jev falla"
+      ]
+    },
+    {
+      "repo": "Kungie/gut",
+      "name": "gut",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "research",
+      "stars": 6,
+      "language": "Python",
+      "decision": "yes",
+      "fit": "inferred",
+      "form": "exec",
+      "callable": [
+        "lib",
+        "mcp"
+      ],
+      "cost": {
+        "runtime": "python",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Juicios como una línea de Python (`gut.likely`, clasificar, puntuar) que devuelven sí, no o `gut.UNSURE`, con `ask_human` para derivar lo dudoso a una persona; los umbrales salen de palabras (`lean`, `stakes`) y no de números. Funciona sobre Jev (TypeSafe, OpenRouter u Ollaya) y sobre cualquier modelo pequeño: servidores compatibles con OpenAI, clasificador de cero ejemplos y transformers locales; `Cascade` pregunta primero al más barato. Hay un servidor MCP (`gutfeel-mcp`). Genérico con una salida de duda explícita, como JevRouter. Evidencia solo de README.",
+      "blockers": [
+        "es sobre todo una biblioteca: hace falta un shim, o usar el servidor MCP",
+        "con un modelo local la decisión no es de Jev",
+        "no se leyó el contrato del servidor MCP",
+        "el paquete se publica como `gutfeel`"
+      ]
+    },
+    {
+      "repo": "openlayer-ai/jevals",
+      "name": "jevals",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "research",
+      "stars": 102,
+      "language": "Python",
+      "decision": "yes",
+      "fit": "inferred",
+      "form": "exec",
+      "callable": [
+        "cli",
+        "lib",
+        "mcp"
+      ],
+      "cost": {
+        "runtime": "python",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Evaluaciones y barreras para agentes con modelos de decisión en lugar de un juez LLM: todas las evaluaciones de una traza salen en una sola petición. `jevals run trazas.jsonl --evals ...` escribe con `--out` una fila por traza con cada puntuación y probabilidad, y `--show-failures` lista las peores. Una barrera es una evaluación más una política que mapea las respuestas a `allow`, `escalate` o `block`, escrita en Python o en YAML (`jevals schema`), y `jevals calibrate` ajusta contra etiquetas humanas. Sirve con Jev por TypeSafe, Vercel u OpenRouter, o con Kev, Laya o Eikos en local. Evidencia solo de README.",
+      "blockers": [
+        "es un marco con muchas evaluaciones, no un especialista: hay que elegir cuáles servir",
+        "la clave puede ser de TypeSafe, de Vercel AI Gateway o de OpenRouter",
+        "no se leyeron los códigos de salida"
+      ]
+    },
+    {
+      "repo": "kyu1204/jgrep",
+      "name": "jgrep (kyu1204)",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "apps",
+      "stars": 59,
+      "language": "TypeScript",
+      "decision": "yes",
+      "fit": "inferred",
+      "form": "exec",
+      "callable": [
+        "cli"
+      ],
+      "cost": {
+        "runtime": "node",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "`grep` de lo que el código hace y no de cómo se llama (se publica en npm como `jevgrep`): sin índice ni embeddings, una llamada a Jev por trozo. Su estado de salida es el de grep, 0 con coincidencias, 1 sin ellas y 2 si no pudo ejecutarse o algún trozo falló, y `--json` tiene un contrato estable (un array). Un modo `--tests` elige los ficheros de test que un diff puede afectar, y un `JGREP_ENDPOINT` en el propio equipo no necesita clave. Las cifras de su banco (12 % de los tests con más del 90 % de los cambiados, 0,11 USD en 60 commits) son de su autor. Evidencia solo de README.",
+      "blockers": [
+        "cada llamada es de pago y envía código a la API",
+        "las cifras son de su autor",
+        "no se leyó qué ocurre con un modelo que dude"
+      ]
+    },
+    {
+      "repo": "uehaj/sys1grep",
+      "name": "jev-semgrep",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "apps",
+      "stars": 148,
+      "language": "JavaScript",
+      "decision": "yes",
+      "fit": "inferred",
+      "form": "exec",
+      "callable": [
+        "cli"
+      ],
+      "cost": {
+        "runtime": "node",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "`grep` por significado: para cada línea Jev contesta con una probabilidad a «¿coincide con el sentido X?» y se aplica un umbral; se pueden combinar sentidos con AND, OR y NOT, y funciona entre idiomas. `--dry-run` no envía nada e imprime los ajustes y el coste, `--max-cost` pregunta antes de gastar, y cualquier servidor que sirva el mismo `POST /v1/systemone` puede sustituir a Jev sin clave. En un terminal pide confirmación y sin ella sale con 2, así que los scripts pasan `-y`. Evidencia solo de README.",
+      "blockers": [
+        "pide confirmación en un terminal: los scripts deben pasar `-y`",
+        "el README es muy largo y no se leyó la tabla de códigos de salida",
+        "cada línea se envía a la API"
+      ]
+    },
+    {
+      "repo": "reachjalil/jevlogs",
+      "name": "jevlogs",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "apps",
+      "stars": 18,
+      "language": "JavaScript",
+      "decision": "yes",
+      "fit": "inferred",
+      "form": "exec",
+      "callable": [
+        "cli",
+        "lib"
+      ],
+      "cost": {
+        "runtime": "node",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Puntúa cada registro antes de gastar en análisis: valor diagnóstico de 0 a 100, prioridad y probabilidad de que sea accionable; los de bajo valor con confianza pueden saltarse una rama de análisis con LLM, y el modo de anotación conserva todos añadiendo atributos `jev.*`. Se integra como envoltorio de un exportador de OpenTelemetry o por CLI: `cat app.jsonl | npx jevlogs --live --stdin --json` emite una decisión por línea sin los cuerpos, y `--follow` hace streaming. Si el proveedor falla conserva los registros para análisis y sale con 2; los errores de uso salen con 1. Falla en el lado seguro y lo separa de la respuesta. Hay una demostración sin conexión con respuestas fijas. Evidencia solo de README.",
+      "blockers": [
+        "requiere Node 22",
+        "no se leyó el esquema exacto de la línea JSON"
+      ]
+    },
+    {
+      "repo": "qualixar/jev-decision-layer",
+      "name": "jev-decision-layer",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "research",
+      "stars": 4,
+      "language": "Python",
+      "decision": "unclear",
+      "fit": "inferred",
+      "form": "exec",
+      "callable": [
+        "mcp",
+        "hook",
+        "lib"
+      ],
+      "cost": {
+        "runtime": "python",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "unix"
+      },
+      "evidence": "static",
+      "verdict": "Capa de decisión para asistentes: se le da una elección acotada (tarea, herramienta, habilidad o revisión), Jev devuelve una respuesta tipada con confianza, la capa local la comprueba y deja un recibo, y el anfitrión conserva la autoridad de ejecución. Versión 1.0.15 con 20 herramientas MCP, 55 recetas y 165 casos sintéticos sin conexión; `jev selftest` los repite contra la lógica real sin clave. Es honesta sobre sus límites: los suelos de las recetas son una política de demostración sin evaluación etiquetada, y el autotest no mide precisión ni latencia. Pero el uso real parece exigir una inscripción previa (el autotest no la necesita y `jev doctor` sale con 2 antes del alta, que su README da por esperado) y está verificada solo en macOS. Evidencia solo de README.",
+      "blockers": [
+        "el uso real parece requerir inscribir un espacio de trabajo (`NOT_ENROLLED`, exit 2 antes del alta)",
+        "verificada solo en macOS; Linux es experimental",
+        "son muchas recetas, no un especialista",
+        "los umbrales son de demostración, sin evaluación etiquetada"
+      ]
+    },
+    {
+      "repo": "Ravinder82/jev-flash-router",
+      "name": "jev-flash-router",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "research",
+      "stars": 3,
+      "language": "TypeScript",
+      "decision": "unclear",
+      "fit": "inferred",
+      "form": "exec",
+      "callable": [
+        "mcp"
+      ],
+      "cost": {
+        "runtime": "node",
+        "requires_key": [
+          "openrouter"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Servidor MCP de enrutado de decisiones sin tokens de salida: evalúa contexto, diffs, registros u opciones de plan y devuelve una elección (unos 150 ms, `output_tokens: 0`), con la API Decisions de OpenRouter y el modelo `typesafe/jev-latest`; se ejecuta con `npx`. La descripción es genérica y no se vieron sus herramientas, su esquema de entrada ni la salida. Evidencia solo de README.",
+      "blockers": [
+        "no se leyeron las herramientas ni el formato de salida",
+        "usa OpenRouter, no la API de TypeSafe directamente"
+      ]
+    },
+    {
+      "repo": "doronp/jevc",
+      "name": "jevc",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "integrations",
+      "stars": 8,
+      "language": "TypeScript",
+      "decision": "unclear",
+      "fit": "inferred",
+      "form": "exec",
+      "callable": [
+        "cli"
+      ],
+      "cost": {
+        "runtime": "node",
+        "requires_key": [],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Compilador que convierte una regla en prosa («NUNCA hacer commit salvo que el usuario lo pida») en un programa de Jev: unas pocas preguntas tipadas y un reductor que calcula el veredicto en código corriente, de modo que la regla es una invariante legible, versionable y comprobable. Instalación `npm i -g jev-compiler` (el comando es `jevc`); `jevc check` repite un corpus grabado sin conexión y todo su README se ejecuta sin clave ni red. Es una herramienta de diseño: genera y prueba las barreras, y no queda claro cómo se invoca después un programa compilado sobre una entrada real. Evidencia solo de README.",
+      "blockers": [
+        "herramienta de diseño y compilación, no una decisión en línea",
+        "no se leyó cómo se ejecuta un programa compilado sobre una entrada viva",
+        "la compilación de reglas se apoya en el agente del usuario"
+      ]
+    },
+    {
+      "repo": "keltokhy/jlink",
+      "name": "jlink",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "apps",
+      "stars": 6,
+      "language": "Python",
+      "decision": "unclear",
+      "fit": "inferred",
+      "form": "exec",
+      "callable": [
+        "cli",
+        "lib"
+      ],
+      "cost": {
+        "runtime": "python",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Enlace de registros con la regla de coincidencia escrita en inglés: `jlink.link(a, b, entity=..., on=..., definition=...)` usa los juicios de pares de Jev (Noul), con bloqueo local de candidatos y resolución de coincidencias, y hay una línea de comandos que usan también Stata y R. Admite revisión humana local y modelos locales sin clave. Es una herramienta de procesamiento de tablas cuyo resultado es un conjunto de datos enlazado, no un veredicto suelto. Evidencia solo de README.",
+      "blockers": [
+        "la entrada son dos tablas y la salida un conjunto de datos, no un veredicto",
+        "no se leyó el formato de la salida ni los códigos de salida",
+        "no se confirmó qué clave necesita"
+      ]
+    },
+    {
+      "repo": "kinde-starter-kits/jev-agent-authorization",
+      "name": "jev-agent-authorization",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "research",
+      "stars": 5,
+      "language": "TypeScript",
+      "decision": "no",
+      "fit": "inferred",
+      "form": "n_a",
+      "callable": [
+        "mcp"
+      ],
+      "cost": {
+        "runtime": "node",
+        "requires_key": [
+          "typesafe",
+          "kinde"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Kit de arranque (Jev Gatehouse) que comprueba cada llamada de herramienta de un agente antes de ejecutarla: Kinde verifica el token y los permisos del usuario y deniega si falta uno, y el resto de las llamadas van a Jev con la petición, la llamada y los documentos leídos; el código de la app decide. Es una aplicación de ejemplo con una pasarela propia delante de una API de trabajo y atada a Kinde, no una decisión suelta que servir.",
+      "blockers": []
+    },
+    {
+      "repo": "simota/tenbin",
+      "name": "tenbin",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "research",
+      "stars": 4,
+      "language": "TypeScript",
+      "decision": "no",
+      "fit": "inferred",
+      "form": "n_a",
+      "callable": [
+        "mcp"
+      ],
+      "cost": {
+        "runtime": "node",
+        "requires_key": [],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Repositorio para usar la API System One desde un agente de código en tiempo de diseño: documentación, un servidor MCP (comprobación de preguntas, evaluación, evaluación por lotes para calibrar umbrales, reordenación, exploración de taxonomías y control de coste) y una habilidad de agente que descompone un juicio en Choice, Score y Noul. Arranca sin clave con las herramientas sin conexión. Ayuda a diseñar decisiones, pero no sirve una.",
+      "blockers": []
+    },
+    {
+      "repo": "killerz3/jevalyzer",
+      "name": "jevalyzer",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "research",
+      "stars": 3,
+      "language": "TypeScript",
+      "decision": "no",
+      "fit": "inferred",
+      "form": "n_a",
+      "callable": [
+        "cli"
+      ],
+      "cost": {
+        "runtime": "bun",
+        "requires_key": [
+          "ai-gateway"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Lee los registros de chat que los agentes de código (Claude Code, Codex CLI, opencode, Gemini CLI, Antigravity) dejan en el disco, puntúa cada intercambio con Jev por Vercel AI Gateway, busca dónde se equivocó el agente, calcula qué modelo se prefiere y lo muestra en un informe HTML o un panel de terminal. Es una aplicación de análisis de extremo a extremo; su `--dry-run` imprime la petición. Todavía no está en npm.",
+      "blockers": []
+    },
+    {
+      "repo": "parth-kp/jev-mail-classifier",
+      "name": "jev-mail-classifier",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "apps",
+      "stars": 19,
+      "language": "Python",
+      "decision": "no",
+      "fit": "inferred",
+      "form": "n_a",
+      "callable": [
+        "cli"
+      ],
+      "cost": {
+        "runtime": "python",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Clasifica la bandeja de entrada con Jev y, según una configuración, etiqueta, mueve, marca y notifica. `./jev-mail run` procesa el correo pendiente y `--dry-run` muestra lo que ocurriría sin tocar el buzón. Es una aplicación con efectos sobre el buzón del usuario, no una decisión que servir.",
+      "blockers": []
+    },
+    {
+      "repo": "carlosedm10/agi-jev-containment",
+      "name": "agi-jev-containment",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "games",
+      "stars": 5,
+      "language": "Python",
+      "decision": "no",
+      "fit": "inferred",
+      "form": "n_a",
+      "callable": [
+        "http"
+      ],
+      "cost": {
+        "runtime": "docker",
+        "requires_key": [],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Pila local de observación y respuesta para agentes en un entorno aislado (FastAPI, React/Vite y Neo4j, con Docker): recibe eventos de herramientas, oculta secretos, escribe una cinta JSONL, puntúa la intención con Jev y Sentinel y aplica una escalera de contención de L1 a L5 que solo puede escalar. Acepta eventos por HTTP (`POST /api/runs/{run_id}/events`) y, sin claves, clasifica en modo degradado (`degraded: true`). Es un producto de monitorización completo, no una decisión suelta.",
+      "blockers": []
+    },
+    {
+      "repo": "vnmoorthy/siege",
+      "name": "siege",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "games",
+      "stars": 1,
+      "language": "TypeScript",
+      "decision": "no",
+      "fit": "inferred",
+      "form": "n_a",
+      "callable": [
+        "lib"
+      ],
+      "cost": {
+        "runtime": "python",
+        "requires_key": [
+          "typesafe",
+          "wandb",
+          "anthropic"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "SIEGE: un agente de atención al cliente con herramientas reales (reembolsos, cambios de dirección, descuentos) frente a una sala de 200 personas que intentan hacerlo fallar; cada llamada pasa por un filtro previo escrito por el defensor y luego Jev la juzga como `Choice{allow, block, escalate}` con probabilidades calibradas. Es una demostración de hackatón con arena, panel y bucle de defensa; sin claves corre en modo simulado con sustitutos deterministas y lo declara.",
+      "blockers": []
     }
   ]
 }

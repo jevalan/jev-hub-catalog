@@ -50,11 +50,11 @@ validador lo comprueba.
 
 ## Estado publicado hoy
 
-89 triadas · 3 evaluadas (90 de las 92 analizadas están en el catálogo) · 1250 sin
+107 triadas · 3 evaluadas (108 de las 110 analizadas están en el catálogo) · 1232 sin
 tocar, de 1340 entradas visibles. 64 son de la cohorte B: 26 de `routing`, 17 de
-`review`, 12 de `gates`, 6 de `context` y 3 de `supervision`; 12 son de la cohorte
-C (muestreo de `browser`, `research`, `apps` e `integrations`, ver «Muestreo de las
-categorías candidatas»); este recuento crece con cada tanda. **Se han medido tres: toolgate, jev-firewall y reflex**, todos sin
+`review`, 12 de `gates`, 6 de `context` y 3 de `supervision`; 30 son de la cohorte
+C (muestreo de `browser`, `research`, `apps`, `integrations` y `games`, ver «Muestreo de
+las categorías candidatas»); este recuento crece con cada tanda. **Se han medido tres: toolgate, jev-firewall y reflex**, todos sin
 claves (los dos últimos, ejecutando su CLI directamente y sin pasar por el hub; ver
 «Medido: jev-firewall» y «Medido: reflex»). De toolgate se midió: la
 regla estática, el modo de fallo (que llega como `error`, nunca como permiso), la
@@ -283,12 +283,26 @@ evaluadas: `ismaelsoilet/jev-harness` (puertas de calidad para agentes; falla
 abierto hacia un motor determinista, pero lo marca con `is_mock`),
 `ItisShikhar/gg-friggin-ez` (filtro de toxicidad, solo biblioteca de Node) y
 `caiovicentino/jev-risk-check-provider` (riesgo previo al pago, servicio alojado y
-de pago por x402). Quedaron sin leer `carlosedm10/agi-jev-containment` y
-`vnmoorthy/siege`, que parecen gates.
+de pago por x402). Otros dos que parecían gates, `carlosedm10/agi-jev-containment` y
+`vnmoorthy/siege`, no lo son (ver abajo).
+
+**Segunda pasada sobre `research` y `apps` (18 veredictos más).** Con `yes`:
+`jev-align` (verificador de alineamiento; su exit 0 cubre `pass` y `flag`, y un fallo
+persistente degrada a `flag`), `jev-oas-sentinel` (cambios incompatibles en OpenAPI;
+documenta que falla cerrado en modo de aplicación), `jev-codes` (auditoría de un diff
+contra paquetes de estándares), `gut`, `jevals`, `jgrep`, `sys1grep` y `jevlogs`
+(puntúa registros; si el proveedor falla los conserva y sale con 2, es decir, falla
+en el lado seguro y lo separa de la respuesta). Con `unclear`: `jev-decision-layer`
+(parece exigir inscripción y está verificada solo en macOS), `jev-flash-router`,
+`jevc` (herramienta de diseño que compila reglas) y `jlink`. Seis `n_a`: aplicaciones,
+un kit de arranque (Kinde) y una herramienta de diseño (`tenbin`), ninguno una decisión
+suelta que servir. Los dos que antes quedaban sin leer en `games`
+(`agi-jev-containment` y `siege`) resultaron ser una pila de monitorización y una
+demostración de hackatón, ambos `n_a`.
 
 **Lo que queda sin muestrear:** la mayor parte
 de los candidatos con superficie (unos 235 entre las cuatro categorías, de los que
-solo se han evaluado 12), y los linters con `--dry-run`. Medir cualquiera exige instalar código de terceros:
+se han evaluado 30), y los linters con `--dry-run`. Medir cualquiera exige instalar código de terceros:
 `wellposed` y `snifftest` están en npm sin dependencias ni scripts de instalación,
 pero esperan a que se autorice.
 
