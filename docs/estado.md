@@ -48,9 +48,9 @@ validador lo comprueba.
 
 ## Estado publicado hoy
 
-22 triadas · 1 evaluada (21 de las 23 analizadas están en el catálogo) · 1319 sin
-tocar, de 1340 entradas visibles. Diez son de la cohorte B: cinco de `routing` y
-cinco de `review`; este recuento crece con cada tanda. **Solo toolgate se ha medido**, y sin claves: la
+34 triadas · 1 evaluada (33 de las 35 analizadas están en el catálogo) · 1307 sin
+tocar, de 1340 entradas visibles. 22 son de la cohorte B: cinco de `routing` y
+diecisiete de `review`; este recuento crece con cada tanda. **Solo toolgate se ha medido**, y sin claves: la
 regla estática, el modo de fallo (que llega como `error`, nunca como permiso), la
 validación de entrada y versión y el descubrimiento con su digest. No se midió lo
 que depende del modelo (allow/ask con probabilidades), el plazo agotado ni el
@@ -147,8 +147,7 @@ de 159, `browser` 50 de 109, `integrations` 19 de 45. De `games`, 34 de 76.
    26 sin contar skillranker: JevRouter, skill-router, pi-jev, jev-router y
    jev-code; siguen los 21 por estrellas desde dirien/jev-router). Criterio
    fijado en la primera tanda: un launcher, proxy o SDK que decide dentro de su
-   propio proceso es `n_a`. En `review` (hechos 5 de 17: jev-lint, supercov,
-   perch, jev-review y hermes-nerve; siguen 12 desde snifftest) las
+   propio proceso es `n_a`. `review` está completo (los 17 con superficie invocable por proceso). Sus
    herramientas devuelven colecciones: una colección con puntuación o
    probabilidad tipada por ítem es `yes`; sin salida documentada o con solo un
    escalar sin umbral, `unclear`. Esos cinco son evidencia de README y árbol, sin
