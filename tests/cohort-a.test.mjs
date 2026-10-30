@@ -9,8 +9,7 @@ const catalog = readJson(CATALOG);
 const byRepo = new Map(assessments.map((a) => [a.repo.toLowerCase(), a]));
 
 test("cohort A holds the 13 analysed clones", () => {
-  assert.equal(assessments.length, 13);
-  assert.equal(assessments.every((a) => a.cohort === "A"), true);
+  assert.equal(assessments.filter((a) => a.cohort === "A").length, 13);
 });
 
 test("catalog membership is stated for every entry, including the two absentees", () => {

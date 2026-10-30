@@ -48,8 +48,9 @@ validador lo comprueba.
 
 ## Estado publicado hoy
 
-12 triadas · 1 evaluada (11 de las 13 analizadas están en el catálogo) · 1329 sin
-tocar, de 1340 entradas visibles. **Solo toolgate se ha medido**, y sin claves: la
+17 triadas · 1 evaluada (16 de las 18 analizadas están en el catálogo) · 1324 sin
+tocar, de 1340 entradas visibles. Los cinco últimos son la primera tanda de
+`routing` (cohorte B); este recuento crece con cada tanda. **Solo toolgate se ha medido**, y sin claves: la
 regla estática, el modo de fallo (que llega como `error`, nunca como permiso), la
 validación de entrada y versión y el descubrimiento con su digest. No se midió lo
 que depende del modelo (allow/ask con probabilidades), el plazo agotado ni el
@@ -142,7 +143,11 @@ de 159, `browser` 50 de 109, `integrations` 19 de 45. De `games`, 34 de 76.
    `tests/shelf.test.mjs`, cambios en `build.mjs`, `validate.mjs`,
    `validate-rules.mjs`, `paths.mjs`, `README.md` y docs). En inglés, Conventional
    Commits.
-2. **Veredictos de `routing`** (27 con `cli`/`mcp`/`http` primero), **leyendo el
+2. **Veredictos de `routing`** (27 con `cli`/`mcp`/`http` primero; hechos 5 de
+   26 sin contar skillranker: JevRouter, skill-router, pi-jev, jev-router y
+   jev-code; siguen los 21 por estrellas desde dirien/jev-router). Criterio
+   fijado en la primera tanda: un launcher, proxy o SDK que decide dentro de su
+   propio proceso es `n_a`. **Leyendo el
    código de cada uno**: el triaje solo ordena por dónde empezar. Cada veredicto
    entra en `data/assessments.json` con `cohort: "B"`, `evidence: "static"` y su
    `fit`. Después `review`, `gates`, `context` y `supervision`.

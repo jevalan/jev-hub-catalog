@@ -5,7 +5,7 @@ Generado desde `data/assessments.json`. Snapshot del universo: 2026-10-07 (jev-a
 
 ## Cobertura
 
-12 triadas · 1 evaluadas (11 de las 13 analizadas están en el catálogo) · 1329 sin tocar, de 1340 entradas visibles del catálogo.
+17 triadas · 1 evaluadas (16 de las 18 analizadas están en el catálogo) · 1324 sin tocar, de 1340 entradas visibles del catálogo.
 
 Un veredicto **triado** sale de leer el código; uno **medido** sale de ejecutarlo. No son lo mismo y aquí no se presentan como si lo fueran.
 
@@ -30,6 +30,11 @@ Un veredicto **triado** sale de leer el código; uno **medido** sale de ejecutar
 | `RiskAverseTech/toolgate` | yes | exec | cli, mcp, hook, lib | node + typesafe/openrouter | medido | Ya adaptado en jevalan como capacidad tool.risk (`node ${TOOLGATE_CLI} decide`). El CLI imprime veredicto, motivo, origen y probabilidades, y el hub mapea no-opinion a abstain y fail-mode a error. Medido de punta a punta sin claves (v0.16.0 tras el hub de jevalan): la regla estática decide y valida contra el esquema, el modo de fallo llega como error provider_failed y nunca como permiso, y entrada o versión incorrectas no llegan al especialista. NO medido: las decisiones que dependen del modelo (allow/ask con probabilidades), el plazo agotado y el coste. |
 | `shitianfang/wakegate` | no | n_a | lib | node | estático | Librería pura (shouldWake), sin plugin ni CLI ni MCP. jevalan ya cubre la misma decisión con el flujo agent-wakeup, que además no arrastra runtime. |
 | `JoaquinRuiz/medula` | yes | http | http, lib | python + openrouter | estático | Servidor local con SQLite y app de demostración: encajaría como proveedor http, pero arrastra su propio estado de escrituras y su andamiaje de laboratorio. |
+| `gargpratyush/jev-router` | no | n_a | cli | node + typesafe | estático | Es un launcher y proxy de Claude Code y Codex: elige el tier del modelo en cada turno dentro de su propio proceso. `jev-explain` solo lee el último estado. No hay una petición que entre y un veredicto que salga, así que no cabe en el hub. |
+| `BillionsBobby/JevRouter` | yes | exec | cli, mcp, lib | node + typesafe/openrouter | estático | `route` recibe un JSON con la petición y los candidatos y devuelve una decisión tipada con las probabilidades de Jev intactas y el campo `router` aparte. Por defecto solo decide, no ejecuta, y deja un recibo. `bin/` importa `dist/`, que se compila en `prepare`, así que hay que instalar antes de medirlo. |
+| `TheoOliveira/pi-jev` | yes | exec | cli | node + typesafe | estático | Casi todo es una extensión de Pi, que no se puede llamar desde fuera. Lo único invocable es `pi-jev-gate -c <criterios>`, que lee el diff y sale con 0 si pasa y 1 si falla. Con `--fail-open` un error sale como exit 0, o sea como permiso: un shim tendría que mapear el exit 2 a `error` y no usar ese flag. Requiere `tsx`. |
+| `GodsBoy/jev-agent-skill-router` | yes | exec | cli, lib | python + typesafe | estático | `jev-router route` recibe una petición y un catálogo y devuelve `route`, `no_skill` o `review` con la probabilidad de cada llamada; no carga ni ejecuta ninguna skill. Encaja con el modelo de outcome del hub sin shim. Su evaluación publicada es exploratoria y con datos reutilizados, así que no cuenta como medida nuestra. |
+| `rhighs/jev-code` | no | n_a | cli, lib | node + typesafe | estático | Es un SDK para construir decisiones y un agente de código interactivo, no una decisión que servir. El instalador solo cubre macOS y Linux y el paquete no está en npm. |
 
 ## Aparcado
 

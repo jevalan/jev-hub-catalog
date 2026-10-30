@@ -12,14 +12,21 @@ const fit = readJson(FIT);
 const readme = buildReadme(assessments, catalog);
 const site = buildSite(assessments, catalog, readFileSync(TEMPLATE, "utf8"));
 
+// Los recuentos salen de los datos: la cohorte B crece en cada tanda y fijarlos
+// aquí obligaría a reescribir el test con cada veredicto nuevo. Lo único que se
+// fija es el catálogo visible.
+const measured = assessments.filter((a) => a.evidence === "measured").length;
+const inCatalog = assessments.filter((a) => a.in_catalog).length;
+const triaged = assessments.length - measured;
+
 test("coverage counts against the visible catalog, not against the analysed set", () => {
   const c = coverage(assessments, catalog);
-  assert.deepEqual(c, { total: 1340, triaged: 12, evaluated: 1, inCatalog: 11, untouched: 1329 });
+  assert.deepEqual(c, { total: 1340, triaged, evaluated: measured, inCatalog, untouched: 1340 - inCatalog });
 });
 
 test("the README states the split, including how many analysed projects live outside the catalog", () => {
-  assert.match(readme, /12 triadas · 1 evaluadas \(11 de las 13 analizadas están en el catálogo\)/);
-  assert.match(readme, /1329 sin tocar/);
+  assert.match(readme, new RegExp(`${triaged} triadas · ${measured} evaluadas \\(${inCatalog} de las ${assessments.length} analizadas están en el catálogo\\)`));
+  assert.match(readme, new RegExp(`${1340 - inCatalog} sin tocar`));
 });
 
 test("every generated verdict carries its evidence label and its repo", () => {
