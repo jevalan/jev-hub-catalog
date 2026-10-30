@@ -48,9 +48,9 @@ validador lo comprueba.
 
 ## Estado publicado hoy
 
-55 triadas · 1 evaluada (54 de las 56 analizadas están en el catálogo) · 1286 sin
-tocar, de 1340 entradas visibles. 43 son de la cohorte B: 26 de `routing` y 17 de
-`review`; este recuento crece con cada tanda. **Solo toolgate se ha medido**, y sin claves: la
+67 triadas · 1 evaluada (66 de las 68 analizadas están en el catálogo) · 1274 sin
+tocar, de 1340 entradas visibles. 55 son de la cohorte B: 26 de `routing`, 17 de
+`review` y 12 de `gates`; este recuento crece con cada tanda. **Solo toolgate se ha medido**, y sin claves: la
 regla estática, el modo de fallo (que llega como `error`, nunca como permiso), la
 validación de entrada y versión y el descubrimiento con su digest. No se midió lo
 que depende del modelo (allow/ask con probabilidades), el plazo agotado ni el
@@ -149,7 +149,10 @@ de 159, `browser` 50 de 109, `integrations` 19 de 45. De `games`, 34 de 76.
    probabilidad tipada por ítem es `yes`; sin salida documentada o con solo un
    escalar sin umbral, `unclear`. Todo es evidencia de README y árbol, con
    alguna sección más leída en los dudosos, sin leer el código que imprime la
-   salida. Siguen `gates`, `context` y `supervision`. **Leyendo el
+   salida. `gates` está completo (los 12): un hook que lee la acción por stdin y
+   devuelve `allow`/`ask`/`deny` es un `exec` con shim de envelope, como Canny y
+   toolgate, y fallar abierto es un blocker (`unclear` si no se separa el fallo
+   de la respuesta). Siguen `context` y `supervision`. **Leyendo el
    código de cada uno**: el triaje solo ordena por dónde empezar. Cada veredicto
    entra en `data/assessments.json` con `cohort: "B"`, `evidence: "static"` y su
    `fit`. Después `review`, `gates`, `context` y `supervision`.

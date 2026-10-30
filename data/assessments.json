@@ -1476,6 +1476,336 @@
       "evidence": "static",
       "verdict": "Lee todos los ficheros de una carpeta y los clasifica por departamento, tipo de documento, sensibilidad, fecha y contraparte con Jev; escribe catálogo, `INDEX.md`, un informe HTML y, si se pide, una copia organizada sin mover los originales. Tiene `--json`, `--estimate` y un tope de coste, pero es un proceso por lotes sobre una carpeta, no una decisión por petición.",
       "blockers": []
+    },
+    {
+      "repo": "Koushik890/jev-firewall",
+      "name": "jev-firewall",
+      "cohort": "B",
+      "in_catalog": true,
+      "catalog_category": "agents",
+      "stars": 2,
+      "language": "TypeScript",
+      "decision": "yes",
+      "fit": "gates",
+      "form": "exec",
+      "callable": [
+        "cli",
+        "hook"
+      ],
+      "cost": {
+        "runtime": "node",
+        "requires_key": [
+          "typesafe",
+          "vercel"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Hook PreToolUse para Claude Code y Codex: reglas deterministas más Jev, que responde exactamente `allow`, `ask` o `block` con confianza calibrada. `jev-firewall check [claude|codex] '<json>'` mete un payload de hook por el pipeline real (o por stdin) y hay un log de auditoría y un `doctor`. Falla siempre cerrado: cualquier error, sea configuración mala, modelo que revienta, payload ilegible o clave ausente, da `block` o `ask`, nunca un allow en silencio. Es el más parecido a toolgate; la salida es el envelope de hook, así que necesitaría un shim. Evidencia solo de README.",
+      "blockers": [
+        "la salida es el envelope de hook: hace falta un shim a veredicto"
+      ]
+    },
+    {
+      "repo": "harshwasan/jev-sentinel",
+      "name": "pi-jev-sentinel",
+      "cohort": "B",
+      "in_catalog": true,
+      "catalog_category": "agents",
+      "stars": 12,
+      "language": "TypeScript",
+      "decision": "yes",
+      "fit": "gates",
+      "form": "exec",
+      "callable": [
+        "hook",
+        "cli"
+      ],
+      "cost": {
+        "runtime": "node",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Guardia para agentes de código con un mismo conjunto de comprobaciones en tres anfitriones (extensión de Pi y hooks de Claude Code y Codex): antes de la llamada juzga intención (en tarea, fuera de tarea, inyectado, necesita contexto) y riesgo (de seguro a necesita aprobación, 0 a 2); revisa la salida de las herramientas y la respuesta final. Si Jev falla o no hay clave, pregunta al usuario y nunca permite solo. Umbrales configurables (`riskAskScore` 0.3, `riskWarnScore` 1.3, `allowThreshold` 0.8). El «ask» depende de la aprobación del anfitrión y la comprobación de salida corre después de la herramienta. Evidencia solo de README.",
+      "blockers": [
+        "`ask` depende de la aprobación del anfitrión: sin humano no hay a quién preguntar"
+      ]
+    },
+    {
+      "repo": "godspede/construct-auto-classifier",
+      "name": "construct-auto-classifier",
+      "cohort": "B",
+      "in_catalog": true,
+      "catalog_category": "agents",
+      "stars": 6,
+      "language": "TypeScript",
+      "decision": "yes",
+      "fit": "gates",
+      "form": "exec",
+      "callable": [
+        "cli",
+        "lib"
+      ],
+      "cost": {
+        "runtime": "node",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Compuerta de seguridad por efecto para los comandos de shell de agentes de código (Antigravity, OpenCode y arneses externos): decide qué hace el comando, su reversibilidad y su radio de daño, no palabras clave. Reglas rápidas de denegar y permitir (menos de 1 ms), procedencia de scripts, caché, y una pregunta `allow`/`deny` a Jev o a cualquier LLM de chat, con modelos de reserva. En una máquina sin operador (`policy.headless`) una escalada se convierte en denegación. Su certificación de «cero comandos peligrosos permitidos» es su propio benchmark, no una medida nuestra. No se ha visto el uso concreto del CLI ni sus códigos de salida. Evidencia solo de README.",
+      "blockers": [
+        "uso del CLI y códigos de salida sin verificar",
+        "certificación propia, no medida aquí"
+      ]
+    },
+    {
+      "repo": "ursuciprian/reflex",
+      "name": "reflex (ursuciprian)",
+      "cohort": "B",
+      "in_catalog": true,
+      "catalog_category": "agents",
+      "stars": 2,
+      "language": "JavaScript",
+      "decision": "yes",
+      "fit": "gates",
+      "form": "exec",
+      "callable": [
+        "hook",
+        "cli"
+      ],
+      "cost": {
+        "runtime": "node",
+        "requires_key": [],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Hook de pre-ejecución para Claude Code, Codex CLI, opencode y pi que juzga cada comando de shell por a dónde apunta y qué cambia, con conciencia de entorno (perfil de AWS, contexto de kube, workspace de Terraform, rama), y lo deja correr, pregunta o bloquea. Una política `.reflex/policy.json` común a todo el equipo. En modo enforce falla cerrado: un hook que revienta responde `ask` en Claude Code y `deny` en Codex. Su motor local va sin clave y Jev es opcional. No se ha visto un verbo de CLI que decida una acción suelta: se invoca como hook. Solo juzga comandos de shell, no ediciones ni llamadas MCP. Evidencia solo de README.",
+      "blockers": [
+        "se invoca como hook: sin verbo de CLI visto para una acción suelta",
+        "el motor por defecto es local y no usa Jev"
+      ]
+    },
+    {
+      "repo": "moezubair/check-risk",
+      "name": "check-risk",
+      "cohort": "B",
+      "in_catalog": true,
+      "catalog_category": "agents",
+      "stars": 0,
+      "language": "TypeScript",
+      "decision": "yes",
+      "fit": "gates",
+      "form": "exec",
+      "callable": [
+        "cli",
+        "lib"
+      ],
+      "cost": {
+        "runtime": "node",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Convierte un cambio de Git en nivel y puntuación de riesgo, motivos, comprobaciones exigidas y grupos de revisores; se puede usar como CLI, con `--format json`, como acción de GitHub o como API de TypeScript. Reglas deterministas (rutas, dependencias nuevas, diff grande, falta de tests) más señales semánticas de Jev. Exit 0 evaluación completa por debajo del umbral, 1 riesgo que alcanza `--fail-on` y 2 evaluación incompleta o error operativo. Sin clave devuelve `status: \"incomplete\"` con exit 2 y desactiva el auto-merge, es decir, la falta de Jev no se confunde con un permiso. Su propio README dice que la validación en vivo con Jev sigue pendiente y que no está en npm (v0.1). Evidencia solo de README.",
+      "blockers": [
+        "v0.1 sin publicar en npm",
+        "validación en vivo con Jev pendiente según su README"
+      ]
+    },
+    {
+      "repo": "caiovicentino/jev-shield",
+      "name": "jev-shield",
+      "cohort": "B",
+      "in_catalog": true,
+      "catalog_category": "agents",
+      "stars": 3,
+      "language": "JavaScript",
+      "decision": "yes",
+      "fit": "gates",
+      "form": "exec",
+      "callable": [
+        "cli",
+        "hook"
+      ],
+      "cost": {
+        "runtime": "node",
+        "requires_key": [
+          "vercel"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Cortafuegos semántico MCP: un proxy stdio entre cualquier cliente y servidor MCP que examina las llamadas, los resultados y las descripciones de herramientas, con comprobaciones estructurales deterministas y probabilidades calibradas de Jev. Aparte del proxy tiene `verify`, que recibe por stdin una acción (`{\"kind\":\"call\",\"tool\":...,\"args\":...}`) y la juzga, y hooks opcionales para Claude Code y opencode. Cada comprobación cuesta unos 0,00003 dólares y añade de 0,5 a 1,3 s. Pide la clave de Vercel AI Gateway. Evidencia solo de README.",
+      "blockers": [
+        "fail-closed es opt-in (`JEV_FAIL_MODE=closed`): por defecto el hook no falla cerrado"
+      ]
+    },
+    {
+      "repo": "h0j5bz0adh0-stack/jev-pilot",
+      "name": "jev-pilot",
+      "cohort": "B",
+      "in_catalog": true,
+      "catalog_category": "agents",
+      "stars": 6,
+      "language": "Python",
+      "decision": "yes",
+      "fit": "gates",
+      "form": "exec",
+      "callable": [
+        "lib"
+      ],
+      "cost": {
+        "runtime": "python",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Librería de Python con `decide` (elige entre candidatos y devuelve ganador, confianza y probabilidades), `guard` (juzga un comando o una mutación propuesta y devuelve `allowed` y `danger_score` contra un umbral) y `check_stuck` (detecta bucles de reintentos). `on_error` es `fail_closed` por defecto, pero existe `fail_open`. Solo documenta la API de Python: no se ha visto un CLI, así que haría falta un wrapper. Sus cifras de latencia y coste son de TypeSafe, no medidas aquí. Evidencia solo de README.",
+      "blockers": [
+        "sin CLI visto: solo API de Python",
+        "existe `on_error=\"fail_open\"`"
+      ]
+    },
+    {
+      "repo": "dr-dimitru/claude-jev-plugin",
+      "name": "claude-jev-plugin",
+      "cohort": "B",
+      "in_catalog": true,
+      "catalog_category": "agents",
+      "stars": 2,
+      "language": "TypeScript",
+      "decision": "unclear",
+      "fit": "gates",
+      "form": "exec",
+      "callable": [
+        "hook"
+      ],
+      "cost": {
+        "runtime": "node",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Plugin de Claude Code con hooks que juzgan las llamadas a Bash, Write y Edit antes de ejecutarlas y la salida de Bash después; declara no ser un sandbox y que las reglas de permisos de Claude Code siguen siendo el control duro. Arranca en modo shadow, donde solo avisa; en enforce devuelve `ask` y nunca `allow` por la confianza de TypeSafe. **Falla abierto** cuando no hay un juicio validado: clave ausente, configuración inválida, plazo (15 s en total), red, 429 o 529, respuesta mal formada o fallo de estado. Un fallo que cuenta como continuar es lo contrario de lo que el hub necesita. Evidencia solo de README.",
+      "blockers": [
+        "falla abierto sin distinguir el fallo del permiso",
+        "arranca en modo shadow"
+      ]
+    },
+    {
+      "repo": "qinpei-dev/permit-mcp",
+      "name": "PermitMCP",
+      "cohort": "B",
+      "in_catalog": true,
+      "catalog_category": "agents",
+      "stars": 1,
+      "language": "Python",
+      "decision": "unclear",
+      "fit": "gates",
+      "form": "exec",
+      "callable": [
+        "mcp"
+      ],
+      "cost": {
+        "runtime": "python",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Capa de control de ejecución para agentes MCP: una cadena `ActionProposal` a política determinista, proveedor de decisión opcional, permiso de un solo uso y ejecutor, con resultados `allow`, `review` o `deny`. Jev es un proveedor opcional que no ejecuta ni anula la política. Pero la cadena **ejecuta** la herramienta de arriba (`upstream_call`) y emite permisos con estado, y sus herramientas de decisión usan un mock local sin `JEV_API_KEY`. En v0.5.0, y se declara que no es un proxy MCP general ni un sandbox. Evidencia solo de README.",
+      "blockers": [
+        "ejecuta la herramienta de origen y emite permisos con estado",
+        "usa un mock local si no hay clave"
+      ]
+    },
+    {
+      "repo": "DevMortimer/pi-warden",
+      "name": "pi-warden",
+      "cohort": "B",
+      "in_catalog": true,
+      "catalog_category": "agents",
+      "stars": 161,
+      "language": "TypeScript",
+      "decision": "no",
+      "fit": "gates",
+      "form": "n_a",
+      "callable": [
+        "hook"
+      ],
+      "cost": {
+        "runtime": "node",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Guardarraíles para Pi que corrigen al agente en lugar de interrumpirlo: detecta un «hecho» sin haber corrido los tests y devuelve el aviso al propio agente. Vive en el anfitrión; en Claude Code solo da feedback consultivo tras Write y Edit. Las guardas sin conexión funcionan sin clave. Sus cifras (817 acciones detenidas en 3.350 sesiones) son uso real de su autor, no una medida nuestra.",
+      "blockers": []
+    },
+    {
+      "repo": "bojansandhaus/jev-decisions-hermes",
+      "name": "jev-decisions",
+      "cohort": "B",
+      "in_catalog": true,
+      "catalog_category": "agents",
+      "stars": 3,
+      "language": "Python",
+      "decision": "no",
+      "fit": "gates",
+      "form": "n_a",
+      "callable": [
+        "lib"
+      ],
+      "cost": {
+        "runtime": "python",
+        "requires_key": [
+          "typesafe",
+          "openrouter"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Plugin de Hermes que añade herramientas para revisar un plan, comprobar las fuentes de una respuesta y valorar si una tarea está realmente terminada. Es consultivo: recomienda pedir aprobación o verificar, y bloquear exige una integración adicional. Vive dentro de su anfitrión. Acepta Laya local o cualquier modelo que hable el contrato `/v1/systemone`.",
+      "blockers": []
+    },
+    {
+      "repo": "numerous-com/dgp",
+      "name": "DGP (Decision Graph Protocol)",
+      "cohort": "B",
+      "in_catalog": true,
+      "catalog_category": "agents",
+      "stars": 0,
+      "language": "Python",
+      "decision": "no",
+      "fit": "gates",
+      "form": "n_a",
+      "callable": [
+        "http"
+      ],
+      "cost": {
+        "runtime": "python",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Protocolo experimental de IA basada en decisiones, con adaptador para Jev y un ejemplo ejecutable; es independiente de quien evalúa (resolvedores deterministas, otros modelos y personas usan los mismos contratos). Es una especificación y un marco para construir sistemas de decisión, no una decisión que servir. Su propio README avisa de que falta inferencia durable de producción.",
+      "blockers": []
     }
   ]
 }
