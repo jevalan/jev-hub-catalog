@@ -2,7 +2,7 @@
 
 **Estado:** borrador de diseño, pendiente de revisión antes del plan de implementación.
 
-Repositorio independiente en `E:/workspace/personal/jev/jev-hub-catalog`. No modifica `jev-awesome`, `jevalan` ni ninguno de los clones: los lee.
+Repositorio independiente en un repositorio propio, hermano de `jev-awesome`. No modifica `jev-awesome`, `jevalan` ni ninguno de los clones: los lee.
 
 ## 1. Propósito
 

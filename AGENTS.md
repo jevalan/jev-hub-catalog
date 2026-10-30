@@ -10,6 +10,18 @@ hub de decisión de jevalan, con qué **forma** (`flow`/`exec`/`http`/`n_a`) y a
 qué **coste**. `data/*.json` es la fuente de verdad; los scripts lo validan y
 generan los artefactos públicos. El repo **decide**, no adapta ni clona nada.
 
+## Relación con jevalan
+
+Este repo **vive fuera de jevalan** (<https://github.com/jevalan/jevalan>) y
+depende de él por sus artefactos publicados, nunca al revés: el perfil del hub
+(`docs/hub-profile.md`), el `digest` de cada capacidad, `/.well-known/jev-hub.json`
+y la suite de conformidad (`cargo test -p jevalan-daemon --test conformance`).
+jevalan solo conserva dos o tres capacidades de ejemplo; el catálogo, los
+veredictos y las medidas crecen aquí. `scripts/probe.mjs` mide un especialista
+arrancando un `jevalan serve` en un sandbox sin claves. **No es un registro**:
+la spec del hub deja fuera empuje, descarga y firma. Solo toolgate está medido
+(`runs/`); lo demás es lectura de código (`static`).
+
 Fuentes de contexto (leer antes de tocar el diseño):
 - Diseño: `docs/superpowers/specs/2026-10-10-hub-scout-design.md`
 - Plan: `docs/superpowers/plans/2026-10-10-core-y-triaje.md`
@@ -21,7 +33,7 @@ Cero dependencias: **no hay `npm install`**, solo stdlib de Node (≥ 20), ESM
 (`.mjs`).
 
 ```bash
-npm test                       # node --test, 47 pruebas, todo offline
+npm test                       # node --test, 54 pruebas, todo offline
 node --test tests/triage.test.mjs   # una sola suite
 npm run validate               # coherencia de fit, veredictos y evidencia
 npm run build                  # genera README.md y site/index.html (falla si validate falla)
@@ -62,9 +74,9 @@ node scripts/pin-catalog.mjs   # congela el universo desde el árbol de análisi
 
 ## El árbol de análisis vive fuera del repo
 
-En otra unidad (`G:/dev/jev/jev-awesome`), movido desde `E:` por falta de
-espacio. **Toda** ruta hacia allí pasa por `SOURCES` en
-`scripts/lib/paths.mjs`, con `SCOUT_SOURCES` como override de entorno. Nunca
+Por defecto, como directorio hermano (`../jev-awesome`). **Toda** ruta hacia
+allí pasa por `SOURCES` en `scripts/lib/paths.mjs`, con `SCOUT_SOURCES` como
+override de entorno si está en otro sitio u otra unidad. Nunca
 hardcodees esa ruta en otro sitio. El validador comprueba que `data/` **no
 contenga rutas absolutas de la máquina** (ni con `/` ni con `\`).
 

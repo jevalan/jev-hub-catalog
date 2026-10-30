@@ -34,12 +34,12 @@ Cero dependencias: solo stdlib de Node (>= 20). No hay `npm install`.
 
 ## De dónde lee
 
-El árbol de análisis vive **fuera** del repo, en otra unidad, porque se movió por
-falta de espacio:
+El árbol de análisis vive **fuera** del repo; por defecto, como hermano
+(`../jev-awesome`):
 
 ```
-G:/dev/jev/jev-awesome/awesome-jev/data/projects.json   → data/catalog.json
-G:/dev/jev/jev-awesome/docs/agents-tooling-clasificacion.md → data/fit.json
+<fuentes>/awesome-jev/data/projects.json   → data/catalog.json
+<fuentes>/docs/agents-tooling-clasificacion.md → data/fit.json
 ```
 
 Toda ruta hacia allí pasa por `SOURCES` en `scripts/lib/paths.mjs`, con
