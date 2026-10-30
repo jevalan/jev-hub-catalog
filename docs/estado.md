@@ -50,9 +50,9 @@ validador lo comprueba.
 
 ## Estado publicado hoy
 
-107 triadas · 3 evaluadas (108 de las 110 analizadas están en el catálogo) · 1232 sin
+122 triadas · 3 evaluadas (123 de las 125 analizadas están en el catálogo) · 1217 sin
 tocar, de 1340 entradas visibles. 64 son de la cohorte B: 26 de `routing`, 17 de
-`review`, 12 de `gates`, 6 de `context` y 3 de `supervision`; 30 son de la cohorte
+`review`, 12 de `gates`, 6 de `context` y 3 de `supervision`; 45 son de la cohorte
 C (muestreo de `browser`, `research`, `apps`, `integrations` y `games`, ver «Muestreo de
 las categorías candidatas»); este recuento crece con cada tanda. **Se han medido tres: toolgate, jev-firewall y reflex**, todos sin
 claves (los dos últimos, ejecutando su CLI directamente y sin pasar por el hub; ver
@@ -300,9 +300,21 @@ suelta que servir. Los dos que antes quedaban sin leer en `games`
 (`agi-jev-containment` y `siege`) resultaron ser una pila de monitorización y una
 demostración de hackatón, ambos `n_a`.
 
+**Tercera pasada (15 veredictos más).** Con `yes`: `jev-filter` (filtrado de resultados
+de herramientas; su contrato exige leer el paquete incluso con exit 2),
+`anofox-decide` (funciones SQL de decisión en DuckDB), `nlgrep` y `typesafe-comment`.
+Con `unclear`: `AntonioCoppe/jev-harness` (andamiaje), `jev-mode` (**declara que falla
+abierto**), `jevsql`, `typesafe-triage-guard` (se declara I+D y trae un `--mock`) y
+`commentcop`. Seis `n_a`: dos herramientas de calibración (`jeval` y `jevcal`, útiles
+para quien opera el hub pero que no sirven una decisión), `jev-x-kit` (su modo sin
+conexión usa un simulador, no un modelo), `jev-research-mcp`, el cliente `jev-cli` y la
+extensión de PostgreSQL `jev4pg`. `psyb0t/decidealot` (un multiplexor de motores
+locales y de Jev detrás de un mismo endpoint HTTP y MCP) cuenta como motor y queda sin
+evaluar, igual que el resto de esa clase.
+
 **Lo que queda sin muestrear:** la mayor parte
 de los candidatos con superficie (unos 235 entre las cuatro categorías, de los que
-se han evaluado 30), y los linters con `--dry-run`. Medir cualquiera exige instalar código de terceros:
+se han evaluado 45), y los linters con `--dry-run`. Medir cualquiera exige instalar código de terceros:
 `wellposed` y `snifftest` están en npm sin dependencias ni scripts de instalación,
 pero esperan a que se autorice.
 

@@ -2985,6 +2985,420 @@
       "evidence": "static",
       "verdict": "SIEGE: un agente de atención al cliente con herramientas reales (reembolsos, cambios de dirección, descuentos) frente a una sala de 200 personas que intentan hacerlo fallar; cada llamada pasa por un filtro previo escrito por el defensor y luego Jev la juzga como `Choice{allow, block, escalate}` con probabilidades calibradas. Es una demostración de hackatón con arena, panel y bucle de defensa; sin claves corre en modo simulado con sustitutos deterministas y lo declara.",
       "blockers": []
+    },
+    {
+      "repo": "apixly-ai/jev-filter",
+      "name": "jev-filter",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "research",
+      "stars": 1,
+      "language": "Python",
+      "decision": "yes",
+      "fit": "inferred",
+      "form": "exec",
+      "callable": [
+        "cli",
+        "mcp",
+        "lib"
+      ],
+      "cost": {
+        "runtime": "node",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "unix"
+      },
+      "evidence": "static",
+      "verdict": "Filtrado semántico de resultados de herramientas de agentes: convierte salidas grandes (resultados de búsqueda, símbolos de código completos, registros correlacionados) en decisiones tipadas y compactas antes de que entren en el contexto, con respuestas tipadas, identificadores de origen y elementos a revisar, y conserva lo que falta y los fallos parciales. Se usa por CLI, por Python, por JavaScript o con cuatro herramientas MCP de solo lectura. Su contrato separa lo incompleto: el paquete debe leerse incluso con exit 2, donde `complete=false` y `review_ids` piden atención. La instalación y `doctor` funcionan sin conexión. Sus propios bancos son francos: 3/13 a 13/13 comportamientos esperados en contratos sin conexión, pero solo 16/48 objetivos de lectura en sitios públicos reales. Evidencia solo de README.",
+      "blockers": [
+        "Node 22 y macOS o Linux; en Windows exige WSL o instalar Python a mano",
+        "el contrato del paquete de análisis es largo y no se leyó entero",
+        "no se confirmó qué credencial necesita la inferencia",
+        "las cifras son de su autor"
+      ]
+    },
+    {
+      "repo": "DataZooDE/anofox-decide",
+      "name": "anofox-decide",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "research",
+      "stars": 2,
+      "language": "C++",
+      "decision": "yes",
+      "fit": "inferred",
+      "form": "exec",
+      "callable": [
+        "lib"
+      ],
+      "cost": {
+        "runtime": "native",
+        "requires_key": [],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Extensión de DuckDB que lleva decisiones en lenguaje natural a SQL: `decide_probability(texto, 'Se pide un reembolso.')`, `decide_choice(texto, '¿Qué equipo es dueño?', ['facturación', 'defecto', 'otro'])` y una escala ordenada, sobre cualquier texto o estado estructurado, con probabilidades calibradas para elegir el umbral y medir. Corre sin conexión en el propio proceso con Julia-1 o Laya sobre ONNX Runtime, o con hosted Jev u otros proveedores; el tutorial arranca con un modelo de pega (`stub`) para ejecutarse sin descargar nada, y una pregunta de elección admite como máximo 24 opciones con el modelo local. Evidencia solo de README.",
+      "blockers": [
+        "se invoca como función SQL dentro de DuckDB: hace falta un shim con DuckDB",
+        "con un modelo local la decisión no es de Jev",
+        "el modelo de pega del tutorial no es un modelo real",
+        "no se leyó el contrato de errores"
+      ]
+    },
+    {
+      "repo": "YehuiTang0316/jev-nlgrep",
+      "name": "nlgrep",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "apps",
+      "stars": 4,
+      "language": "TypeScript",
+      "decision": "yes",
+      "fit": "inferred",
+      "form": "exec",
+      "callable": [
+        "cli"
+      ],
+      "cost": {
+        "runtime": "node",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Busca código, documentos, registros y texto por significado con condiciones en lenguaje natural (admite consultas en chino) y combina condiciones de texto, formato y estructura. `--json` saca JSON por la salida estándar, `--dry-run` planifica sin red y muestra aciertos de caché y llamadas pendientes, `--max-requests 0` acepta solo juicios en caché, y lee de stdin si no se dan rutas. Cada resultado lleva `p`, la estimación del modelo de que se cumpla la condición; los ficheros se ordenan por su ventana de mayor puntuación y los números de línea identifican la ventana evaluada, no una línea. Evidencia solo de README.",
+      "blockers": [
+        "puntúa ventanas, no líneas",
+        "cada llamada es de pago y envía texto a la API",
+        "no se leyeron los códigos de salida"
+      ]
+    },
+    {
+      "repo": "Hexdigest123/typesafe-comment",
+      "name": "typesafe-comment",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "apps",
+      "stars": 0,
+      "language": "Python",
+      "decision": "yes",
+      "fit": "inferred",
+      "form": "exec",
+      "callable": [
+        "cli"
+      ],
+      "cost": {
+        "runtime": "python",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Linter de comentarios de código: puntúa cada comentario en cinco heurísticas (utilidad, legibilidad, exactitud, redundancia y cobertura) y los que quedan bajo los umbrales emiten avisos y hacen salir al proceso con un código distinto de cero para que el pipeline se bloquee. `typesafe-comment --json src/` da salida legible por máquinas; está en PyPI y se puede ejecutar sin instalar con `uvx`; admite Python y, con tree-sitter, C, C++, JS, TS, Go y Rust. Evidencia solo de README.",
+      "blockers": [
+        "el dominio es estrecho (comentarios de código)",
+        "no se leyó la tabla de códigos de salida",
+        "no se leyó qué hace si Jev falla"
+      ]
+    },
+    {
+      "repo": "AntonioCoppe/jev-harness",
+      "name": "jev-harness",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "research",
+      "stars": 15,
+      "language": "TypeScript",
+      "decision": "unclear",
+      "fit": "inferred",
+      "form": "exec",
+      "callable": [
+        "lib",
+        "cli"
+      ],
+      "cost": {
+        "runtime": "node",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Biblioteca de TypeScript que convierte las respuestas de Jev en acciones que se pueden poner en producción: política (de respuestas a `notify`, `suppress`, `place`, `skip`…), puerta de confianza (si es baja, revisar, escalar o suprimir en lugar de adivinar), modo sombra que registra qué se haría sin cambiar el comportamiento real, recetas reutilizables y una CLI de evaluación sin conexión con fixtures que comprueban la acción. Es un andamiaje para quien usa Jev, no una decisión suelta, y la única CLI vista es la de evaluación. No confundir con el `jev-harness` de ismaelsoilet, que es otra cosa. Evidencia solo de README.",
+      "blockers": [
+        "biblioteca de andamiaje: no hay una decisión que servir por sí sola",
+        "la única CLI vista es la de evaluación sin conexión",
+        "el mismo nombre que otro proyecto distinto"
+      ]
+    },
+    {
+      "repo": "ddfeyes/jev-mode",
+      "name": "jev-mode",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "research",
+      "stars": 4,
+      "language": "Python",
+      "decision": "unclear",
+      "fit": "inferred",
+      "form": "exec",
+      "callable": [
+        "hook",
+        "cli"
+      ],
+      "cost": {
+        "runtime": "python",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Saca del contexto del agente los juicios semánticos repetidos (qué equipo es dueño de un ticket, si un fichero está obsoleto, si un mensaje informa de un fallo, qué categoría tiene una fila): se envía un elemento y un mapa de preguntas tipadas y vuelven respuestas limitadas a las opciones dadas, cada una con una confianza calibrada; hay una entrada por stdin con el formato de evento de herramienta de un hook. Declara medidas sobre 1000 juicios de triaje. Pero su README dice «It fails open»: sin clave, sin red, con una respuesta lenta o mal formada las comprobaciones dejan pasar, aunque se pueden desactivar. No está en PyPI. Evidencia solo de README.",
+      "blockers": [
+        "declara que falla abierto ante falta de clave, red, lentitud o respuesta mal formada",
+        "no se leyó si ese caso se marca o llega como una respuesta normal",
+        "no está en PyPI: se instala desde git"
+      ]
+    },
+    {
+      "repo": "EugeneBoondock/jevsql",
+      "name": "jevsql",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "apps",
+      "stars": 5,
+      "language": "JavaScript",
+      "decision": "unclear",
+      "fit": "inferred",
+      "form": "exec",
+      "callable": [
+        "cli",
+        "lib"
+      ],
+      "cost": {
+        "runtime": "node",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Añade juicios de Jev a SQLite: comparar registros por significado, elegir la evidencia exacta de un texto, ordenar pasajes recuperados, derivar lo incierto a una cola de revisión y detectar que una fuente cambiada invalida una afirmación anterior, con API de filas nativa para PostgreSQL, presupuestos, caché por inquilino y cancelación. Sus comprobaciones de datos semánticas salen con 0 si pasan, 2 si hay violaciones y 1 si el error es operativo o de uso, y `--dry-run` da el coste y deja el resultado sin decidir. Es una plataforma de datos amplia, no un especialista, y la parte exacta (sumas de dinero) la hace código sin modelo. Evidencia solo de README.",
+      "blockers": [
+        "producto amplio sobre SQLite, no una decisión suelta",
+        "la entrada es una base de datos",
+        "no se leyó qué hace si Jev falla"
+      ]
+    },
+    {
+      "repo": "shivam2003-dev/typesafe-triage-guard",
+      "name": "typesafe-triage-guard",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "apps",
+      "stars": 0,
+      "language": "Python",
+      "decision": "unclear",
+      "fit": "inferred",
+      "form": "exec",
+      "callable": [
+        "cli"
+      ],
+      "cost": {
+        "runtime": "python",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Tres canalizaciones de juicio componibles sobre Jev: triaje de tickets de soporte (enruta y prioriza con una barrera de seguridad), triaje de alertas de observabilidad y una puerta de riesgo de despliegue. `triage-guard ticket run` y compañía aceptan `--json`, `--policy strict|permissive` y `--mock`, un cliente heurístico sin conexión que se pide expresamente. Su propio README dice que es I+D y un ejemplo trabajado, no un producto. Evidencia solo de README.",
+      "blockers": [
+        "se declara I+D y ejemplo, no un producto",
+        "con `--mock` las respuestas no vienen de ningún modelo",
+        "no se leyó el esquema de salida ni los códigos de salida"
+      ]
+    },
+    {
+      "repo": "ntedvs/commentcop",
+      "name": "commentcop",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "apps",
+      "stars": 1,
+      "language": "TypeScript",
+      "decision": "unclear",
+      "fit": "inferred",
+      "form": "exec",
+      "callable": [
+        "cli"
+      ],
+      "cost": {
+        "runtime": "bun",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "CLI que juzga los comentarios de código JS y TS con Jev: lee cada comentario con el código que lo rodea y puntúa exactitud y utilidad sobre 100, y muestra primero los más débiles. Respeta `.gitignore`, omite código generado y dependencias, y `--dry-run` previsualiza lo que encuentra sin llamar a Jev. `setup` guarda la clave en la configuración del usuario, así que no debe ejecutarse desde el hub. No se vio una salida legible por máquinas ni códigos de salida. Evidencia solo de README.",
+      "blockers": [
+        "no se vio `--json` ni códigos de salida",
+        "`setup` escribe la clave en la configuración del usuario",
+        "solo JS y TS"
+      ]
+    },
+    {
+      "repo": "rlaope/jeval",
+      "name": "jeval",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "research",
+      "stars": 22,
+      "language": "Python",
+      "decision": "no",
+      "fit": "inferred",
+      "form": "n_a",
+      "callable": [
+        "cli"
+      ],
+      "cost": {
+        "runtime": "python",
+        "requires_key": [],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Mide cuánto vale la confianza de un clasificador y convierte lo que cuesta un error en el umbral donde la máquina debe dejar de decidir y empezar una persona; sale un HTML que se abre sin conexión y un YAML que lee la aplicación. Se calcula todo desde registros etiquetados en disco, sin servidor, red, cuenta ni clave. Es una herramienta de calibración, no una decisión que servir. No está en PyPI y `pip install jeval` instala un proyecto ajeno.",
+      "blockers": []
+    },
+    {
+      "repo": "abhixhek/jevcal",
+      "name": "jevcal",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "research",
+      "stars": 10,
+      "language": "Python",
+      "decision": "no",
+      "fit": "inferred",
+      "form": "n_a",
+      "callable": [
+        "cli"
+      ],
+      "cost": {
+        "runtime": "python",
+        "requires_key": [],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Mide un modelo de decisión tipada con los datos del usuario, elige el umbral que cumple su objetivo de exactitud, calcula qué parte del tráfico sigue necesitando un LLM y hace fallar la CI cuando una actualización del modelo lo rompe (`jevcal check --lock ... --data ...` sale con 1 ante deriva). La demostración corre sin clave con un simulador incorporado. Es una herramienta de calibración, no una decisión que servir. No está en PyPI.",
+      "blockers": []
+    },
+    {
+      "repo": "Kadihx/jev-x-kit",
+      "name": "jev-x-kit",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "research",
+      "stars": 3,
+      "language": "TypeScript",
+      "decision": "no",
+      "fit": "inferred",
+      "form": "n_a",
+      "callable": [
+        "cli",
+        "mcp"
+      ],
+      "cost": {
+        "runtime": "node",
+        "requires_key": [],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Marco universal de decisión autónoma, investigación profunda, planificación y automejora, empaquetado como plugin de Claude Code, servidor MCP y CLI. Funciona «100 % gratis y sin conexión» gracias a un simulador determinista que mantiene válidos los primitivos y los esquemas, es decir, las respuestas sin conexión no salen de ningún modelo; contra la API alojada hay que fijar `TYPESAFE_JEV_NATIVE=1`. Es un marco con demasiadas piezas, no una decisión que servir.",
+      "blockers": []
+    },
+    {
+      "repo": "Merth1470/jev-research-mcp",
+      "name": "jev-research-mcp",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "research",
+      "stars": 3,
+      "language": "Python",
+      "decision": "no",
+      "fit": "inferred",
+      "form": "n_a",
+      "callable": [
+        "mcp"
+      ],
+      "cost": {
+        "runtime": "python",
+        "requires_key": [
+          "typesafe",
+          "brave"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Servidor MCP autoalojado con una herramienta principal, `research`, que usa Jev como capa de selección de evidencia en la investigación web de un agente: filtra dos veces (resultados de búsqueda antes de descargar y bloques de contenido después de analizar) y devuelve bloques compactos de evidencia con procedencia. Entrega contenido recuperado, no un veredicto. Necesita `TYPESAFE_API_KEY` y `BRAVE_API_KEY`.",
+      "blockers": []
+    },
+    {
+      "repo": "tumf/jev-cli",
+      "name": "jev-cli (tumf)",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "apps",
+      "stars": 14,
+      "language": "Python",
+      "decision": "no",
+      "fit": "inferred",
+      "form": "n_a",
+      "callable": [
+        "cli",
+        "mcp"
+      ],
+      "cost": {
+        "runtime": "python",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "CLI y servidor MCP por stdio, no oficiales, para la API de Jev: se manda texto o un estado JSON, se hacen preguntas tipadas (`noul`, `choice`, `score`) y se reciben respuestas legibles por máquinas; admite varias preguntas por petición, texto, JSON, ficheros y stdin, errores estructurados por stderr y códigos de salida con sentido. Es un cliente de transporte puro de la API, sin decisión propia, como jevkit.",
+      "blockers": []
+    },
+    {
+      "repo": "Sheltercosmo/jev4pg",
+      "name": "jev4pg",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "integrations",
+      "stars": 156,
+      "language": "Python",
+      "decision": "no",
+      "fit": "inferred",
+      "form": "n_a",
+      "callable": [
+        "http",
+        "lib"
+      ],
+      "cost": {
+        "runtime": "python",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Extensión para PostgreSQL 14 a 17 con 41 operadores de Jev (filtrar, extraer, ordenar, emparejar, verificar), incrustaciones explicables, caché de evidencia, reintentos controlados y un espacio de trabajo con API HTTP y aplicación propios, que se arrancan con PostgreSQL y sus procesos. Es una plataforma que decide dentro de su propia base de datos, no una decisión que servir. Las cifras de exactitud y latencia (98 % frente a 92 %) son de su autor.",
+      "blockers": []
     }
   ]
 }

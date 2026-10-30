@@ -130,8 +130,8 @@ Cambiar estos implica actualizar tests, docs y el plan a la vez:
 - Cohorte A: **13** entradas; solo toolgate es `measured`, con su run en disco.
 - La cobertura publicada **no es un invariante fijo**: crece con cada veredicto de
   la cohorte B y los tests la derivan de `assessments.json`. Solo se fijan las
-  **1340** entradas visibles. Hoy: **107** triadas, **3** evaluadas (**108** de las 110
-  en el catálogo), **1232** sin tocar.
+  **1340** entradas visibles. Hoy: **122** triadas, **3** evaluadas (**123** de las 125
+  en el catálogo), **1217** sin tocar.
 
 ## Reglas inviolables (validadas por `validate-rules.mjs`)
 
