@@ -2052,6 +2052,347 @@
       "evidence": "static",
       "verdict": "Experimento mínimo de bucle de agente donde Jev dirige el flujo de control y un modelo de chat de LangChain escribe los valores de los argumentos y la respuesta final, sobre tres servidores MCP locales con 12 herramientas. Incluye un benchmark de investigación frente a bucles nativos con LLM. Es un arnés experimental, no una decisión que servir.",
       "blockers": []
+    },
+    {
+      "repo": "mizchi/jev-test-filter",
+      "name": "jev-test-filter",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "browser",
+      "stars": 34,
+      "language": "TypeScript",
+      "decision": "yes",
+      "fit": "inferred",
+      "form": "exec",
+      "callable": [
+        "cli"
+      ],
+      "cost": {
+        "runtime": "node",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Lee un `git diff`, pregunta a Jev cuánto puede alterar ese cambio el resultado de cada test del repositorio (un estado compartido, una pregunta por test, una sola ida y vuelta) e imprime los argumentos de filtro que ya entiende el ejecutor (vitest, jest, node:test, bun, Playwright, cargo, go, rspec). `--json` entrega la puntuación completa: por test, `selected`, `reason` (`touched`, `unsure`, `below`), `score` y `confidence`, más el gasto. Los códigos de salida están documentados y separan «nada seleccionado» (3), argumentos erróneos (2) y fallo de la herramienta (1); `--exec` y `--json` salen siempre con 0 si la herramienta funcionó. Evidencia solo de README.",
+      "blockers": [
+        "necesita un repositorio git con el cambio a mano y Node 24 o superior",
+        "`--exec` lanza el comando del usuario: el hub solo debería usar `--json`",
+        "no se leyó qué hace si la petición a Jev falla"
+      ]
+    },
+    {
+      "repo": "PyModel/jev-judge-mcp",
+      "name": "jev-judge-mcp",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "research",
+      "stars": 71,
+      "language": "Python",
+      "decision": "yes",
+      "fit": "inferred",
+      "form": "exec",
+      "callable": [
+        "mcp",
+        "cli"
+      ],
+      "cost": {
+        "runtime": "python",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "unix"
+      },
+      "evidence": "static",
+      "verdict": "Servidor MCP por stdio con quince herramientas de juicio tipado sobre Jev (verificar, comprobar, filtrar, clasificar, reordenar, decidir, comparar, extraer, revisar, puntuar…): el agente aporta evidencia y una pregunta enumerable y la política local decide `auto`, `review` o `escalate`. Es genérico y trae política de confianza, como JevRouter. Se usa como servidor MCP; `setup`, `install` y `doctor` configuran el anfitrión y no deben formar parte de la llamada del hub. Evidencia solo de README.",
+      "blockers": [
+        "solo Linux o macOS",
+        "requiere Python 3.12 y uv",
+        "`install` escribe en la configuración de varios agentes: no ejecutarlo",
+        "no se leyó el esquema de salida de cada herramienta"
+      ]
+    },
+    {
+      "repo": "emreozyoruk/hush",
+      "name": "hush",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "integrations",
+      "stars": 2,
+      "language": "JavaScript",
+      "decision": "yes",
+      "fit": "inferred",
+      "form": "exec",
+      "callable": [
+        "cli"
+      ],
+      "cost": {
+        "runtime": "node",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Triaje de incidencias y pull requests que se abstiene cuando no está seguro: etiqueta, spam, falta de información y duplicado, cada uno con su umbral configurable, y si no lo alcanza no hace nada y lo explica. `npx hush-triage owner/repo` es de solo lectura («nothing will be written») y `--json` entrega el resultado; como Acción de GitHub aplica las etiquetas. Evidencia solo de README.",
+      "blockers": [
+        "la entrada es una incidencia o PR de GitHub, no un estado libre",
+        "no se leyó qué credencial de GitHub necesita ni qué hace si Jev falla"
+      ]
+    },
+    {
+      "repo": "sharziki/semdecide",
+      "name": "semdecide",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "apps",
+      "stars": 76,
+      "language": "Python",
+      "decision": "yes",
+      "fit": "inferred",
+      "form": "exec",
+      "callable": [
+        "cli"
+      ],
+      "cost": {
+        "runtime": "python",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "`grep` por significado y `jq` para el juicio: `is` (predicado), `choose` (ruta entre opciones con probabilidad de cada una y confianza), `score` (rúbrica ordenada), `filter` (JSONL) y `guard` (receta de seguridad de acciones: allow, escalate, block). Entrada por stdin, `--text` o `--file`; `--json` da una salida versionada (`schema_version`); los errores salen como JSON versionado por stderr con el detalle del proveedor redactado. Los códigos de salida separan la respuesta del fallo: 0 verdadero, 1 falso, 2 entrada o uso inválidos, 3 incierto bajo el margen o la confianza mínima, 4 fallo del proveedor, y `guard` usa 0, 10 y 20. Es la separación que se le exige a un gate. Evidencia solo de README.",
+      "blockers": [
+        "no está en PyPI: se instala desde un artefacto de la release de GitHub",
+        "no se midió"
+      ]
+    },
+    {
+      "repo": "sufianetaouil/every",
+      "name": "every",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "apps",
+      "stars": 7,
+      "language": "Python",
+      "decision": "yes",
+      "fit": "inferred",
+      "form": "exec",
+      "callable": [
+        "cli"
+      ],
+      "cost": {
+        "runtime": "python",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Hace una pregunta de sí o no a cada función de un código y devuelve la probabilidad de cada una, ordenadas, con umbral (`--above`) y `--json`. Es una colección con probabilidad por ítem y salida documentada. `--selftest` mide recall, falsos positivos y AUROC con 20 funciones etiquetadas. Evidencia solo de README.",
+      "blockers": [
+        "el código de cada función se envía a la API de TypeSafe",
+        "se ignora qué hace `--yes` y qué confirmación salta",
+        "se ignora el exit code"
+      ]
+    },
+    {
+      "repo": "jyatesdotdev/jev-logtriage",
+      "name": "jev-logtriage",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "apps",
+      "stars": 1,
+      "language": "Python",
+      "decision": "unclear",
+      "fit": "inferred",
+      "form": "exec",
+      "callable": [
+        "cli"
+      ],
+      "cost": {
+        "runtime": "python",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Colapsa un lote de registros, hace seis preguntas a Jev en una sola llamada y el código aplica los umbrales para asignar `suppress`, `watch`, `review`, `notify` o `page`. Nada se ejecuta. La confianza baja nunca llega a automatizar. Las dos entradas que se vieron son un Loki o un conjunto de prueba incluido (`--demo`); no se vio una entrada libre ni una salida JSON documentada. Evidencia solo de README.",
+      "blockers": [
+        "entrada: Loki o fixtures, sin entrada libre documentada",
+        "salida en tabla, sin formato máquina visto",
+        "no se leyó qué hace si Jev falla"
+      ]
+    },
+    {
+      "repo": "hemanth/pkg-gate",
+      "name": "pkg-gate",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "apps",
+      "stars": 0,
+      "language": "JavaScript",
+      "decision": "unclear",
+      "fit": "inferred",
+      "form": "exec",
+      "callable": [
+        "lib",
+        "cli"
+      ],
+      "cost": {
+        "runtime": "node",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Puerta previa a la instalación de paquetes npm: extrae los scripts de ciclo de vida (`preinstall`, `install`, `postinstall`) o evalúa una cadena de shell, y devuelve `allow`, `warn` o `block` con intención y probabilidad de acceso a secretos. Salida estructurada (`report.structured`) y códigos 0 (permitir), 1 (bloquear) y 2 (avisar). Pero sin clave cae a un «simulador calibrado offline»: da un veredicto con apariencia de calibrado que no sale de Jev. Evidencia solo de README.",
+      "blockers": [
+        "sin clave devuelve un veredicto simulado, no un error",
+        "no se leyó si ese simulador puede responder `allow`",
+        "es sobre todo una biblioteca"
+      ]
+    },
+    {
+      "repo": "1jehuang/jev-pr-labeler",
+      "name": "jev-pr-labeler",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "apps",
+      "stars": 4,
+      "language": "Python",
+      "decision": "unclear",
+      "fit": "inferred",
+      "form": "exec",
+      "callable": [
+        "cli"
+      ],
+      "cost": {
+        "runtime": "python",
+        "requires_key": [
+          "openrouter"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Etiqueta semánticamente un pull request de GitHub con la API Decisions de OpenRouter: tipo (uno), área (varias), plataforma, atención (`breaking-change`, `security`) y tamaño por alcance conceptual y no por líneas. Por defecto es un ensayo que no escribe en GitHub (aunque hace una llamada de pago); `--apply` etiqueta. El informe trae elección y confianza por pregunta. Pero la taxonomía es la de otro proyecto (Jcode) y vive en `taxonomy.py`: para servirla hay que bifurcar. Evidencia solo de README.",
+      "blockers": [
+        "taxonomía cableada del proyecto Jcode",
+        "usa OpenRouter, no la API de TypeSafe directamente",
+        "la entrada es un PR de GitHub"
+      ]
+    },
+    {
+      "repo": "Bentlybro/siftr",
+      "name": "siftr",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "research",
+      "stars": 7,
+      "language": "Python",
+      "decision": "unclear",
+      "fit": "inferred",
+      "form": "exec",
+      "callable": [
+        "mcp",
+        "cli"
+      ],
+      "cost": {
+        "runtime": "python",
+        "requires_key": [
+          "openrouter"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Cuatro herramientas de solo lectura para agentes de código: `search` (qué archivo toca esta incidencia), `read` (qué partes importan de un archivo), `pick` (qué archivo de test lo cubre) y `filter` (partes relevantes de un registro, experimental). Publica cifras sobre SWE-bench Lite en un split congelado de 202 incidencias (82 % en el top 5 de `search`) y admite que `grep` gana cuando se conocen las palabras. Es en buena parte recuperación de contenido, no un veredicto. Evidencia solo de README.",
+      "blockers": [
+        "recuperación y priorización de contenido, más que una decisión tipada",
+        "usa OpenRouter",
+        "el instalador se descarga con `curl | sh`: no ejecutarlo",
+        "las cifras son de su autor"
+      ]
+    },
+    {
+      "repo": "egma-ai/jev-code-reviewer",
+      "name": "jev-code-reviewer",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "research",
+      "stars": 138,
+      "language": "JavaScript",
+      "decision": "no",
+      "fit": "inferred",
+      "form": "n_a",
+      "callable": [
+        "cli"
+      ],
+      "cost": {
+        "runtime": "node",
+        "requires_key": [
+          "typesafe",
+          "openai"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Aplicación de revisión de PR de extremo a extremo: un servidor local, una extensión de Chrome que sustituye el código por su lógica en la página de «Files changed» y un CLI (`analyze`) que clasifica cada cambio por prioridad con Jev y lo explica con OpenAI. No devuelve una decisión suelta que servir. El código cambiado y su contexto salen hacia TypeSafe y OpenAI.",
+      "blockers": []
+    },
+    {
+      "repo": "browser-use/jev-ultrafast",
+      "name": "Jev Ultrafast",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "browser",
+      "stars": 22238,
+      "language": "Python",
+      "decision": "no",
+      "fit": "inferred",
+      "form": "n_a",
+      "callable": [
+        "cli"
+      ],
+      "cost": {
+        "runtime": "python",
+        "requires_key": [
+          "typesafe",
+          "text-model"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Agente de navegador con un espacio de acciones indexado: dado un objetivo, Jev elige operación y elemento en una sola petición (`CLICK`, `TYPE_TEXT`, `SELECT`, `SCROLL_*`, `WAIT`, `DONE`, `BLOCKED`) y un LLM pequeño solo escribe el texto cuando toca. Es un bucle de agente completo que actúa sobre el navegador, no una decisión que servir. Es la referencia de la que cuelgan casi todos los proyectos de la categoría navegador.",
+      "blockers": []
+    },
+    {
+      "repo": "krw82/jev-playwright-mcp",
+      "name": "jev-playwright-mcp",
+      "cohort": "C",
+      "in_catalog": true,
+      "catalog_category": "browser",
+      "stars": 2,
+      "language": "TypeScript",
+      "decision": "no",
+      "fit": "inferred",
+      "form": "n_a",
+      "callable": [
+        "mcp"
+      ],
+      "cost": {
+        "runtime": "node",
+        "requires_key": [
+          "typesafe"
+        ],
+        "host": "any"
+      },
+      "evidence": "static",
+      "verdict": "Proxy MCP sobre el servidor oficial de Playwright con una capa de juicio por dentro: clasifica el estado de la página (muro de acceso, captcha, error, límite, muro de pago…), enmascara inyecciones de instrucciones, poda instantáneas por objetivo y evalúa el riesgo de las acciones antes de ejecutarlas. Decide dentro de su propio proceso, no expone una decisión. Y sin clave todo degrada a paso directo, es decir, deja pasar sin comprobar.",
+      "blockers": []
     }
   ]
 }

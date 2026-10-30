@@ -50,10 +50,11 @@ validador lo comprueba.
 
 ## Estado publicado hoy
 
-74 triadas · 3 evaluadas (75 de las 77 analizadas están en el catálogo) · 1265 sin
+86 triadas · 3 evaluadas (87 de las 89 analizadas están en el catálogo) · 1253 sin
 tocar, de 1340 entradas visibles. 64 son de la cohorte B: 26 de `routing`, 17 de
-`review`, 12 de `gates`, 6 de `context` y 3 de `supervision`; este recuento crece
-con cada tanda. **Se han medido tres: toolgate, jev-firewall y reflex**, todos sin
+`review`, 12 de `gates`, 6 de `context` y 3 de `supervision`; 12 son de la cohorte
+C (muestreo de `browser`, `research`, `apps` e `integrations`, ver «Muestreo de las
+categorías candidatas»); este recuento crece con cada tanda. **Se han medido tres: toolgate, jev-firewall y reflex**, todos sin
 claves (los dos últimos, ejecutando su CLI directamente y sin pasar por el hub; ver
 «Medido: jev-firewall» y «Medido: reflex»). De toolgate se midió: la
 regla estática, el modo de fallo (que llega como `error`, nunca como permiso), la
@@ -233,13 +234,50 @@ de 159, `browser` 50 de 109, `integrations` 19 de 45. De `games`, 34 de 76.
    código de cada uno**: el triaje solo ordena por dónde empezar. Cada veredicto
    entra en `data/assessments.json` con `cohort: "B"`, `evidence: "static"` y su
    `fit`. Después `review`, `gates`, `context` y `supervision`.
-3. **Muestrear** `research`, `apps`, `integrations` y `browser` para ver si hay veta,
-   y revisar `games` cuando toque.
+3. **Muestrear** `research`, `apps`, `integrations` y `browser` para ver si hay veta:
+   **primera pasada hecha** (ver «Muestreo de las categorías candidatas»). Queda
+   revisar `games` cuando toque.
 4. **Decidir si se repinea el catálogo:** el triaje halló 17 `gone` y el invariante
    dice 11, es decir, 6 repos borrados desde que se congeló. Repinear obliga a
    actualizar a la vez tests, `AGENTS.md`, este documento y el plan.
 5. **Sitio:** `site/index.html` no muestra todavía la sección «Aparcado», solo el
    README.
+
+## Muestreo de las categorías candidatas
+
+Primera pasada sobre `browser`, `research`, `apps` e `integrations`, solo leyendo
+(READMEs y la caché del triaje; no se instaló ni ejecutó nada de terceros). Se
+cruzó la descripción del catálogo con la señal `callable`, se bajaron 20 READMEs y
+se leyó una quincena (de forma parcial en varios); 12 veredictos entran como cohorte **C**, `evidence: "static"` y
+`fit: "inferred"`. Los candidatos con superficie invocable por proceso son muchos
+(`research` 120, `apps` 65, `browser` 41, `integrations` 9), pero casi todos caen en
+dos clases:
+
+1. **Usos de dominio de los tres primitivos** (choice, score, noul): `yes` cuando
+   hay entrada libre y salida documentada. Son `mizchi/jev-test-filter`,
+   `PyModel/jev-judge-mcp`, `emreozyoruk/hush`, `sharziki/semdecide` y
+   `sufianetaouil/every`. `semdecide` tiene uno de los contratos más limpios de los
+   leídos hasta ahora: JSON versionado y exit 3 para «incierto» frente a exit 4 para «fallo
+   del proveedor». Con reservas (`unclear`): `jev-logtriage` (solo Loki o fixtures),
+   `pkg-gate` (sin clave da un veredicto simulado), `jev-pr-labeler` (taxonomía de
+   otro proyecto) y `siftr` (recuperación de contenido).
+2. **Motores: reimplementaciones abiertas de Jev** que sirven `/v1/systemone`
+   (von, jevk5, litjev, local-jev, WaterSheep, lichen, Decis, jeff, OpenJev…). **No
+   se han evaluado y es una decisión de diseño pendiente:** no son una capacidad que
+   el hub sirva sino un *backend* de modelo, un papel distinto de `flow/exec/http`.
+   Modelarlos obligaría a tocar el esquema; no se ha hecho. `wfzyx/von` declara estar
+   **archivado** y recomienda LiquidAI/d1-omni-600M, lo que importa si se elige uno.
+
+Los `n_a` de la muestra siguen el criterio de siempre: bucles de agente de navegador
+(`jev-ultrafast`, de la que cuelgan casi todos los de `browser`), apps de extremo a
+extremo (`jev-code-reviewer`) y proxies (`jev-playwright-mcp`, que sin clave pasa todo
+sin comprobar).
+
+**Lo que queda sin muestrear:** `games` (aparcada, primera a revisar), la mayor parte
+de los candidatos con superficie (unos 235 entre las cuatro categorías, de los que
+solo se han evaluado 12), y los linters con `--dry-run`. Medir cualquiera exige instalar código de terceros:
+`wellposed` y `snifftest` están en npm sin dependencias ni scripts de instalación,
+pero esperan a que se autorice.
 
 ## Cinco cosas que se aprendieron y están en el código
 
