@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readJson } from "../scripts/lib/json.mjs";
 import { ASSESSMENTS, CATALOG, FIT } from "../scripts/lib/paths.mjs";
+import { hasRun } from "../scripts/lib/runs.mjs";
 import { validateAll, validateAssessments } from "../scripts/lib/validate-rules.mjs";
 
 const doc = readJson(ASSESSMENTS);
@@ -16,11 +17,11 @@ const withEntry = (patch) => {
 };
 
 test("the shipped cohort A is valid", () => {
-  assert.deepEqual(validateAssessments(doc.assessments, catalog, noRuns, fit), []);
+  assert.deepEqual(validateAssessments(doc.assessments, catalog, hasRun, fit), []);
 });
 
 test("validateAll covers fit and assessments together", () => {
-  assert.deepEqual(validateAll({ assessments: doc.assessments, fit, catalog, hasRun: noRuns }), []);
+  assert.deepEqual(validateAll({ assessments: doc.assessments, fit, catalog, hasRun }), []);
 });
 
 test("measured without a run that exists is rejected", () => {

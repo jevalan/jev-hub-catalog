@@ -4,6 +4,7 @@ import { readFileSync } from "node:fs";
 import { readJson } from "../scripts/lib/json.mjs";
 import { ASSESSMENTS, CATALOG, FIT, TEMPLATE } from "../scripts/lib/paths.mjs";
 import { assertPublishable, buildReadme, buildSite, coverage } from "../scripts/build.mjs";
+import { hasRun } from "../scripts/lib/runs.mjs";
 
 const { assessments } = readJson(ASSESSMENTS);
 const catalog = readJson(CATALOG);
@@ -13,12 +14,11 @@ const site = buildSite(assessments, catalog, readFileSync(TEMPLATE, "utf8"));
 
 test("coverage counts against the visible catalog, not against the analysed set", () => {
   const c = coverage(assessments, catalog);
-  assert.deepEqual(c, { total: 1340, triaged: 13, evaluated: 0, inCatalog: 11, untouched: 1329 });
+  assert.deepEqual(c, { total: 1340, triaged: 12, evaluated: 1, inCatalog: 11, untouched: 1329 });
 });
 
 test("the README states the split, including how many analysed projects live outside the catalog", () => {
-  assert.match(readme, /13 triadas \(11 de ellas en el catálogo\)/);
-  assert.match(readme, /0 evaluadas/);
+  assert.match(readme, /12 triadas · 1 evaluadas \(11 de las 13 analizadas están en el catálogo\)/);
   assert.match(readme, /1329 sin tocar/);
 });
 
@@ -43,5 +43,5 @@ test("build refuses to publish a verdict the validator rejects", () => {
 });
 
 test("build accepts the shipped data", () => {
-  assert.doesNotThrow(() => assertPublishable({ assessments, fit, catalog, hasRun: () => false }));
+  assert.doesNotThrow(() => assertPublishable({ assessments, fit, catalog, hasRun }));
 });

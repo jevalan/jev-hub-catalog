@@ -14,10 +14,11 @@
       "form": "exec",
       "callable": ["cli", "mcp", "hook", "lib"],
       "cost": { "runtime": "node", "requires_key": ["typesafe", "openrouter"], "host": "any" },
-      "evidence": "static",
-      "verdict": "Ya adaptado en jevalon como capacidad tool.risk (`node ${TOOLGATE_CLI} decide`). El CLI imprime veredicto, motivo, origen y probabilidades, y el hub mapea no-opinion a abstain y fail-mode a error.",
+      "evidence": "measured",
+      "verdict": "Ya adaptado en jevalan como capacidad tool.risk (`node ${TOOLGATE_CLI} decide`). El CLI imprime veredicto, motivo, origen y probabilidades, y el hub mapea no-opinion a abstain y fail-mode a error. Medido de punta a punta sin claves (v0.16.0 tras el hub de jevalan): la regla estática decide y valida contra el esquema, el modo de fallo llega como error provider_failed y nunca como permiso, y entrada o versión incorrectas no llegan al especialista. NO medido: las decisiones que dependen del modelo (allow/ask con probabilidades), el plazo agotado y el coste.",
       "blockers": [],
-      "capability": "tool.risk"
+      "capability": "tool.risk",
+      "run": "runs/2026-10-30-riskaversetech-toolgate"
     },
     {
       "repo": "qkal/Canny",
@@ -101,7 +102,7 @@
       "callable": ["lib"],
       "cost": { "runtime": "node", "requires_key": [], "host": "any" },
       "evidence": "static",
-      "verdict": "Librería pura (shouldWake), sin plugin ni CLI ni MCP. jevalon ya cubre la misma decisión con el flujo agent-wakeup, que además no arrastra runtime.",
+      "verdict": "Librería pura (shouldWake), sin plugin ni CLI ni MCP. jevalan ya cubre la misma decisión con el flujo agent-wakeup, que además no arrastra runtime.",
       "blockers": []
     },
     {

@@ -45,14 +45,14 @@ export function buildReadme(assessments, catalog) {
     )
     .join("\n");
 
-  return `# jevalon hub scout
+  return `# jevalan hub scout
 
-Qué proyectos del ecosistema Jev puede servir el hub de jevalon, con qué forma y a qué coste.
+Qué proyectos del ecosistema Jev puede servir el hub de jevalan, con qué forma y a qué coste.
 Generado desde \`data/assessments.json\`. Snapshot del universo: ${catalog.updated} (${catalog.source}).
 
 ## Cobertura
 
-${c.triaged} triadas (${c.inCatalog} de ellas en el catálogo) · ${c.evaluated} evaluadas · ${c.untouched} sin tocar, de ${c.total} entradas visibles del catálogo.
+${c.triaged} triadas · ${c.evaluated} evaluadas (${c.inCatalog} de las ${c.triaged + c.evaluated} analizadas están en el catálogo) · ${c.untouched} sin tocar, de ${c.total} entradas visibles del catálogo.
 
 Un veredicto **triado** sale de leer el código; uno **medido** sale de ejecutarlo. No son lo mismo y aquí no se presentan como si lo fueran.
 
@@ -80,7 +80,7 @@ export function buildSite(assessments, catalog, template) {
   return insertRows(
     template.replaceAll(
       "{{COVERAGE}}",
-      `${c.triaged} triadas (${c.inCatalog} en el catálogo) · ${c.evaluated} evaluadas · ${c.untouched} sin tocar`,
+      `${c.triaged} triadas · ${c.evaluated} evaluadas (${c.inCatalog} de ${c.triaged + c.evaluated} en el catálogo) · ${c.untouched} sin tocar`,
     ),
     rows,
   );

@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readJson } from "../scripts/lib/json.mjs";
 import { ASSESSMENTS, CATALOG } from "../scripts/lib/paths.mjs";
+import { hasRun } from "../scripts/lib/runs.mjs";
 
 const { assessments } = readJson(ASSESSMENTS);
 const catalog = readJson(CATALOG);
@@ -27,6 +28,7 @@ test("toolgate is catalogued under research and is the one already adapted", () 
   assert.equal(t.capability, "tool.risk");
 });
 
-test("no entry claims to be measured while there is no probe yet", () => {
-  assert.equal(assessments.every((a) => a.evidence === "static"), true);
+test("an entry is measured only if its run is on disk, and toolgate is the one measured so far", () => {
+  for (const a of assessments.filter((x) => x.evidence === "measured")) assert.equal(hasRun(a.run), true, `${a.repo} sin run`);
+  assert.deepEqual(assessments.filter((a) => a.evidence === "measured").map((a) => a.repo), ["RiskAverseTech/toolgate"]);
 });

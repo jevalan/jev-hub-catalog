@@ -1,0 +1,137 @@
+{
+  "repo": "RiskAverseTech/toolgate",
+  "capability": "tool.risk",
+  "date": "2026-10-30",
+  "environment": {
+    "node": "v24.8.0",
+    "jevalan": "jevalan 0.1.0-alpha.1",
+    "specialist": "0.16.0",
+    "keys": "ninguna: entorno vacío, el especialista no puede llamar a ningún modelo"
+  },
+  "measured": [
+    "decisión por regla estática",
+    "modo de fallo traducido a error",
+    "validación de entrada y versión",
+    "descubrimiento y digest"
+  ],
+  "not_measured": [
+    "decisiones que dependen del modelo (allow/ask con probabilidades)",
+    "plazo agotado",
+    "coste y latencia con modelo"
+  ],
+  "discovery": {
+    "pass": true,
+    "problems": []
+  },
+  "cases": [
+    {
+      "id": "static-rule-decides",
+      "why": "Una regla estática del especialista decide sin modelo y la decisión valida contra el esquema.",
+      "pass": true,
+      "problems": [],
+      "reply": {
+        "capability": "tool.risk",
+        "capability_version": "1",
+        "decision": {
+          "reason": "Recursive delete targeting root or home",
+          "source": "static-rule",
+          "verdict": "deny"
+        },
+        "protocol_version": "jev-hub/0.1",
+        "provider": {
+          "id": "toolgate",
+          "version": "unconfigured"
+        },
+        "request_id": "probe",
+        "status": "ok",
+        "trace": {
+          "cost": "not_measured",
+          "elapsed_ms": 461,
+          "trace_id": "18e35b9ad95851300001"
+        }
+      }
+    },
+    {
+      "id": "no-model-is-an-error",
+      "why": "Sin modelo, el especialista informa de su modo de fallo y el hub lo traduce a error, nunca a permiso.",
+      "pass": true,
+      "problems": [],
+      "reply": {
+        "capability": "tool.risk",
+        "capability_version": "1",
+        "error": {
+          "code": "provider_failed",
+          "message": "el especialista informó de un fallo",
+          "retryable": true
+        },
+        "protocol_version": "jev-hub/0.1",
+        "provider": {
+          "id": "toolgate",
+          "version": "unconfigured"
+        },
+        "request_id": "probe",
+        "status": "error",
+        "trace": {
+          "cost": "not_measured",
+          "elapsed_ms": 693,
+          "trace_id": "18e35b9af54863a80002"
+        }
+      }
+    },
+    {
+      "id": "input-outside-schema",
+      "why": "Una entrada fuera del esquema es error y no llega al especialista.",
+      "pass": true,
+      "problems": [],
+      "reply": {
+        "capability": "tool.risk",
+        "capability_version": "1",
+        "error": {
+          "code": "invalid_input",
+          "message": "7 is not of type \"object\"",
+          "retryable": false
+        },
+        "protocol_version": "jev-hub/0.1",
+        "provider": {
+          "id": "toolgate",
+          "version": "unconfigured"
+        },
+        "request_id": "probe",
+        "status": "error",
+        "trace": {
+          "cost": "not_measured",
+          "elapsed_ms": 0,
+          "trace_id": "18e35b9b1ed76fc00003"
+        }
+      }
+    },
+    {
+      "id": "other-contract-version",
+      "why": "Otra versión del contrato es error.",
+      "pass": true,
+      "problems": [],
+      "reply": {
+        "capability": "tool.risk",
+        "capability_version": "9",
+        "error": {
+          "code": "version_mismatch",
+          "message": "la capacidad está en la versión 1",
+          "retryable": false
+        },
+        "protocol_version": "jev-hub/0.1",
+        "provider": {
+          "id": "toolgate",
+          "version": "unconfigured"
+        },
+        "request_id": "probe",
+        "status": "error",
+        "trace": {
+          "cost": "not_measured",
+          "elapsed_ms": 0,
+          "trace_id": "18e35b9b1f1e18d00004"
+        }
+      }
+    }
+  ],
+  "pass": true
+}
