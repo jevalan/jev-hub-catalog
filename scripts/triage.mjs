@@ -15,6 +15,31 @@ export const BRANCHES = ["HEAD", "main", "master"];
 
 export const cacheKey = (repo) => repo.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
+const hash = (s) => {
+  let h = 5381;
+  for (const ch of s) h = ((h << 5) + h + ch.codePointAt(0)) >>> 0;
+  return h.toString(36);
+};
+
+/** La clave pierde el separador owner/name, así que dos repos distintos pueden
+ * caer en el mismo slug (`foo/bar-baz` y `foo-bar/baz` → `foo-bar-baz`) y
+ * compartir fichero, pisándose el uno al otro. La clave legible se conserva;
+ * solo los slugs ambiguos reciben un sufijo estable derivado del repo exacto. */
+export function cacheNames(repos) {
+  const bySlug = new Map();
+  for (const repo of repos) {
+    const slug = cacheKey(repo);
+    if (!bySlug.has(slug)) bySlug.set(slug, new Set());
+    bySlug.get(slug).add(repo.toLowerCase());
+  }
+  const names = new Map();
+  for (const repo of repos) {
+    const slug = cacheKey(repo);
+    names.set(repo, bySlug.get(slug).size > 1 ? `${slug}-${hash(repo.toLowerCase())}` : slug);
+  }
+  return names;
+}
+
 export function describeStatus(status) {
   if (status === 200) return "ok";
   if (status === 404 || status === 451) return "gone";
@@ -35,7 +60,7 @@ export function planTargets(catalog) {
 }
 
 const headers = () => {
-  const h = { Accept: "application/vnd.github+json", "User-Agent": "jevalon-hub-scout" };
+  const h = { Accept: "application/vnd.github+json", "User-Agent": "jevalan-hub-scout" };
   if (process.env.GITHUB_TOKEN) h.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
   return h;
 };
@@ -94,11 +119,12 @@ async function main() {
   mkdirSync(TRIAGE_CACHE, { recursive: true });
 
   const targets = planTargets(readJson(CATALOG));
+  const names = cacheNames(targets.map((t) => t.repo));
   let written = 0;
   let cached = 0;
   for (const target of targets) {
     if (written >= limit) break;
-    const file = resolve(TRIAGE_CACHE, `${cacheKey(target.repo)}.json`);
+    const file = resolve(TRIAGE_CACHE, `${names.get(target.repo)}.json`);
     if (existsSync(file)) {
       cached++;
       continue;

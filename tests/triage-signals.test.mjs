@@ -45,3 +45,10 @@ test("a hooks or mcp module under a test path is a fixture, not a surface", () =
   const fixtureTree = ["tests/fixtures/hooks/hooks.json", "tests/mcp.js", "bench/tasks/x/server.py"];
   assert.deepEqual(signal(fixtureTree, {}).callable, ["none"]);
 });
+
+test("a src package under a test path is not a library either", () => {
+  assert.deepEqual(signal(["tests/fixtures/src/pkg/__init__.py"], {}).callable, ["none"]);
+  assert.deepEqual(signal(["examples/demo/src/lib.rs"], {}).callable, ["none"]);
+  // La misma señal, fuera de un doble, sí es la librería del proyecto.
+  assert.deepEqual(signal(["src/pkg/__init__.py"], {}).callable, ["lib"]);
+});

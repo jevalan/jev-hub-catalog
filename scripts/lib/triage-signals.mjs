@@ -39,7 +39,9 @@ export function signal(tree, manifests = {}) {
   if (has(own, ".mcp.json") || some(own, /(^|\/)mcp[_-]?server\.py$/) || some(own, /(^|\/)mcp\.(mjs|js|ts)$/)) found.add("mcp");
 
   if (bin(manifests) || rustBin(manifests) || pyScripts(manifests)) found.add("cli");
-  if (jsLibrary(manifests) || pyLibrary(manifests, tree) || rustLibrary(manifests, tree)) found.add("lib");
+  // También sobre `own`: un paquete bajo tests/ o fixtures/ es un doble, no la
+  // superficie del proyecto. El manifiesto sí basta si declara librería.
+  if (jsLibrary(manifests) || pyLibrary(manifests, own) || rustLibrary(manifests, own)) found.add("lib");
   if (some(own, /(^|\/)(server|servidor)\.py$/)) found.add("http");
 
   const callable = ORDER.filter((c) => found.has(c));

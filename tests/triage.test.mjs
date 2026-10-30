@@ -2,13 +2,21 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readJson } from "../scripts/lib/json.mjs";
 import { CATALOG } from "../scripts/lib/paths.mjs";
-import { BRANCHES, cacheKey, describeStatus, planTargets, shouldCache, shouldStop } from "../scripts/triage.mjs";
+import { BRANCHES, cacheKey, cacheNames, describeStatus, planTargets, shouldCache, shouldStop } from "../scripts/triage.mjs";
 
 const catalog = readJson(CATALOG);
 
 test("the cache key swallows case and separator differences", () => {
   assert.equal(cacheKey("qkal/Canny"), "qkal-canny");
   assert.equal(cacheKey("qkal/canny"), cacheKey("qkal/Canny"));
+});
+
+test("repos that share a slug never share a cache file", () => {
+  // `cacheKey` pierde el separador owner/name: ambos dan `foo-bar-baz`.
+  assert.equal(cacheKey("foo/bar-baz"), cacheKey("foo-bar/baz"));
+  const names = cacheNames(["qkal/Canny", "foo/bar-baz", "foo-bar/baz"]);
+  assert.equal(names.get("qkal/Canny"), "qkal-canny", "un slug único conserva su nombre legible");
+  assert.notEqual(names.get("foo/bar-baz"), names.get("foo-bar/baz"));
 });
 
 test("targets need a repo, skip the gone ones and come most-starred first", () => {

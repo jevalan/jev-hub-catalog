@@ -1,15 +1,15 @@
-# jevalon-hub-scout — diseño
+# jevalan-hub-scout — diseño
 
 **Estado:** borrador de diseño, pendiente de revisión antes del plan de implementación.
 
-Repositorio independiente en `E:/workspace/personal/jev/jevalon-hub-scout`. No modifica `jev-awesome`, `jevalon` ni ninguno de los clones: los lee.
+Repositorio independiente en `E:/workspace/personal/jev/jevalan-hub-scout`. No modifica `jev-awesome`, `jevalan` ni ninguno de los clones: los lee.
 
 ## 1. Propósito
 
 Sirve a tres decisiones a la vez, y hay que decir en qué orden, porque tiran en direcciones opuestas:
 
 1. **Recurso público del ecosistema Jev** — quiere amplitud: veredicto barato para muchas entradas.
-2. **Decidir qué adaptar a jevalon** — quiere un ranking: coste frente a valor.
+2. **Decidir qué adaptar a jevalan** — quiere un ranking: coste frente a valor.
 3. **Probar de verdad** — quiere profundidad: clonar, invocar y medir, con presupuesto declarado.
 
 La resolución es un diseño en capas: **triaje masivo barato → veredicto profundo sobre una shortlist → publicación con la profundidad declarada por entrada**. Nunca se presenta una estimación como si fuera una medida.
@@ -21,7 +21,7 @@ La resolución es un diseño en capas: **triaje masivo barato → veredicto prof
 | Universo de proyectos | `jev-awesome/awesome-jev/data/projects.json` (1351 entradas, `updated` 2026-10-07) | Copia pinneada en `data/catalog.json` con su fecha de corte. No se edita |
 | Eje *fit* (¿esto es una decisión?) | `jev-awesome/docs/agents-tooling-clasificacion.md` (7 grupos, 305 entradas) | Pasa a `data/fit.json` en forma máquina y reproducible |
 | Patrón común del ecosistema | `jev-awesome/docs/patron-recurrente-agent-tooling.md` | Fundamenta los ejes: estado → pregunta acotada → política local |
-| Envoltorio del hub | `jev-awesome/docs/hub-contract.md` y `jevalon/capabilities/*.yaml` | Define los valores de `form`: `flow` \| `exec` \| `http` |
+| Envoltorio del hub | `jev-awesome/docs/hub-contract.md` y `jevalan/capabilities/*.yaml` | Define los valores de `form`: `flow` \| `exec` \| `http` |
 | Forma del pipeline | `awesome-jev/scripts/*.mjs` | Cero dependencias, solo stdlib de Node, `data/` → `README.md` + `site/index.html` generados |
 | Regla editorial | `jev-awesome/README.md` («no se han ejecutado tests…»), `toolgate/SECURITY.md` | Se convierte en el campo `evidence` de cada veredicto |
 
@@ -31,7 +31,7 @@ De la sesión de análisis de 13 clones ya se conocen resultados reales. **Es el
 
 | Proyecto | Catálogo | Estrellas | Superficies observadas | `callable` | `form` |
 | --- | --- | ---: | --- | --- | --- |
-| toolgate | **`research`** | 2 | `.claude-plugin/plugin.json`, `hooks/hooks.json`, `bin` → `dist/cli.js`, `src/mcp.ts`, exports de librería | cli, mcp, hook, lib | `exec` (**ya adaptado en jevalon**) |
+| toolgate | **`research`** | 2 | `.claude-plugin/plugin.json`, `hooks/hooks.json`, `bin` → `dist/cli.js`, `src/mcp.ts`, exports de librería | cli, mcp, hook, lib | `exec` (**ya adaptado en jevalan**) |
 | canny | `agents` | 121 | sin `.claude-plugin`; escribe `.claude/settings.json` y `.codex/hooks.json`; `bin`; **sin** MCP; **sin** exports | cli | `exec` (necesita shim) |
 | jevwire | `agents` | 21 | `.claude-plugin/` + marketplace, `bin` → MCP stdio, `exports` → librería; **no publicado en npm** | cli, mcp, lib | `exec` (necesita wrapper MCP) |
 | winnow | `agents` | 102 | `.claude-plugin/`, `.mcp.json`, console script Python, `hooks/hooks.json` + módulo TS | mcp, cli | **n/a** (expone `winnow_recall`/`winnow_stats`, no un veredicto) |
@@ -47,7 +47,7 @@ De la sesión de análisis de 13 clones ya se conocen resultados reales. **Es el
 
 Tres hallazgos que el diseño debe asumir:
 
-1. **El catálogo y la muestra no son subconjuntos.** 11 de 13 están en el catálogo; **médula y wakegate no aparecen** (0 coincidencias, tampoco en `exclude.json`), y **toolgate está en `research`, no en `agents`**. Filtrar por `category = agents` deja fuera el firewall que jevalon ya sirve en producción.
+1. **El catálogo y la muestra no son subconjuntos.** 11 de 13 están en el catálogo; **médula y wakegate no aparecen** (0 coincidencias, tampoco en `exclude.json`), y **toolgate está en `research`, no en `agents`**. Filtrar por `category = agents` deja fuera el firewall que jevalan ya sirve en producción.
 2. **Estrellas y fit no coinciden.** El top-10 de `agents` por estrellas incluye solo 1 proyecto ya analizado; toolgate tiene ★2. La mediana de `agents` es 6 estrellas y solo 32 superan las 100. Estrellas miden popularidad, no encaje.
 3. **La mitad del ecosistema no tiene decisión que servir.** De los 13, cinco no encajan en el modelo del hub (winnow, fast-jev-compaction, spending-effort, switchboard, y los 3 SDKs). El primer eje del veredicto es «¿hay una decisión?», no «¿es difícil?».
 
@@ -68,12 +68,12 @@ Separados a propósito: un proyecto puede tener decisión y ninguna forma de inv
 | Eje | Valores | Qué responde |
 | --- | --- | --- |
 | `decision` | `yes` \| `no` \| `unclear` | ¿Hay una pregunta acotada que el hub pueda enrutar? |
-| `form` | `flow` \| `exec` \| `http` \| `n_a` | ¿Cómo la serviría jevalon? `n_a` incluye "no aplica" y "no encaja" |
+| `form` | `flow` \| `exec` \| `http` \| `n_a` | ¿Cómo la serviría jevalan? `n_a` incluye "no aplica" y "no encaja" |
 | `callable` | `cli` \| `mcp` \| `http` \| `hook` \| `lib` \| `none` (lista) | ¿Qué expone hoy para hablarle? |
 | `cost` | `{ runtime, requires_key, host }` | Node/Python/Rust/none; `typesafe`/`openrouter`/`none`/otro; `any`/`unix`/`windows` |
 | `evidence` | `static` \| `measured` | ¿Se leyó el código o se ejecutó? |
 
-`cost` no incluye dinero a propósito: el laboratorio de jevalon ya lleva presupuesto y precios, y aquí se falsearía sin tarifas reales.
+`cost` no incluye dinero a propósito: el laboratorio de jevalan ya lleva presupuesto y precios, y aquí se falsearía sin tarifas reales.
 
 ## 6. Modelo de datos
 
@@ -128,7 +128,7 @@ README.md                # generado
       "callable": ["cli", "mcp", "hook", "lib"],
       "cost": { "runtime": "node", "requires_key": ["typesafe", "openrouter"], "host": "any" },
       "evidence": "measured",
-      "verdict": "Adaptado en jevalon como capacidad tool.risk (`node ${TOOLGATE_CLI} decide`).",
+      "verdict": "Adaptado en jevalan como capacidad tool.risk (`node ${TOOLGATE_CLI} decide`).",
       "blockers": [],
       "capability": "tool.risk",
       "run": "runs/2026-10-10-toolgate"
@@ -159,7 +159,7 @@ Una llamada por repo a la API de árbol de GitHub devuelve todas las rutas, y co
 
 Solo sobre la shortlist de las cohortes A y B que el triaje marque como invocables.
 
-- **Offline primero.** Igual que el laboratorio de jevalon: primero una grabación o un modo `--offline`/`--dry-run`/`--fake` si el proyecto lo ofrece; solo después se gasta en una llamada real.
+- **Offline primero.** Igual que el laboratorio de jevalan: primero una grabación o un modo `--offline`/`--dry-run`/`--fake` si el proyecto lo ofrece; solo después se gasta en una llamada real.
 - **Sin herramientas ni efectos.** El smoke test invoca la superficie de decisión con entradas sintéticas y **nunca** ejecuta la acción que la herramienta proponga.
 - **Claves fuera del repo.** Vía entorno; los identificadores de clave se registran como booleanos (`requires_key: true`), jamás su valor.
 - **Un `run` por intento**: comando exacto, versión del proyecto (commit), fecha, latencia, resultado, y si se usó red.
@@ -191,7 +191,7 @@ Cero dependencias y solo stdlib de Node, igual que `awesome-jev`: no hay `npm in
 ## 11. Fuera de alcance
 
 - Publicar el sitio (Cloudflare/Wrangler) y elegir el dominio: fase posterior.
-- Construir cualquier adaptador para jevalon: este repo **decide**, no adapta.
+- Construir cualquier adaptador para jevalan: este repo **decide**, no adapta.
 - Estimaciones en dinero: solo `requires_key` y `local`/`hosted`.
 - Descubrimiento automático de proyectos nuevos: el universo entra desde el catálogo.
 - Ejecutar los tests internos de los proyectos clonados: se mide la superficie de decisión, no su calidad.

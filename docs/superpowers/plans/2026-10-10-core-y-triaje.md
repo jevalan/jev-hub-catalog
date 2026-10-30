@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Construir el núcleo de `jevalon-hub-scout`: snapshot del universo, eje *fit* importado en forma máquina, los 13 veredictos de la cohorte A, validador, README y sitio generados, y el triaje por árbol de GitHub calibrado contra esos 13.
+**Goal:** Construir el núcleo de `jevalan-hub-scout`: snapshot del universo, eje *fit* importado en forma máquina, los 13 veredictos de la cohorte A, validador, README y sitio generados, y el triaje por árbol de GitHub calibrado contra esos 13.
 
 **Architecture:** Pipeline de datos puro. `data/*.json` es la fuente de verdad, `scripts/validate.mjs` la protege con reglas, `scripts/build.mjs` genera los dos artefactos públicos, y `scripts/triage.mjs` **sugiere** `callable` desde el árbol de ficheros (con caché en disco) mientras `assessments.json` manda. Los fixtures de calibración se generan una vez desde la API real y a partir de ahí todo se prueba offline.
 
@@ -12,7 +12,7 @@
 
 ## Global Constraints
 
-- Repositorio en `E:/workspace/personal/jev/jevalon-hub-scout`. **Solo lee** el árbol de análisis, que vive fuera y en otra unidad (`G:/dev/jev/jev-awesome`, movido desde `E:` por falta de espacio); nunca lo modifica. Toda ruta hacia él pasa por `SOURCES` en `scripts/lib/paths.mjs`, con `SCOUT_SOURCES` como override.
+- Repositorio en `E:/workspace/personal/jev/jevalan-hub-scout`. **Solo lee** el árbol de análisis, que vive fuera y en otra unidad (`G:/dev/jev/jev-awesome`, movido desde `E:` por falta de espacio); nunca lo modifica. Toda ruta hacia él pasa por `SOURCES` en `scripts/lib/paths.mjs`, con `SCOUT_SOURCES` como override.
 - **Cero dependencias.** Sin `dependencies` ni `devDependencies`. Sin `npm install`. Solo stdlib de Node.
 - Node ≥ 20 (`engines.node`), ESM (`.mjs`), 2 espacios, comillas dobles, punto y coma.
 - **`README.md` y `site/index.html` son generados.** No se editan a mano.
@@ -99,7 +99,7 @@ test("writeJson round-trips through readJson and ends with a newline", () => {
 });
 
 test("paths resolve inside the repository", () => {
-  assert.equal(ROOT.endsWith("jevalon-hub-scout"), true);
+  assert.equal(ROOT.endsWith("jevalan-hub-scout"), true);
   assert.equal(ASSESSMENTS, join(ROOT, "data", "assessments.json"));
 });
 ```
@@ -142,10 +142,10 @@ export function writeJson(path, value) {
 ```json
 // package.json
 {
-  "name": "jevalon-hub-scout",
+  "name": "jevalan-hub-scout",
   "version": "0.0.1",
   "private": true,
-  "description": "Mapa de adaptabilidad del ecosistema Jev a jevalon: qué proyectos puede servir el hub, con qué forma y a qué coste.",
+  "description": "Mapa de adaptabilidad del ecosistema Jev a jevalan: qué proyectos puede servir el hub, con qué forma y a qué coste.",
   "type": "module",
   "scripts": {
     "fit": "node scripts/import-fit.mjs",
@@ -852,12 +852,12 @@ Expected: FAIL — `Cannot find module '../scripts/build.mjs'`
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Hub Scout</title>
-<meta name="description" content="Qué proyectos del ecosistema Jev puede servir jevalon, con qué forma y a qué coste.">
+<meta name="description" content="Qué proyectos del ecosistema Jev puede servir jevalan, con qué forma y a qué coste.">
 </head>
 <body>
 <header>
   <h1>Hub Scout</h1>
-  <p>Mapa de adaptabilidad del ecosistema Jev a jevalon. {{COVERAGE}}</p>
+  <p>Mapa de adaptabilidad del ecosistema Jev a jevalan. {{COVERAGE}}</p>
 </header>
 <main>
 <table>
@@ -908,9 +908,9 @@ export function buildReadme(assessments, catalog) {
     )
     .join("\n");
 
-  return `# jevalon hub scout
+  return `# jevalan hub scout
 
-Qué proyectos del ecosistema Jev puede servir el hub de jevalon, con qué forma y a qué coste.
+Qué proyectos del ecosistema Jev puede servir el hub de jevalan, con qué forma y a qué coste.
 Generado desde \`data/assessments.json\`. Snapshot del universo: ${catalog.updated} (${catalog.source}).
 
 ## Cobertura
@@ -1069,7 +1069,7 @@ export function planTargets(catalog) {
 }
 
 const headers = () => {
-  const h = { Accept: "application/vnd.github+json", "User-Agent": "jevalon-hub-scout" };
+  const h = { Accept: "application/vnd.github+json", "User-Agent": "jevalan-hub-scout" };
   if (process.env.GITHUB_TOKEN) h.Authorization = `Bearer ${process.env.GITHUB_TOKEN}`;
   return h;
 };
