@@ -35,7 +35,7 @@ Cero dependencias: **no hay `npm install`**, solo stdlib de Node (≥ 20), ESM
 (`.mjs`).
 
 ```bash
-npm test                       # node --test, 129 pruebas, todo offline
+npm test                       # node --test, 134 pruebas, todo offline
 node --test tests/triage.test.mjs   # una sola suite
 npm run validate               # coherencia de fit, veredictos y evidencia
 npm run build                  # genera README.md, site/index.html (directorio) y site/veredictos.html (tabla) (falla si validate falla)
@@ -62,6 +62,9 @@ node scripts/probe-cli.mjs --repo <o/r> --cli <ruta al CLI>
                                # con `stub: true` (semdecide) levanta scripts/lib/stub-provider.mjs, un proveedor SIMULADO en 127.0.0.1: mide el
                                # envoltorio, nunca a Jev. Para every, `--python` es el venv y `--grammars` una caché privada de gramáticas ya bajada
                                # (su dependencia las descarga la primera vez; la sonda corre con un proxy muerto y debe pasar sin red)
+node scripts/bench-jev-openrouter.mjs --env <.env> --fixtures <jev-compiler/fixtures> --repeats 1000 --cap 5 --concurrency 24
+                               # estabilidad y deriva de Jev (no de un proyecto) con el corpus grabado de jevc: 58 fixtures con verdad de terreno,
+                               # repetidos N veces por OpenRouter; ~0,00004 USD por petición, con tope duro. Escribe runs/<fecha>-jev-openrouter-drift/
 node scripts/probe-cli.mjs --repo sharziki/semdecide --cli <src> --python <py> --live-openrouter <.env> --cap 1
                                # lo mismo contra Jev DE VERDAD por OpenRouter (typesafe/jev-1.13): la clave vive solo en el entorno de
                                # scripts/lib/openrouter-adapter.mjs, el especialista recibe una inventada y el gasto se cuenta y se topa (USD).
