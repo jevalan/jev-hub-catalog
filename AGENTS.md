@@ -65,6 +65,8 @@ node scripts/probe-cli.mjs --repo <o/r> --cli <ruta al CLI>
 node scripts/bench-jev-openrouter.mjs --env <.env> --fixtures <jev-compiler/fixtures> --repeats 1000 --cap 5 --concurrency 24
                                # estabilidad y deriva de Jev (no de un proyecto) con el corpus grabado de jevc: 58 fixtures con verdad de terreno,
                                # repetidos N veces por OpenRouter; ~0,00004 USD por petición, con tope duro. Escribe runs/<fecha>-jev-openrouter-drift/
+                               # `--variant reorder` baraja preguntas, claves del estado y criteria (limpio); `--variant paraphrase --paraphrases <f>` reescribe el texto
+                               # de las preguntas (generado con scripts/paraphrase-fixtures.mjs, sin revisión humana: techo de sensibilidad, no verdad)
 node scripts/probe-cli.mjs --repo sharziki/semdecide --cli <src> --python <py> --live-openrouter <.env> --cap 1
                                # lo mismo contra Jev DE VERDAD por OpenRouter (typesafe/jev-1.13): la clave vive solo en el entorno de
                                # scripts/lib/openrouter-adapter.mjs, el especialista recibe una inventada y el gasto se cuenta y se topa (USD).

@@ -29,6 +29,33 @@ const repeats = Number(arg("repeats", "3"));
 const cap = Number(arg("cap", "1"));
 const concurrency = Number(arg("concurrency", "8"));
 const model = arg("model", "typesafe/jev-1.13");
+// base: idéntico al corpus; reorder: orden de preguntas, de claves del estado y de criteria; paraphrase: texto de las preguntas reescrito.
+const variant = arg("variant", "base");
+const paraphraseFile = arg("paraphrases");
+if (!["base", "reorder", "paraphrase"].includes(variant) || (variant === "paraphrase" && !paraphraseFile)) {
+  console.error("--variant base|reorder|paraphrase (paraphrase exige --paraphrases <fichero>)");
+  process.exit(2);
+}
+const paraphrases = variant === "paraphrase" ? JSON.parse(readFileSync(paraphraseFile, "utf8")) : null;
+let seed = 12345;
+const rnd = () => ((seed = (seed * 1664525 + 1013904223) % 4294967296) / 4294967296);
+const shuffled = (entries) => entries.map((e) => [rnd(), e]).sort((a, b) => a[0] - b[0]).map((x) => x[1]);
+/** Versión de un fixture para la repetición `rep`; el ground truth (`expect`) no cambia nunca. */
+function variantOf(fx, rep) {
+  if (variant === "base") return { state: fx.state, questions: fx.questions };
+  if (variant === "reorder") {
+    const questions = Object.fromEntries(shuffled(Object.entries(fx.questions)).map(([id, q]) => [id, q.criteria && !Array.isArray(q.criteria) ? { ...q, criteria: Object.fromEntries(shuffled(Object.entries(q.criteria))) } : q]));
+    const state = fx.state && typeof fx.state === "object" && !Array.isArray(fx.state) ? Object.fromEntries(shuffled(Object.entries(fx.state))) : fx.state;
+    return { state, questions };
+  }
+  const questions = Object.fromEntries(Object.entries(fx.questions).map(([id, q]) => {
+    const list = paraphrases.paraphrases[fx.id]?.[id];
+    const p = list?.[rep % list.length];
+    if (!p) return [id, q];
+    return [id, { ...q, instructions: p.instructions, ...(p.criteria && q.criteria && !Array.isArray(q.criteria) ? { criteria: Object.fromEntries(Object.keys(q.criteria).map((k) => [k, p.criteria[k] ?? q.criteria[k]])) } : {}) }];
+  }));
+  return { state: fx.state, questions };
+}
 if (!envFile || !dir || !existsSync(dir)) {
   console.error("faltan argumentos: --env --fixtures");
   process.exit(2);
@@ -59,8 +86,9 @@ let sent = 0;
 let consecutiveFailures = 0;
 let stop = null;
 
-async function call(fx) {
-  const body = JSON.stringify({ model, state: fx.state, questions: fx.questions });
+async function call(fx, rep) {
+  const v = variantOf(fx, rep);
+  const body = JSON.stringify({ model, state: v.state, questions: v.questions });
   for (let attempt = 0; attempt < 5; attempt++) {
     const t0 = performance.now();
     try {
@@ -101,7 +129,7 @@ async function worker() {
     if (stop) return;
     const item = queue.shift();
     sent++;
-    const answers = await call(item.fx);
+    const answers = await call(item.fx, item.reps.length);
     consecutiveFailures = answers ? 0 : consecutiveFailures + 1;
     item.reps.push(answers);
     if (sent % 250 === 0) console.log(`${sent} peticiones, ${spent.toFixed(4)} USD, ${Math.round(sent / ((performance.now() - start) / 1000))} req/s`);
@@ -161,6 +189,8 @@ const summary = {
 };
 const run = {
   group: "jev-openrouter-drift",
+  variant,
+  ...(variant === "paraphrase" ? { paraphrased_with: { model: paraphrases.model, questions: `${paraphrases.questions_paraphrased}/${paraphrases.questions_total}`, n_per_question: paraphrases.n } } : {}),
   date: today(),
   scope: "directo: la Decisions API de OpenRouter, sin pasar por el hub ni por ningún envoltorio",
   environment: {
@@ -184,8 +214,8 @@ const run = {
   summary,
   fixtures: perFixture,
 };
-const out = join(ROOT, "runs", `${today()}-jev-openrouter-drift`);
+const out = join(ROOT, "runs", `${today()}-jev-openrouter-drift${variant === "base" ? "" : "-" + variant}`);
 mkdirSync(out, { recursive: true });
 writeFileSync(join(out, "run.json"), JSON.stringify(run, null, 2) + "\n");
 console.log(JSON.stringify({ spend: run.spend, throughput: run.throughput, errors, models: [...models], summary }, null, 2));
-console.log(`evidencia: runs/${today()}-jev-openrouter-drift/run.json`);
+console.log(`evidencia: runs/${today()}-jev-openrouter-drift${variant === "base" ? "" : "-" + variant}/run.json`);
