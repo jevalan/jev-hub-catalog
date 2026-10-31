@@ -37,3 +37,18 @@ test("el caso del aviso solo exige que el aviso exista y que el proceso no falle
   assert.deepEqual(judgeCase(c, ok), []);
   assert.equal(judgeCase(c, { ...ok, json: { findings: [] } }).length, 1);
 });
+
+import { jevHarnessCases } from "../scripts/lib/cli-cases-jevharness.mjs";
+
+test("los casos de jev-harness tienen id único y declaran su estado previo", () => {
+  const hc = jevHarnessCases("0.2.2");
+  assert.equal(new Set(hc.map((c) => c.id)).size, hc.length);
+  for (const c of hc) assert.ok(c.why && Array.isArray(c.args) && Number.isInteger(c.exit), c.id);
+  for (const c of hc.filter((x) => x.prelude)) assert.ok(c.fresh, `${c.id}: una llamada previa exige partir de estado limpio`);
+});
+
+test("el caso de incoherencia solo falla si aborta con probabilidad baja", () => {
+  const c = jevHarnessCases("0.2.2").find((x) => x.id === "abort-action-matches-probability");
+  assert.equal(judgeCase(c, { status: 1, stdout: "", stderr: "", json: { should_abort: true, abort_probability: 0.88 } }).length, 0);
+  assert.equal(judgeCase(c, { status: 1, stdout: "", stderr: "", json: { should_abort: true, abort_probability: 0.08 } }).length, 1);
+});

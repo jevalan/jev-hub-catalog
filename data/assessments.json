@@ -2416,18 +2416,22 @@
         "lib"
       ],
       "cost": {
-        "runtime": "node",
+        "runtime": "python",
         "requires_key": [],
         "host": "any"
       },
-      "evidence": "static",
-      "verdict": "Capa de decisión «System 1.5» para el bucle de calidad de un agente de código, determinista primero: triaje de fallos de test (dependencia ausente, error transitorio, defecto de lógica), ruptura de bucles de la muerte, veto de finalización, gobierno del esfuerzo de razonamiento y enrutado de modelo. Existe en Python, TypeScript y Rust, sin dependencias en el núcleo de los dos primeros. `jev-harness test-gate --log <fichero> --json` y compañía; códigos de salida 0 (seguro o saltar el LLM), 1 (abortar o defecto de lógica) y 2 (error de sintaxis o, con `--fail-closed`, error del proveedor). Cada resultado lleva un bloque `uncertainty` con margen, entropía normalizada, confianza y si escalar. Sin clave o ante un fallo del proveedor (429, 5xx, plazo, red, 401/403, respuesta ininterpretable) degrada al motor determinista y lo **marca** (`is_mock: true` más `degraded_reason`), no es un fallo silencioso; `--fail-closed` convierte esa degradación en error. No exige clave en modo local (`requires_key` vacío); la clave de un proveedor solo hace falta para el modo en vivo. Evidencia solo de README.",
+      "evidence": "measured",
+      "verdict": "Capa de decisión «System 1.5» para el bucle de calidad de un agente de código, determinista primero: triaje de fallos de test (dependencia ausente, error transitorio, defecto de lógica), ruptura de bucles de la muerte, veto de finalización, gobierno del esfuerzo de razonamiento y enrutado de modelo. Existe en Python, TypeScript y Rust, sin dependencias en el núcleo de los dos primeros. `jev-harness test-gate --log <fichero> --json` y compañía; códigos de salida 0 (seguro o saltar el LLM), 1 (abortar o defecto de lógica) y 2 (error de sintaxis o, con `--fail-closed`, error del proveedor). Cada resultado lleva un bloque `uncertainty` con margen, entropía normalizada, confianza y si escalar. Sin clave o ante un fallo del proveedor (429, 5xx, plazo, red, 401/403, respuesta ininterpretable) degrada al motor determinista y lo **marca** (`is_mock: true` más `degraded_reason`), no es un fallo silencioso; `--fail-closed` convierte esa degradación en error. No exige clave en modo local (`requires_key` vacío); la clave de un proveedor solo hace falta para el modo en vivo. Medido el 2026-10-31 (v0.2.2 del wheel de PyPI, ejecutado directo en un sandbox sin claves, 21 casos, 18 superados): solo se midió el motor local determinista, no un modelo. Contrato confirmado: `test-gate` resuelve solo dependencia ausente y error transitorio (exit 0) y escala el defecto lógico (exit 1), el motor sin clave se etiqueta siempre con `is_mock: true`, `--shadow` no cambia el código de salida, los recibos guardan hash y nunca el log, y `--fail-closed` sin clave no inventa un error de proveedor. Tres fallos: `status --json` devuelve texto; `abort-check` depende del historial de `~/.config/jev/session.json` (tras abortar un plan, uno sano también sale abortado, así que no es una función de la petición como exige el hub, y obliga a darle un HOME limpio por llamada); y puede abortar con `abort_probability` 0,08. Además, un error de sintaxis sale con exit 1 y no con el 2 que describe el README.",
       "blockers": [
         "por defecto falla abierto hacia el motor determinista: el shim debe leer `is_mock` o pasar `--fail-closed`",
+        "`abort-check` depende del historial en ~/.config/jev/session.json: hay que lanzarlo con un HOME limpio por llamada",
+        "`abort-check` puede abortar con abort_probability 0,08 (acción y probabilidad incoherentes)",
+        "`status --json` no devuelve JSON",
+        "un error de sintaxis sale con exit 1, no con el 2 que documenta el README",
         "son varias puertas, no un especialista: hay que elegir cuáles servir",
-        "con el motor determinista la decisión no es de Jev",
-        "no se leyó la lista completa de subcomandos ni se midió"
-      ]
+        "con el motor determinista la decisión no es de Jev; el modo con modelo no está medido"
+      ],
+      "run": "runs/2026-10-31-ismaelsoilet-jev-harness"
     },
     {
       "repo": "ItisShikhar/gg-friggin-ez",

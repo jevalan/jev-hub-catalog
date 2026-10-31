@@ -1,0 +1,189 @@
+{
+  "repo": "ismaelsoilet/jev-harness",
+  "date": "2026-10-31",
+  "scope": "directo: se ejecuta el CLI del especialista, sin pasar por el hub de jevalan",
+  "environment": {
+    "node": "v24.8.0",
+    "specialist": "0.2.2",
+    "keys": "ninguna: entorno vacío, HOME y cwd propios; el especialista no puede llamar a ningún modelo"
+  },
+  "measured": [
+    "motor local determinista sin clave: triaje de fallos de test, abort-check, route, verify y nudge-gate",
+    "contrato de salida: exit 0 cuando la decisión se resuelve sola, 1 cuando exige acción o escalar, 2 uso incorrecto",
+    "el motor sin clave se etiqueta siempre (`is_mock: true`) y `--fail-closed` sin clave no inventa un error de proveedor",
+    "`--shadow` no cambia el código de salida y lo avisa por stderr",
+    "recibos de auditoría: solo hash de la entrada, nunca el texto del log",
+    "`--json` en cada comando de decisión y en `status`",
+    "huella en disco del sandbox"
+  ],
+  "not_measured": [
+    "el motor con modelo (TYPESAFE_API_KEY y demás proveedores) y cualquier decisión que dependa de él",
+    "qué hace `--fail-closed` ante un error real de proveedor: sin clave no hay proveedor que falle",
+    "plazo agotado o error de red, coste y latencia con modelo",
+    "`init`, `doctor`, `export`, `mcp` y `replay`, que escriben configuración o abren un servidor",
+    "la recuperación automática (`--allow-auto-recovery`), que instalaría paquetes",
+    "el hook `jev-test-gate`, que ejecuta el comando de tests del usuario"
+  ],
+  "footprint": [
+    ".config/jev/receipts.jsonl",
+    ".config/jev/receipts.lock",
+    ".config/jev/session.json",
+    ".config/jev/session.lock"
+  ],
+  "cases": [
+    {
+      "id": "version",
+      "why": "`--version` imprime la versión del paquete instalado.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "help",
+      "why": "`--help` lista los subcomandos de decisión.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "status-without-key",
+      "why": "Sin clave, `status` dice que no hay clave y que corre el motor local sin red.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "status-honours-json",
+      "why": "Todos los comandos aceptan `--json` (salida legible por máquina), `status` incluido.",
+      "pass": false,
+      "problems": [
+        "`status --json` no devuelve JSON, devuelve texto"
+      ],
+      "exit": 0
+    },
+    {
+      "id": "missing-dependency-skips-llm",
+      "why": "Una dependencia ausente se resuelve sin LLM: categoría env_missing, exit 0, recuperación solo propuesta.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "transient-error-retries",
+      "why": "Un error transitorio de red se resuelve sin LLM: flaky_transient, exit 0.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "logic-defect-escalates",
+      "why": "Un defecto lógico real escala: deep_logic, exit 1 y no se salta el LLM.",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "offline-is-labelled",
+      "why": "Sin clave y sin `--mock` el motor local se etiqueta igualmente: nunca se hace pasar por el modelo.",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "fail-closed-without-key-stays-offline",
+      "why": "`--fail-closed` sin clave no inventa un error de proveedor: entrega la misma decisión local, etiquetada.",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "shadow-never-changes-exit",
+      "why": "`--shadow` decide y avisa, pero el proceso sale siempre con 0.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "missing-input-is-usage-error",
+      "why": "`test-gate` sin log es un error de uso (exit 2) y dice qué falta.",
+      "pass": true,
+      "problems": [],
+      "exit": 2
+    },
+    {
+      "id": "abort-proceed",
+      "why": "`abort-check` ante un paso sano y sin historia deja seguir: exit 0.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "abort-loop",
+      "why": "`abort-check` ante un reintento repetido recomienda abortar: exit 1 y `abort_and_ask`.",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "abort-decision-depends-only-on-input",
+      "why": "El hub es sin estado: el mismo plan sano debe dar la misma decisión aunque antes se haya abortado otro. `abort-check` sigue la historia que guarda en ~/.config/jev/session.json.",
+      "pass": false,
+      "problems": [
+        "exit 1, se esperaba 0",
+        "un plan sano sale abortado por la llamada anterior"
+      ],
+      "exit": 1
+    },
+    {
+      "id": "abort-action-matches-probability",
+      "why": "La acción y su probabilidad son coherentes: abortar con `abort_probability` por debajo de 0,5 es contradictorio.",
+      "pass": false,
+      "problems": [
+        "aborta con probabilidad 0.08"
+      ],
+      "exit": 1
+    },
+    {
+      "id": "route-trivial-is-deterministic",
+      "why": "Una tarea trivial se enruta sin tokens de LLM.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "route-hard-goes-heavy",
+      "why": "Una tarea de razonamiento profundo no se queda en el tier determinista.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "verify-satisfied",
+      "why": "`verify` da por cumplido un criterio que la evidencia respalda: exit 0.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "verify-unsatisfied",
+      "why": "`verify` rechaza evidencia que contradice el criterio: exit 1 y `needs_rework`.",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "receipts-hold-hashes-not-logs",
+      "why": "Los recibos de auditoría guardan un hash de la entrada y nunca el texto del log.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "footprint-stays-in-sandbox",
+      "why": "Lo que el CLI deja en disco queda dentro del sandbox y dentro de lo que su documentación declara.",
+      "pass": true,
+      "problems": []
+    }
+  ],
+  "pass": false
+}

@@ -13,7 +13,8 @@ import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, 
 import { tmpdir } from "node:os";
 import { dirname, join, relative, resolve } from "node:path";
 import { ROOT } from "./lib/paths.mjs";
-import { FIXTURES, judgeCase, wellposedCases } from "./lib/cli-cases-wellposed.mjs";
+import { FIXTURES as WP_FIXTURES, judgeCase, wellposedCases } from "./lib/cli-cases-wellposed.mjs";
+import { jevHarnessCases } from "./lib/cli-cases-jevharness.mjs";
 
 const arg = (name) => {
   const i = process.argv.indexOf(`--${name}`);
@@ -26,6 +27,10 @@ const today = () => new Date().toISOString().slice(0, 10);
 const CLIS = {
   "suraj-phanindra/wellposed": {
     cases: wellposedCases,
+    fixtures: WP_FIXTURES,
+    allowed: /^$/,
+    // `--cli` es el script; se ejecuta con el Node que lanza esta sonda.
+    launch: (cli) => ({ command: process.execPath, prefix: [resolve(cli)] }),
     // Apaga el chequeo de actualizaciones (GET a registry.npmjs.org y caché en disco).
     env: { WELLPOSED_NO_UPDATE_CHECK: "1", NO_COLOR: "1" },
     measured: [
@@ -45,6 +50,37 @@ const CLIS = {
       "el paquete como skill dentro de Claude Code o Codex",
     ],
   },
+  "ismaelsoilet/jev-harness": {
+    cases: jevHarnessCases,
+    fixtures: {},
+    // Recibos y sesión en ~/.config/jev (HOME del sandbox): es lo que documenta el propio paquete.
+    allowed: /^.config[\/]jev[\/](?:receipts|session).(?:jsonl|json|lock)$/,
+    // `--cli` es la raíz del wheel descomprimido (contiene jev_harness/). Python `-s -B`, sin `-I`, que ignoraría PYTHONPATH.
+    launch: () => ({ command: which("python"), prefix: ["-s", "-B", "-c", "import sys; from jev_harness.cli import main; sys.exit(main())"] }),
+    pythonPath: true,
+    env: { PYTHONDONTWRITEBYTECODE: "1", PYTHONIOENCODING: "utf-8" },
+    version: (cli) => {
+      const d = readdirSync(resolve(cli)).find((n) => /^jev_harness-.*.dist-info$/.test(n));
+      return d ? d.replace(/^jev_harness-/, "").replace(/.dist-info$/, "") : "desconocida";
+    },
+    measured: [
+      "motor local determinista sin clave: triaje de fallos de test, abort-check, route, verify y nudge-gate",
+      "contrato de salida: exit 0 cuando la decisión se resuelve sola, 1 cuando exige acción o escalar, 2 uso incorrecto",
+      "el motor sin clave se etiqueta siempre (`is_mock: true`) y `--fail-closed` sin clave no inventa un error de proveedor",
+      "`--shadow` no cambia el código de salida y lo avisa por stderr",
+      "recibos de auditoría: solo hash de la entrada, nunca el texto del log",
+      "`--json` en cada comando de decisión y en `status`",
+      "huella en disco del sandbox",
+    ],
+    not_measured: [
+      "el motor con modelo (TYPESAFE_API_KEY y demás proveedores) y cualquier decisión que dependa de él",
+      "qué hace `--fail-closed` ante un error real de proveedor: sin clave no hay proveedor que falle",
+      "plazo agotado o error de red, coste y latencia con modelo",
+      "`init`, `doctor`, `export`, `mcp` y `replay`, que escriben configuración o abren un servidor",
+      "la recuperación automática (`--allow-auto-recovery`), que instalaría paquetes",
+      "el hook `jev-test-gate`, que ejecuta el comando de tests del usuario",
+    ],
+  },
 };
 
 /** Versión del paquete que contiene el CLI, buscando package.json hacia arriba. */
@@ -55,6 +91,14 @@ function specialistVersion(cli) {
     if (existsSync(file)) return JSON.parse(readFileSync(file, "utf8")).version ?? "desconocida";
   }
   return "desconocida";
+}
+
+/** Ruta absoluta de un ejecutable: el entorno del sandbox lleva un PATH mínimo. */
+function which(name) {
+  const r = spawnSync(process.platform === "win32" ? "where" : "which", [name], { encoding: "utf8" });
+  const first = (r.stdout ?? "").split(/\r?\n/).find(Boolean);
+  if (r.status !== 0 || !first) throw new Error(`no encuentro ${name} en el PATH`);
+  return first;
 }
 
 function walk(dir, base = dir) {
@@ -74,7 +118,8 @@ function main() {
   const spec = CLIS[repo.toLowerCase()];
   if (!spec) throw new Error(`sin juego de casos para ${repo}: ${Object.keys(CLIS).join(", ")}`);
   if (!existsSync(cli)) throw new Error(`no existe: ${cli}`);
-  const version = specialistVersion(cli);
+  const version = spec.version ? spec.version(cli) : specialistVersion(cli);
+  const FIXTURES = spec.fixtures ?? {};
 
   const sandbox = mkdtempSync(join(tmpdir(), "scout-cli-"));
   // Entorno mínimo a propósito: ninguna clave, y todo lo que el CLI escribe cae dentro del sandbox.
@@ -88,8 +133,11 @@ function main() {
     LOCALAPPDATA: sandbox,
     APPDATA: sandbox,
     XDG_CACHE_HOME: join(sandbox, ".cache"),
+    ...(spec.pythonPath ? { PYTHONPATH: resolve(cli) } : {}),
     ...spec.env,
   };
+  const tool = spec.launch(cli).command;
+  env.PATH += (process.platform === "win32" ? ";" : ":") + dirname(tool);
   for (const [name, text] of Object.entries(FIXTURES)) writeFileSync(join(sandbox, name), text);
   const scrub = (t) => (typeof t === "string" ? t.replaceAll(sandbox, "<sandbox>") : t);
 
@@ -97,7 +145,14 @@ function main() {
   let footprint;
   try {
     results = spec.cases(version).map((c) => {
-      const r = spawnSync(process.execPath, [resolve(cli), ...c.args], {
+      const { command, prefix } = spec.launch(cli);
+      // Un caso con `fresh` parte de un sandbox sin el estado que el CLI guarda entre llamadas;
+      // `prelude` son las llamadas previas cuyo efecto sobre ese estado se quiere medir.
+      if (c.fresh) rmSync(join(sandbox, ".config", "jev"), { recursive: true, force: true });
+      for (const pre of c.prelude ?? []) {
+        spawnSync(command, [...prefix, ...pre], { cwd: sandbox, env, input: "", encoding: "utf8", timeout: 30000 });
+      }
+      const r = spawnSync(command, [...prefix, ...c.args], {
         cwd: sandbox,
         env,
         input: c.stdinFixture ? FIXTURES[c.stdinFixture] : "",
@@ -126,10 +181,10 @@ function main() {
     rmSync(sandbox, { recursive: true, force: true });
   }
   // Cualquier fichero que no sea una petición escrita por nosotros es algo que el CLI dejó en disco.
-  const stray = footprint.filter((f) => !(f in FIXTURES));
+  const stray = footprint.filter((f) => !(f in FIXTURES) && !spec.allowed.test(f));
   const footprintCase = {
-    id: "footprint-stays-in-fixtures",
-    why: "El CLI no deja nada en disco aparte de las peticiones que le dimos.",
+    id: "footprint-stays-in-sandbox",
+    why: "Lo que el CLI deja en disco queda dentro del sandbox y dentro de lo que su documentación declara.",
     pass: stray.length === 0,
     problems: stray.map((f) => `fichero inesperado: ${f}`),
   };
