@@ -49,7 +49,7 @@ ${techniques.map((k) => `<tr><td>${esc(s.techniques[k] ?? k)}</td>${projects.map
       return `<h4>${esc(repo)}</h4><ul>${lines}<li>${esc(tail)}</li></ul>`;
     })
     .join("\n");
-  return `<h3>${esc(s.frontierGroup(run.group, run.corpus.size, projects.length))}</h3>
+  return `<h3>${esc(s.frontierGroup(run.group, run.corpus.size, projects.length, s.frontierUnits[run.group]))}</h3>
 <p class="note">${esc(s.frontierWarn)}</p>
 <table><thead>${head}</thead><tbody>
 ${rows}
@@ -116,7 +116,7 @@ ${readList(s, r.reads, r.read)}
 ${evidence(run)}`;
 }
 
-const SECTIONS = { gates: gatesSection, review: reviewSection };
+const SECTIONS = { gates: gatesSection, "install-scripts": gatesSection, review: reviewSection };
 
 /** `runs` son los frontier.json ya leídos; cada grupo se pinta con su propia sección. */
 export function buildFrontierPage(runs, lang = "es") {

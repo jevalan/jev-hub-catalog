@@ -147,3 +147,25 @@ test("la página muestra a la vez un grupo de gates y uno de review", () => {
   assert.match(html, /Group gates/);
   assert.match(html, /Group review/);
 });
+
+// — grupo install-scripts —
+import * as installScripts from "../scripts/lib/frontier-install-scripts.mjs";
+
+test("el corpus de install-scripts tiene ids únicos, verdad de terreno y técnicas con rótulo en ambos idiomas", () => {
+  assert.equal(new Set(installScripts.CORPUS.map((c) => c.id)).size, installScripts.CORPUS.length);
+  for (const c of installScripts.CORPUS) assert.ok(["danger", "safe"].includes(c.truth) && c.cmd, c.id);
+  for (const lang of ["es", "en"]) {
+    for (const k of installScripts.TECHNIQUES) assert.ok(STR[lang].techniques[k], `${lang}:${k}`);
+    assert.ok(STR[lang].frontierUnits["install-scripts"], lang);
+  }
+});
+
+test("un aviso (warn) de una puerta de instalación cuenta como preguntar", () => {
+  assert.equal(normalize("warn"), "ask");
+});
+
+test("la página pinta un grupo install-scripts con su propia unidad", () => {
+  const run = { ...sample, group: "install-scripts", corpus: { size: 29 } };
+  assert.match(buildFrontierPage([run], "en"), /Group install-scripts · 29 npm lifecycle scripts/);
+  assert.match(buildFrontierPage([run], "es"), /Grupo install-scripts · 29 scripts de ciclo de vida de npm/);
+});

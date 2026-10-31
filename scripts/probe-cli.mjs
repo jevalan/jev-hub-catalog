@@ -15,6 +15,7 @@ import { dirname, join, relative, resolve } from "node:path";
 import { ROOT } from "./lib/paths.mjs";
 import { FIXTURES as WP_FIXTURES, judgeCase, wellposedCases } from "./lib/cli-cases-wellposed.mjs";
 import { jevHarnessCases } from "./lib/cli-cases-jevharness.mjs";
+import { FIXTURES as PG_FIXTURES, pkgGateCases } from "./lib/cli-cases-pkggate.mjs";
 
 const arg = (name) => {
   const i = process.argv.indexOf(`--${name}`);
@@ -48,6 +49,28 @@ const CLIS = {
       "`eval`, que lanza otro proceso del paquete contra su corpus etiquetado",
       "la calidad de cada una de las reglas: solo se ejercitaron cinco",
       "el paquete como skill dentro de Claude Code o Codex",
+    ],
+  },
+  "hemanth/pkg-gate": {
+    cases: pkgGateCases,
+    fixtures: PG_FIXTURES,
+    allowed: /^$/,
+    // `--cli` es bin/cli.js dentro de un directorio con su dependencia (@typesafe-ai/sdk) ya al lado.
+    launch: (cli) => ({ command: process.execPath, prefix: [resolve(cli)] }),
+    env: { NO_COLOR: "1" },
+    measured: [
+      "contrato de salida: allow exit 0, block exit 1, warn exit 2, errores de uso y de lectura exit 1",
+      "manifiestos locales y órdenes sueltas (`-s`) sintéticos, sin red y sin clave",
+      "el simulador sin clave: qué permite, qué avisa y qué bloquea, y que se etiqueta como simulado",
+      "los ganchos que vigila (`postinstall`, `prepare`) y el esquema de `--json`",
+      "umbral `--block-score` y equivalencia de `--mock` con no tener clave",
+      "huella en disco del sandbox",
+    ],
+    not_measured: [
+      "el motor con modelo (TYPESAFE_API_KEY) y cualquier decisión que dependa de él",
+      "resolver un nombre de paquete: consulta el registro de npm y no se hizo ninguna petición de red",
+      "qué hace si la API de Jev falla con clave: por su código cae al simulador, y no se ejecutó",
+      "el modo interactivo (`warn` con confirmación en terminal) y el TUI",
     ],
   },
   "ismaelsoilet/jev-harness": {

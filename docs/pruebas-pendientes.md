@@ -13,7 +13,7 @@ Las más baratas de medir: se instalan según su README y corren sin credenciale
 - [ ] `DataZooDE/anofox-decide` · yes · exec · lib
 - [ ] `doronp/jevc` · unclear · exec · cli
 
-## Segunda tanda: piden clave o no traen instalación clara (67)
+## Segunda tanda: piden clave o no traen instalación clara (66)
 
 Necesitan una clave de prueba acotada, un modo `--dry-run`/`--mock` o leer el código antes de decidir cómo medirlas.
 
@@ -82,7 +82,6 @@ Necesitan una clave de prueba acotada, un modo `--dry-run`/`--mock` o leer el c�
 - [ ] `qinpei-dev/permit-mcp` · unclear · exec · mcp · clave: typesafe
 - [ ] `jyatesdotdev/jev-logtriage` · unclear · exec · cli · clave: typesafe
 - [ ] `ntedvs/commentcop` · unclear · exec · cli · clave: typesafe
-- [ ] `hemanth/pkg-gate` · unclear · exec · lib/cli · clave: typesafe
 - [ ] `shivam2003-dev/typesafe-triage-guard` · unclear · exec · cli · clave: typesafe
 
 ## Tercera tanda: servicios alojados o sin CLI (0)

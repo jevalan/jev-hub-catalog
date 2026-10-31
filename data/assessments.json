@@ -2256,13 +2256,15 @@
         ],
         "host": "any"
       },
-      "evidence": "static",
-      "verdict": "Puerta previa a la instalación de paquetes npm: extrae los scripts de ciclo de vida (`preinstall`, `install`, `postinstall`) o evalúa una cadena de shell, y devuelve `allow`, `warn` o `block` con intención y probabilidad de acceso a secretos. Salida estructurada (`report.structured`) y códigos 0 (permitir), 1 (bloquear) y 2 (avisar). Pero sin clave cae a un «simulador calibrado offline»: da un veredicto con apariencia de calibrado que no sale de Jev. Evidencia solo de README.",
+      "evidence": "measured",
+      "verdict": "Puerta previa a la instalación de paquetes npm: extrae los scripts de ciclo de vida (`preinstall`, `install`, `postinstall`, `prepublish`, `prepare`, `preuninstall`, `postuninstall`) de un manifiesto o evalúa una orden suelta (`-s`), y responde allow (exit 0), block (1) o warn (2) con intención y probabilidad de acceso a secretos; `--json` entrega un esquema documentado. Medido sin clave (v0.2.0, ejecutando el CLI directamente con su SDK al lado, sin pasar por el hub; manifiestos locales y órdenes sintéticas, sin red; 19 casos, 17 pasan): bloquea `curl … | bash`, el robo de `~/.npmrc` y un `curl | sh` en `prepare`, avisa ante `uname -a`, permite `node-gyp rebuild` y los paquetes sin scripts, y etiqueta su veredicto como `jev-latest (offline simulator)`. Pero ese simulador es una lista de expresiones regulares, no Jev: lo que no reconoce sale como `allow` con confianza alta, y `rm -rf $HOME` en un postinstall se permite (exit 0). Además `--version` imprime una versión fija (`0.1.0`) que no coincide con la del paquete (`0.2.0`). NO medido: el motor con modelo, resolver un nombre de paquete (consulta el registro de npm), qué hace si la API de Jev falla con clave (por su código cae al simulador) y el modo interactivo.",
       "blockers": [
-        "sin clave devuelve un veredicto simulado, no un error",
-        "no se leyó si ese simulador puede responder `allow`",
-        "es sobre todo una biblioteca"
-      ]
+        "sin clave responde un veredicto simulado por expresiones regulares, no un error: lo que no reconoce se permite (`rm -rf $HOME` en un postinstall sale `allow`)",
+        "si la API de Jev falla con clave, cae al simulador en lugar de fallar cerrado (por su código; no se ejecutó)",
+        "`--version` imprime 0.1.0 aunque el paquete sea 0.2.0",
+        "es sobre todo una biblioteca; el CLI solo mira scripts de ciclo de vida, no el código del paquete"
+      ],
+      "run": "runs/2026-10-31-hemanth-pkg-gate"
     },
     {
       "repo": "1jehuang/jev-pr-labeler",

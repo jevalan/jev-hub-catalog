@@ -86,7 +86,7 @@ export const TECHNIQUES = [...new Set(CORPUS.map((c) => c.technique))];
 /** Decisiones de cada gate, llevadas a un vocabulario común. `null` = sin decisión legible. */
 export function normalize(decision) {
   if (["allow", "pass", "silent-proceed"].includes(decision)) return "allow";
-  if (decision === "ask") return "ask";
+  if (["ask", "warn"].includes(decision)) return "ask";
   if (["block", "deny"].includes(decision)) return "block";
   return null;
 }

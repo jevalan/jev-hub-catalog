@@ -1,0 +1,177 @@
+{
+  "repo": "hemanth/pkg-gate",
+  "date": "2026-10-31",
+  "scope": "directo: se ejecuta el CLI del especialista, sin pasar por el hub de jevalan",
+  "environment": {
+    "node": "v24.8.0",
+    "specialist": "0.2.0",
+    "keys": "ninguna: entorno vacío, HOME y cwd propios; el especialista no puede llamar a ningún modelo"
+  },
+  "measured": [
+    "contrato de salida: allow exit 0, block exit 1, warn exit 2, errores de uso y de lectura exit 1",
+    "manifiestos locales y órdenes sueltas (`-s`) sintéticos, sin red y sin clave",
+    "el simulador sin clave: qué permite, qué avisa y qué bloquea, y que se etiqueta como simulado",
+    "los ganchos que vigila (`postinstall`, `prepare`) y el esquema de `--json`",
+    "umbral `--block-score` y equivalencia de `--mock` con no tener clave",
+    "huella en disco del sandbox"
+  ],
+  "not_measured": [
+    "el motor con modelo (TYPESAFE_API_KEY) y cualquier decisión que dependa de él",
+    "resolver un nombre de paquete: consulta el registro de npm y no se hizo ninguna petición de red",
+    "qué hace si la API de Jev falla con clave: por su código cae al simulador, y no se ejecutó",
+    "el modo interactivo (`warn` con confirmación en terminal) y el TUI"
+  ],
+  "footprint": [
+    "bad.json",
+    "benign.json",
+    "destructive.json",
+    "evil-prepare.json",
+    "no-scripts.json",
+    "pipe-to-shell.json",
+    "recon.json",
+    "steals-npmrc.json"
+  ],
+  "cases": [
+    {
+      "id": "version",
+      "why": "`--version` imprime la versión del paquete instalado.",
+      "pass": false,
+      "problems": [
+        "versión \"0.1.0\", se esperaba 0.2.0"
+      ],
+      "exit": 0
+    },
+    {
+      "id": "help",
+      "why": "`--help` muestra el uso y sale con 0.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "no-target-is-error",
+      "why": "Sin objetivo y sin terminal, es un error de uso (exit 1), no un éxito silencioso.",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "unknown-option-is-error",
+      "why": "Una opción desconocida es un error (exit 1).",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "missing-file",
+      "why": "Un manifiesto que no existe es un error (exit 1) que dice qué falta.",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "invalid-json",
+      "why": "Un manifiesto ilegible es un error (exit 1) que nombra el problema.",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "no-lifecycle-scripts-allowed",
+      "why": "Un paquete sin scripts de ciclo de vida se permite (exit 0) y lo dice.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "native-build-allowed",
+      "why": "Un script de compilación nativa corriente (`node-gyp rebuild`) se permite.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "pipe-to-shell-blocked",
+      "why": "`curl … | bash` en un postinstall se bloquea (exit 1).",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "credential-theft-blocked",
+      "why": "Leer ~/.npmrc y enviarlo a un servidor se bloquea (exit 1).",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "prepare-hook-is-gated",
+      "why": "`prepare` también corre al instalar desde git: un `curl | sh` ahí se bloquea.",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "recon-warns",
+      "why": "Reconocimiento del sistema (`uname -a`) avisa (exit 2) y no se permite en silencio.",
+      "pass": true,
+      "problems": [],
+      "exit": 2
+    },
+    {
+      "id": "destructive-script-never-allowed",
+      "why": "`rm -rf $HOME` en un postinstall es una acción destructiva (nivel 3 de su propia rúbrica): no puede salir permitido.",
+      "pass": false,
+      "problems": [
+        "exit 0, se esperaba 1",
+        "permitió un borrado recursivo del directorio personal"
+      ],
+      "exit": 0
+    },
+    {
+      "id": "inline-script-blocked",
+      "why": "`-s` evalúa una orden suelta: `curl … | bash` se bloquea.",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "structured-output-shape",
+      "why": "`--json` entrega el esquema documentado: schemaVersion, verdict (action, score, confidence, isSafe), scripts y policy.",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "offline-verdict-is-labelled",
+      "why": "Sin clave el veredicto no sale de Jev: debe decirlo en el propio resultado.",
+      "pass": true,
+      "problems": [],
+      "exit": 1,
+      "observed": {
+        "model": "jev-latest (offline simulator)"
+      }
+    },
+    {
+      "id": "mock-equals-no-key",
+      "why": "`--mock` sin clave da el mismo veredicto que sin `--mock`.",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "custom-block-score",
+      "why": "`--block-score` baja el umbral de bloqueo: con 0.1 incluso `node-gyp rebuild` (puntuación 0,15) se bloquea.",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "footprint-stays-in-sandbox",
+      "why": "Lo que el CLI deja en disco queda dentro del sandbox y dentro de lo que su documentación declara.",
+      "pass": true,
+      "problems": []
+    }
+  ],
+  "pass": false
+}
