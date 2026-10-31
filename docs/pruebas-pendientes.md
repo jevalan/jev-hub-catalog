@@ -12,11 +12,10 @@ Las más baratas de medir: se instalan según su README y corren sin credenciale
 
 - [ ] `DataZooDE/anofox-decide` · yes · exec · lib
 
-## Segunda tanda: piden clave o no traen instalación clara (59)
+## Segunda tanda: piden clave o no traen instalación clara (58)
 
 Necesitan una clave de prueba acotada, un modo `--dry-run`/`--mock` o leer el código antes de decidir cómo medirlas.
 
-- [ ] `BillionsBobby/JevRouter` · yes · exec · cli/mcp/lib · clave: typesafe/openrouter
 - [ ] `supercorp-ai/supercov` · yes · exec · cli/lib · clave: typesafe
 - [ ] `uehaj/sys1grep` · yes · exec · cli · clave: typesafe
 - [ ] `Dicklesworthstone/skillranker` · yes · exec · cli/lib · clave: typesafe

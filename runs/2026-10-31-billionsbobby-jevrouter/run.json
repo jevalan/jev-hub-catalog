@@ -1,0 +1,278 @@
+{
+  "repo": "BillionsBobby/JevRouter",
+  "date": "2026-10-31",
+  "scope": "directo: se ejecuta el CLI del especialista, sin pasar por el hub de jevalan",
+  "environment": {
+    "node": "v24.8.0",
+    "specialist": "0.1.0",
+    "keys": "inventada («clave-inventada-de-pruebas») válida solo contra un proveedor local en 127.0.0.1; ninguna petición sale de la máquina y ninguna clave real entra en el entorno"
+  },
+  "measured": [
+    "`route` y `plan` con el proveedor `demo` y con un proveedor simulado nuestro (NO es Jev) para lo que el enrutador hace con una respuesta dada",
+    "permisos y riesgo: el candidato sin permiso queda filtrado y no se elige, el de riesgo alto exige confirmación, y nunca se ejecuta (`execution.enabled: false`)",
+    "umbral de confianza (`no_decision`, exit 2), opción no ofrecida, 500, respuesta que no es JSON, falta de clave y candidatos mal formados: ninguno elige nada",
+    "qué se le manda al proveedor (una pregunta de elección, clave por cabecera) y observaciones: el candidato filtrado sí viaja, un secreto en el texto sí viaja, un riesgo mal formado se degrada",
+    "el registro `.jevrouter/` (`init`, `capability add/list`, `route` sin candidatos), `decision show` y `discover --skills`",
+    "huella en disco del sandbox"
+  ],
+  "not_measured": [
+    "lo que Jev contesta de verdad con el proveedor simulado: lo dicta una marca en el texto",
+    "`serve`, `serve-mcp`, `dashboard` y `agent setup/start/doctor`; de `discover`, `--mcp` (arranca servidores) y `--cli` (ejecuta `<comando> --help`)",
+    "el proveedor `openrouter` del enrutador (URL fija) y los modos batch y decompose del plan",
+    "el endpoint HTTPS real: el simulador usa HTTP en loopback, que el enrutador permite solo ahí"
+  ],
+  "footprint": [
+    ".gitignore",
+    ".jevrouter/capabilities/notes_writer.json",
+    ".jevrouter/capabilities/skill.search-skill.json",
+    ".jevrouter/decisions/dec_0b8891ef-0896-4eed-85e9-d741fd98181c.json",
+    ".jevrouter/decisions/dec_0e4f2e20-d75b-4fc6-a0f4-b68b8fddb789.json",
+    ".jevrouter/decisions/dec_435d4059-d408-4067-a25f-02cf8ac7d7a6.json",
+    ".jevrouter/decisions/dec_4c286f5a-c51b-4a43-a131-76736e624d2f.json",
+    ".jevrouter/decisions/dec_5f44ae24-debd-4def-805a-e1796f1156e1.json",
+    ".jevrouter/decisions/dec_769cb04e-8971-4390-8483-dcced83b87c9.json",
+    ".jevrouter/decisions/dec_808f5948-0206-4357-8087-14da3953c7f5.json",
+    ".jevrouter/decisions/dec_9235f092-5e46-4673-9aad-a38d2a8c9abc.json",
+    ".jevrouter/decisions/dec_bc724f46-4ca3-46c2-a5a6-623975fb5b97.json",
+    ".jevrouter/decisions/dec_c691bfd0-efeb-4f2e-ad68-cf721da1fc14.json",
+    ".jevrouter/decisions/dec_c946eb74-1462-4d2c-bd1b-ca9ba513136b.json",
+    ".jevrouter/decisions/dec_c9dddbe1-fa94-407f-b0dd-0bae30d83047.json",
+    ".jevrouter/decisions/dec_d6e00951-37d8-4e03-aefe-23fc3b43516f.json",
+    ".jevrouter/decisions/dec_e1e3f034-ad2f-4404-840c-5161bdf42706.json",
+    ".jevrouter/plans/plan_f35ca1f4-0bce-4763-952a-07da2735a238.json",
+    ".jevrouter/policy.json",
+    "cands.json",
+    "cap.json",
+    "skills/empty/README.md",
+    "skills/search/SKILL.md"
+  ],
+  "cases": [
+    {
+      "id": "help",
+      "why": "Sin argumentos muestra la lista de comandos.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "exit": 0,
+        "stream": "stdout"
+      }
+    },
+    {
+      "id": "unknown-command",
+      "why": "Un comando desconocido es un error (exit distinto de 0).",
+      "pass": false,
+      "problems": [
+        "salió con 0"
+      ],
+      "exit": 0
+    },
+    {
+      "id": "version-flag",
+      "why": "`--version` imprime la versión del paquete.",
+      "pass": false,
+      "problems": [
+        "no imprime la versión"
+      ],
+      "exit": 0
+    },
+    {
+      "id": "demo-provider-is-labelled",
+      "why": "El proveedor `demo` no habla con nadie y se etiqueta como tal en la procedencia de la decisión.",
+      "pass": true,
+      "problems": [],
+      "exit": 2
+    },
+    {
+      "id": "route-selects-and-never-executes",
+      "why": "Una decisión elegida sale con exit 0, estado `selected` y la ejecución desactivada.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "route-request-shape",
+      "why": "A Jev le llega UNA pregunta de elección con una opción por candidato, la petición como estado y la clave por cabecera.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "actor-without-permission-is-filtered",
+      "why": "Un candidato que exige un permiso que el actor no tiene queda filtrado con el motivo y no se puede elegir.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "filtered-candidate-still-reaches-the-provider",
+      "why": "Observación: el candidato filtrado por permisos, ¿se le manda al modelo de todos modos? (jev-layer lo quita antes de preguntar).",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "options_sent": [
+          "delete_files",
+          "search_web",
+          "summarize"
+        ]
+      }
+    },
+    {
+      "id": "actor-with-permission-can-select-it",
+      "why": "Con el permiso, el mismo candidato sí se puede elegir.",
+      "pass": true,
+      "problems": [],
+      "exit": 2,
+      "observed": {
+        "status": "needs_confirmation",
+        "exit": 2,
+        "requires_confirmation": true
+      }
+    },
+    {
+      "id": "high-risk-requires-confirmation",
+      "why": "Un candidato de riesgo alto (con la forma documentada `risk: { level }`) exige confirmación y no sale como una elección limpia.",
+      "pass": true,
+      "problems": [],
+      "exit": 2
+    },
+    {
+      "id": "malformed-risk-silently-becomes-low",
+      "why": "Observación: un riesgo con la forma equivocada (`risk: \"high\"`, cadena en vez de objeto), ¿se rechaza o se degrada a `low` en silencio?",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "exit": 0,
+        "risk_level": "low",
+        "requires_confirmation": false
+      }
+    },
+    {
+      "id": "low-confidence-is-no-decision",
+      "why": "Con la confianza por debajo del umbral de su política no se elige nada: `no_decision`, exit 2.",
+      "pass": true,
+      "problems": [],
+      "exit": 2
+    },
+    {
+      "id": "answer-outside-the-options-is-rejected",
+      "why": "Si Jev contesta una opción que no se le ofreció, no se acepta: `no_decision` y nada elegido.",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "provider-error-is-no-decision",
+      "why": "Un 500 del proveedor no elige nada: `no_decision`, exit 1, ejecución desactivada.",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "malformed-provider-response-is-no-decision",
+      "why": "Una respuesta que no es JSON tampoco elige nada.",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "no-key-refuses-without-a-request",
+      "why": "Sin clave se niega (exit 1), nombra la variable, no cae al simulador en silencio y no sale ninguna petición.",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "invalid-candidates-json",
+      "why": "Unos candidatos que no son JSON ni YAML válido son un error (exit 1) sin petición.",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "secret-in-request-text-is-sent",
+      "why": "Observación: un secreto escrito en el texto de la petición, ¿sale hacia el proveedor?",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "secret_shaped_value_sent": true
+      }
+    },
+    {
+      "id": "plan-serial-gives-one-decision-per-step",
+      "why": "`plan --steps 2 --mode serial` devuelve dos pasos con una decisión cada uno y sin ejecutar nada.",
+      "pass": true,
+      "problems": [],
+      "exit": 2,
+      "observed": {
+        "exit": 2,
+        "requests": 2
+      }
+    },
+    {
+      "id": "init-appends-to-the-project-gitignore",
+      "why": "Observación: `init` añade `.jevrouter/` al `.gitignore` del proyecto (un fichero que no es suyo), además de crear su carpeta.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "stdout": "Initialized .jevrouter/ (existing files were preserved)"
+      }
+    },
+    {
+      "id": "init-creates-the-project-folder",
+      "why": "`init` crea `.jevrouter/` en el directorio actual y conserva lo que ya existiera.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "capability-add-and-list",
+      "why": "`capability add` registra un manifiesto y `capability list` lo devuelve.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "capability-list-sees-the-registered-one",
+      "why": "El registro persiste entre ejecuciones: `capability list` muestra `notes_writer`.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "route-without-candidates-uses-the-registry",
+      "why": "Sin banderas de candidatos, `route` lee el registro (solo hay uno: `notes_writer`).",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "decision-show-unknown",
+      "why": "Una decisión que no existe es un error (exit 1).",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "discover-skills-reads-frontmatter",
+      "why": "`discover --skills` lee el encabezado de los SKILL.md y no ejecuta nada.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "stdout": ".jevrouter/capabilities/skill.search-skill.json"
+      }
+    },
+    {
+      "id": "footprint-stays-in-sandbox",
+      "why": "Lo que el CLI deja en disco queda dentro del sandbox y dentro de lo que su documentación declara.",
+      "pass": true,
+      "problems": []
+    }
+  ],
+  "pass": false
+}

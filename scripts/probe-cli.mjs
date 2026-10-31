@@ -25,6 +25,7 @@ import { FIXTURES as JV_FIXTURES, jevcCases } from "./lib/cli-cases-jevc.mjs";
 import { FIXTURES as SD_FIXTURES, semdecideCases } from "./lib/cli-cases-semdecide.mjs";
 import { FIXTURES as SDL_FIXTURES, semdecideLiveCases } from "./lib/cli-cases-semdecide-live.mjs";
 import { FIXTURES as JY_FIXTURES, jevLayerCases, jevLayerLiveCases } from "./lib/cli-cases-jevlayer.mjs";
+import { FIXTURES as JR_FIXTURES, jevRouterCases, jevRouterLiveCases } from "./lib/cli-cases-jevrouter.mjs";
 import { FIXTURES as EV_FIXTURES, everyCases, EXTRACT_HARNESS } from "./lib/cli-cases-every.mjs";
 
 const arg = (name) => {
@@ -328,6 +329,48 @@ const CLIS = {
       "el servidor MCP (`jev mcp`), los adaptadores de Hermes, OMP y Codex, y los comandos que escriben configuración (`install`, `init`, `add`, `doctor`)",
       "imágenes, Box, supervisión, filtrado de contexto, ruta de modelos y navegador",
       "el endpoint HTTPS real: el simulador usa HTTP en loopback",
+    ],
+  },
+  "billionsbobby/jevrouter": {
+    cases: jevRouterCases,
+    fixtures: JR_FIXTURES,
+    // El registro, las decisiones y los planes viven en `.jevrouter/` del directorio actual: es lo que documenta.
+    allowed: /^(?:\.jevrouter\/|\.gitignore$)/,
+    stub: true,
+    // `JEV_API_URL` solo redirige al proveedor `typesafe`; el `openrouter` de JevRouter lleva la URL fija.
+    stubEnv: (port) => ({ TYPESAFE_API_KEY: "clave-inventada-de-pruebas", JEV_API_URL: `http://127.0.0.1:${port}/v1/systemone` }),
+    keys: "inventada («clave-inventada-de-pruebas») válida solo contra un proveedor local en 127.0.0.1; ninguna petición sale de la máquina y ninguna clave real entra en el entorno",
+    // `--cli` es bin/jevrouter.mjs, con su dist/ ya compilado (tsc, sin ejecutar scripts) y sus dependencias del lockfile.
+    launch: (cli) => ({ command: process.execPath, prefix: [resolve(cli)] }),
+    env: { NO_COLOR: "1" },
+    live: {
+      cases: jevRouterLiveCases,
+      keys: "inventada para el especialista; la real (OpenRouter) vive solo en el entorno de un adaptador local en 127.0.0.1 con tope de gasto. El proveedor `typesafe` del enrutador manda la petición al adaptador, que la reenvía a OpenRouter",
+      measured: [
+        "Jev de verdad (typesafe/jev-1.13 por OpenRouter) a través del enrutador, con candidatos y textos inventados: tests, búsqueda, despliegue con confirmación y español",
+        "una orden incrustada en la petición y una descripción envenenada de candidato no deciden la elección",
+        "un plan de tres pasos elige en orden la capacidad de cada paso; las probabilidades de cada candidato quedan en `observed`",
+      ],
+      not_measured: [
+        "casos ambiguos en volumen y catálogos grandes (aquí hay 3-4 candidatos), la etapa en dos fases con muchos candidatos y los modos batch y decompose del plan",
+        "el proveedor `openrouter` del propio enrutador (URL fija: no se puede redirigir) y el modelo `~typesafe/jev-latest` que usa por defecto",
+        "`serve`, `serve-mcp`, `dashboard` y `agent setup/start/doctor`",
+        "estabilidad entre ejecuciones y latencia",
+      ],
+    },
+    measured: [
+      "`route` y `plan` con el proveedor `demo` y con un proveedor simulado nuestro (NO es Jev) para lo que el enrutador hace con una respuesta dada",
+      "permisos y riesgo: el candidato sin permiso queda filtrado y no se elige, el de riesgo alto exige confirmación, y nunca se ejecuta (`execution.enabled: false`)",
+      "umbral de confianza (`no_decision`, exit 2), opción no ofrecida, 500, respuesta que no es JSON, falta de clave y candidatos mal formados: ninguno elige nada",
+      "qué se le manda al proveedor (una pregunta de elección, clave por cabecera) y observaciones: el candidato filtrado sí viaja, un secreto en el texto sí viaja, un riesgo mal formado se degrada",
+      "el registro `.jevrouter/` (`init`, `capability add/list`, `route` sin candidatos), `decision show` y `discover --skills`",
+      "huella en disco del sandbox",
+    ],
+    not_measured: [
+      "lo que Jev contesta de verdad con el proveedor simulado: lo dicta una marca en el texto",
+      "`serve`, `serve-mcp`, `dashboard` y `agent setup/start/doctor`; de `discover`, `--mcp` (arranca servidores) y `--cli` (ejecuta `<comando> --help`)",
+      "el proveedor `openrouter` del enrutador (URL fija) y los modos batch y decompose del plan",
+      "el endpoint HTTPS real: el simulador usa HTTP en loopback, que el enrutador permite solo ahí",
     ],
   },
   "ismaelsoilet/jev-harness": {
