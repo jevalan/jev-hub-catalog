@@ -50,7 +50,8 @@ const finding = (json, rule) => (json?.findings || []).find((f) => f.rule === ru
 /** Juicio de una ejecución: devuelve la lista de problemas (vacía = pasa). */
 export function judgeCase(c, r) {
   const problems = [];
-  if (r.status !== c.exit) problems.push(`exit ${r.status}, se esperaba ${c.exit}`);
+  // `exit: null` deja el código a la `check` del caso (cuando vale más de un código).
+  if (c.exit !== null && r.status !== c.exit) problems.push(`exit ${r.status}, se esperaba ${c.exit}`);
   if (c.check) problems.push(...c.check(r));
   return problems;
 }

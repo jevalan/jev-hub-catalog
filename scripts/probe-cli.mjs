@@ -23,6 +23,7 @@ import { FIXTURES as RF_FIXTURES, riffCases } from "./lib/cli-cases-riff.mjs";
 import { FIXTURES as JC_FIXTURES, jevLintCliCases } from "./lib/cli-cases-jevlintcli.mjs";
 import { FIXTURES as JV_FIXTURES, jevcCases } from "./lib/cli-cases-jevc.mjs";
 import { FIXTURES as SD_FIXTURES, semdecideCases } from "./lib/cli-cases-semdecide.mjs";
+import { FIXTURES as SDL_FIXTURES, semdecideLiveCases } from "./lib/cli-cases-semdecide-live.mjs";
 import { FIXTURES as EV_FIXTURES, everyCases, EXTRACT_HARNESS } from "./lib/cli-cases-every.mjs";
 
 const arg = (name) => {
@@ -216,6 +217,22 @@ const CLIS = {
       const m = readFileSync(join(resolve(cli), "..", "pyproject.toml"), "utf8").match(/^version = "([^"]+)"/m);
       return m ? m[1] : "desconocida";
     },
+    live: {
+      cases: semdecideLiveCases,
+      fixtures: SDL_FIXTURES,
+      keys: "inventada («clave-inventada-de-pruebas») para el especialista; la real (OpenRouter) vive solo en el entorno de un adaptador local en 127.0.0.1 con tope de gasto",
+      measured: [
+        "Jev de verdad (typesafe/jev-1.13 por la Decisions API de OpenRouter) a través del envoltorio, con textos inventados y sin ambigüedad: predicado, enrutado, escala, filtro y `guard`",
+        "la probabilidad real de cada caso queda en `observed` (calibración, no solo acierto): toma de cuenta, boletín, español, orden incrustada en el texto, entrada larga",
+        "el modelo que contesta se nombra en el JSON y trae uso de tokens; el gasto total de la sonda queda en `live.spend_usd`",
+      ],
+      not_measured: [
+        "estabilidad entre ejecuciones (cada caso se lanza una vez) y la cola de casos difíciles o ambiguos: solo hay casos evidentes",
+        "otros modelos de Jev o de OpenRouter distintos de typesafe/jev-1.13",
+        "latencia y comportamiento ante límites de tasa",
+        "el camino por TypeSafe directo: aquí va por OpenRouter, que exige `criteria` en los noul y lo añade el adaptador",
+      ],
+    },
     measured: [
       "la lógica del envoltorio frente a un proveedor simulado nuestro (NO es Jev): umbral por defecto 0,70, `--threshold`, margen de incertidumbre y los códigos 0/1/3/4 de su README",
       "`is`, `choose`, `score`, `filter` y `guard`: veredicto, esquema JSON versionado, `--quiet`, `--raw`, orden de los registros y metadata `_semdecide`",
@@ -335,7 +352,12 @@ async function main() {
     console.error("faltan argumentos: --repo --cli");
     process.exit(2);
   }
-  const spec = CLIS[repo.toLowerCase()];
+  const base = CLIS[repo.toLowerCase()];
+  // `--live-openrouter <.env>` cambia el simulador por Jev de verdad (vía OpenRouter, con tope de gasto en `--cap`, USD).
+  const liveEnv = arg("live-openrouter");
+  const live = Boolean(liveEnv && base?.live);
+  const spec = live ? { ...base, ...base.live } : base;
+  let spent = 0;
   if (!spec) throw new Error(`sin juego de casos para ${repo}: ${Object.keys(CLIS).join(", ")}`);
   if (!existsSync(cli)) throw new Error(`no existe: ${cli}`);
   const version = spec.version ? spec.version(cli) : specialistVersion(cli);
@@ -348,7 +370,17 @@ async function main() {
   let stubEnv = {};
   if (spec.stub) {
     writeFileSync(stubLog, "");
-    stub = spawn(process.execPath, [join(ROOT, "scripts", "lib", "stub-provider.mjs"), stubLog], { stdio: ["ignore", "pipe", "inherit"] });
+    if (live) {
+      // La clave real solo entra en el entorno del adaptador; el especialista recibe una inventada.
+      const key = readFileSync(liveEnv, "utf8").split(/\r?\n/).map((l) => l.match(/^\s*OPENROUTER_API_KEY\s*=\s*(.*)$/)?.[1]).find(Boolean)?.trim().replace(/^["']|["']$/g, "");
+      if (!key) throw new Error("el .env no tiene OPENROUTER_API_KEY");
+      stub = spawn(process.execPath, [join(ROOT, "scripts", "lib", "openrouter-adapter.mjs"), stubLog, arg("cap") ?? "1"], {
+        stdio: ["ignore", "pipe", "inherit"],
+        env: { PATH: process.env.PATH, SystemRoot: process.env.SystemRoot ?? "", OPENROUTER_API_KEY: key },
+      });
+    } else {
+      stub = spawn(process.execPath, [join(ROOT, "scripts", "lib", "stub-provider.mjs"), stubLog], { stdio: ["ignore", "pipe", "inherit"] });
+    }
     const port = await new Promise((ok, fail) => {
       createInterface({ input: stub.stdout }).once("line", (l) => ok(JSON.parse(l).port));
       stub.once("error", fail);
@@ -400,6 +432,7 @@ async function main() {
       const res = { status: r.status, stdout: r.stdout ?? "", stderr: r.stderr ?? "" };
       // Lo que llegó al proveedor simulado durante este caso: la prueba de qué sale (y qué no) del proceso.
       res.requests = stub ? readFileSync(stubLog, "utf8").split(/\r?\n/).filter(Boolean).map((l) => JSON.parse(l)) : [];
+      spent += res.requests.reduce((s, q) => s + (q.cost ?? 0), 0);
       try {
         res.json = JSON.parse(res.stdout);
       } catch {
@@ -441,18 +474,20 @@ async function main() {
       specialist: version,
       keys: spec.keys ?? "ninguna: entorno vacío, HOME y cwd propios; el especialista no puede llamar a ningún modelo",
     },
+    ...(live ? { live: { backend: "OpenRouter Decisions API", model: "typesafe/jev-1.13", spend_usd: Number(spent.toFixed(6)), cap_usd: Number(arg("cap") ?? "1") } } : {}),
     measured: spec.measured,
     not_measured: spec.not_measured,
     footprint,
     cases: results,
     pass: results.every((r) => r.pass),
   };
-  const dir = join(ROOT, "runs", `${today()}-${slug(repo)}`);
+  const dir = join(ROOT, "runs", `${today()}-${slug(repo)}${live ? "-openrouter" : ""}`);
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(dir, "run.json"), JSON.stringify(run, null, 2) + "\n");
   console.log(`${run.pass ? "OK" : "FALLA"}: ${results.filter((r) => r.pass).length}/${results.length} casos`);
   for (const r of results) console.log(`  ${r.pass ? "✓" : "✗"} ${r.id}${r.problems.length ? ": " + r.problems.join("; ") : ""}`);
-  console.log(`evidencia: runs/${today()}-${slug(repo)}/run.json`);
+  if (live) console.log(`gasto: ${spent.toFixed(6)} USD de ${arg("cap") ?? "1"}`);
+  console.log(`evidencia: runs/${today()}-${slug(repo)}${live ? "-openrouter" : ""}/run.json`);
   process.exit(run.pass ? 0 : 1);
 }
 

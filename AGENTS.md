@@ -62,6 +62,10 @@ node scripts/probe-cli.mjs --repo <o/r> --cli <ruta al CLI>
                                # con `stub: true` (semdecide) levanta scripts/lib/stub-provider.mjs, un proveedor SIMULADO en 127.0.0.1: mide el
                                # envoltorio, nunca a Jev. Para every, `--python` es el venv y `--grammars` una caché privada de gramáticas ya bajada
                                # (su dependencia las descarga la primera vez; la sonda corre con un proxy muerto y debe pasar sin red)
+node scripts/probe-cli.mjs --repo sharziki/semdecide --cli <src> --python <py> --live-openrouter <.env> --cap 1
+                               # lo mismo contra Jev DE VERDAD por OpenRouter (typesafe/jev-1.13): la clave vive solo en el entorno de
+                               # scripts/lib/openrouter-adapter.mjs, el especialista recibe una inventada y el gasto se cuenta y se topa (USD).
+                               # Escribe runs/<fecha>-<repo>-openrouter/. Nunca pegues la clave en un fichero del repo
 node scripts/probe-gate.mjs --repo <o/r> --cli <ruta al CLI>
                                # mide un gate de hook (jev-firewall, reflex) en un sandbox, sin hub ni claves;
                                # cada gate tiene su juego de casos registrado en el propio script
