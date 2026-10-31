@@ -1,0 +1,215 @@
+{
+  "repo": "doronp/jevc",
+  "date": "2026-10-31",
+  "scope": "directo: se ejecuta el CLI del especialista, sin pasar por el hub de jevalan",
+  "environment": {
+    "node": "v24.8.0",
+    "specialist": "0.1.0",
+    "keys": "ninguna: entorno vacío, HOME y cwd propios; el especialista no puede llamar a ningún modelo"
+  },
+  "measured": [
+    "`scan`: cuenta y clasifica las reglas de un AGENTS.md (decidibles, procedimientos, generación) y avisa cuando no hay ficheros de instrucciones",
+    "`check`: repite offline el corpus grabado de 58 fixtures; rechaza `--model` sin `--live`, un directorio de fixtures ausente y `--live` sin clave",
+    "`show` y `explain`: listan y enseñan los fixtures; los inexistentes son error",
+    "`compile` de un esquema: módulo TypeScript con preguntas noul y choice y veredicto calculado en código; declara lo que no puede bajar (texto libre, enteros) en vez de callarlo",
+    "`compile --lift`: imprime la petición de bajada sin llamar a ningún modelo",
+    "`emit-policy` a toolgate y bouncer: YAML con preguntas booleanas, umbrales y arranque en modo observe; destino desconocido, programa inválido y uso incorrecto son error",
+    "contrato de salida y huella en disco del sandbox"
+  ],
+  "not_measured": [
+    "`check --live`: re-medir contra la API necesita clave de TypeSafe",
+    "que las preguntas compiladas salgan bien con un modelo (la calidad de la bajada `--lift`, que hace el agente)",
+    "las políticas emitidas cargadas en toolgate o bouncer reales",
+    "la corrección de los 58 fixtures: `check` compara una grabación consigo misma y no puede fallar si la grabación es mala"
+  ],
+  "footprint": [
+    "bad-prog.json",
+    "bad.json",
+    "empty/.keep",
+    "prog.json",
+    "proj/AGENTS.md",
+    "rules.md",
+    "schema-free-text.json",
+    "schema-ok.json",
+    "schema-scalar.json"
+  ],
+  "cases": [
+    {
+      "id": "version",
+      "why": "`--version` imprime la versión del paquete.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "help-exits-zero",
+      "why": "`--help` muestra el uso y sale con 0, como cualquier CLI.",
+      "pass": false,
+      "problems": [
+        "exit 1, se esperaba 0"
+      ],
+      "exit": 1
+    },
+    {
+      "id": "unknown-command",
+      "why": "Un comando desconocido es un error de uso (exit 1) y muestra el uso.",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "scan-counts-rules",
+      "why": "`scan` cuenta las reglas de un AGENTS.md y las separa en decidibles, procedimientos y generación, como dice su README.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "scan-lists-the-decidable-rule",
+      "why": "`scan` enseña la regla decidible con su número de línea y propone el siguiente paso.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "scan-without-instruction-files",
+      "why": "Sin ficheros de instrucciones, `scan` lo dice y explica qué busca (exit 0).",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "check-replays-corpus",
+      "why": "`check` repite offline el corpus medido: el README cuenta 58 fixtures y los 58 pasan.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "check-live-needs-key",
+      "why": "`check --live` sin clave se niega (exit 1), nombra la variable y no hace ninguna petición.",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "check-model-needs-live",
+      "why": "`--model` sin `--live` se rechaza (el README dice que solo vale con `--live`).",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "check-bad-fixtures-dir",
+      "why": "`check --fixtures` sobre un directorio que no existe es un error (exit 1) y lo dice.",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "show-lists-fixtures",
+      "why": "`show` sin argumento lista los 58 fixtures grabados.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "show-one-fixture",
+      "why": "`show <id>` enseña el antes (la prosa que sustituye), el estado y las preguntas medidas.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "show-unknown-fixture",
+      "why": "Un fixture inexistente es un error (exit 1) que remite a la lista.",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "explain-unknown-decision",
+      "why": "Una decisión inexistente es un error (exit 1).",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "compile-schema-emits-module",
+      "why": "Un esquema con un booleano y un enum se compila a un módulo TypeScript con una pregunta noul y otra choice, y un veredicto calculado en código.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "compile-schema-reports-what-it-cannot-lower",
+      "why": "Un esquema con texto libre y un entero no se compila en silencio: declara qué necesita un modelo generativo y qué descarta (exit 1).",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "compile-scalar-schema-refused",
+      "why": "Un esquema sin propiedades no inventa decisiones: se rechaza y explica por qué (exit 1).",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "compile-not-json-points-to-lift",
+      "why": "Un fichero que no es JSON remite a `--lift` (exit 1).",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "compile-lift-prints-request",
+      "why": "`compile --lift` imprime la petición para que el agente la lleve a un programa, sin llamar a ningún modelo (exit 0).",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "emit-policy-toolgate",
+      "why": "`emit-policy --for toolgate` baja un programa a YAML de toolgate con preguntas booleanas y umbrales.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "emit-policy-bouncer-starts-in-observe",
+      "why": "`emit-policy --for bouncer` genera una política que arranca en modo observe (solo registra), como avisa su cabecera.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "emit-policy-unknown-target",
+      "why": "Un destino desconocido es un error (exit 1) que lista los conocidos.",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "emit-policy-invalid-program",
+      "why": "Un JSON que no es un programa jevc se rechaza (exit 1) y dice qué forma esperaba.",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "emit-policy-needs-target",
+      "why": "Sin `--for` es un error de uso (exit 1).",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "footprint-stays-in-sandbox",
+      "why": "Lo que el CLI deja en disco queda dentro del sandbox y dentro de lo que su documentación declara.",
+      "pass": true,
+      "problems": []
+    }
+  ],
+  "pass": false
+}

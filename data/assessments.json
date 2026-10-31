@@ -696,9 +696,13 @@
         ],
         "host": "any"
       },
-      "evidence": "static",
-      "verdict": "Reglas de convención en lenguaje natural; devuelve la probabilidad de que cada fichero las incumpla contra un umbral (`--threshold`). Salida `--format json` con `summary`, y los errores fatales salen como `{ \"error\": ... }`. Exit 0 sin hallazgos, 1 con hallazgos por encima del umbral y 2 si falla la configuración o el análisis. La señal es por fichero, sin línea ni arreglo. `--dry-run` imprime la petición sin llamar ni necesitar clave. Evidencia solo de README y árbol.",
-      "blockers": []
+      "evidence": "measured",
+      "verdict": "Reglas de convención en lenguaje natural; devuelve la probabilidad de que cada fichero las incumpla contra un umbral (`--threshold`). Salida `--format json` con `summary`, y los errores fatales salen como `{ \"error\": ... }`. Exit 0 sin hallazgos, 1 con hallazgos por encima del umbral y 2 si falla la configuración o el análisis. La señal es por fichero, sin línea ni arreglo. `--dry-run` imprime la petición sin llamar ni necesitar clave. Evidencia solo de README y árbol. MEDIDO por nosotros sin clave (paquete npm @jevlint/cli 0.1.4, ya compilado, instalado con `--ignore-scripts`; el repositorio antes se llamaba huntedman/JevLint; siempre con `--dry-run` o sin clave, así que ninguna petición sale; 21 casos, 20 pasan): `--dry-run` imprime las peticiones (modelo, fuente de cada fichero y pregunta noul de la regla) sin clave; el recorrido omite node_modules, dist, los directorios y ficheros secrets/credentials y lo que no es JS/TS; `--ignore`, `ignore`, `files`, `plugins` y `--model` hacen lo que dicen; sin clave se niega con exit 2 nombrando JEV_API_KEY; `init` no sobrescribe. Hallazgos: no tiene `--version` (exit 2), y sin configuración el recorrido por defecto SÍ incluye los ficheros de test y los .d.ts (solo `init` escribe esas exclusiones). NO medido: ningún veredicto de un modelo (si un fichero se marca, la probabilidad, el umbral de 0,8 aplicado), plugins ajenos (`--dry-run` ejecuta los configurados con permisos normales de Node; solo se cargaron los dos que trae), la caché de juicios y el coste.",
+      "blockers": [
+        "todo veredicto exige una clave de TypeSafe y envía el fichero entero a su API",
+        "sin `--version`; sin configuración, el recorrido por defecto incluye tests y .d.ts"
+      ],
+      "run": "runs/2026-10-31-iamtoomas-jevlint"
     },
     {
       "repo": "Tech-Byte-Frontier/jevgate",
@@ -2183,12 +2187,14 @@
         ],
         "host": "any"
       },
-      "evidence": "static",
-      "verdict": "`grep` por significado y `jq` para el juicio: `is` (predicado), `choose` (ruta entre opciones con probabilidad de cada una y confianza), `score` (rúbrica ordenada), `filter` (JSONL) y `guard` (receta de seguridad de acciones: allow, escalate, block). Entrada por stdin, `--text` o `--file`; `--json` da una salida versionada (`schema_version`); los errores salen como JSON versionado por stderr con el detalle del proveedor redactado. Los códigos de salida separan la respuesta del fallo: 0 verdadero, 1 falso, 2 entrada o uso inválidos, 3 incierto bajo el margen o la confianza mínima, 4 fallo del proveedor, y `guard` usa 0, 10 y 20. Es la separación que se le exige a un gate. Evidencia solo de README.",
+      "evidence": "measured",
+      "verdict": "`grep` por significado y `jq` para el juicio: `is` (predicado), `choose` (ruta entre opciones con probabilidad de cada una y confianza), `score` (rúbrica ordenada), `filter` (JSONL) y `guard` (receta de seguridad de acciones: allow, escalate, block). Entrada por stdin, `--text` o `--file`; `--json` da una salida versionada (`schema_version`); los errores salen como JSON versionado por stderr con el detalle del proveedor redactado. Los códigos de salida separan la respuesta del fallo: 0 verdadero, 1 falso, 2 entrada o uso inválidos, 3 incierto bajo el margen o la confianza mínima, 4 fallo del proveedor, y `guard` usa 0, 10 y 20. Es la separación que se le exige a un gate. Evidencia solo de README. MEDIDO por nosotros sin clave real (versión 0.2.1 ejecutada desde su fuente, commit 33cf5c0; 40 casos, 40 pasan). OJO con lo que significa: el sandbox apunta `SEMDECIDE_API_URL` a un proveedor SIMULADO nuestro en 127.0.0.1 con una clave inventada, así que se mide el envoltorio, no a Jev. Con ese simulador, los códigos de salida de su README se cumplen (0 verdadero, 1 falso, 3 incierto dentro del margen o con confianza baja, 4 fallo de proveedor, 2 uso incorrecto); un 500 se reintenta (tres peticiones, `--retries 0` una), un 401 no; una respuesta que no es JSON, sin `answers` o con una probabilidad fuera de [0, 1] es un fallo de proveedor y no una decisión; con `--json` el error sale versionado y sin detalles; `filter` conserva el orden y añade `_semdecide`; `guard` falla cerrado (escala, exit 10). Una entrada vacía, demasiado grande, mal formada o la falta de clave no envían ninguna petición. NO medido: lo que Jev contesta de verdad (calibración, coste, latencia), las cinco señales de `guard` con un modelo real, ni la instalación desde el wheel de la release.",
       "blockers": [
         "no está en PyPI: se instala desde un artefacto de la release de GitHub",
-        "no se midió"
-      ]
+        "no se midió",
+        "el envoltorio se midió contra un proveedor simulado: la calidad del juicio depende del modelo y no se midió"
+      ],
+      "run": "runs/2026-10-31-sharziki-semdecide"
     },
     {
       "repo": "sufianetaouil/every",
@@ -2211,13 +2217,16 @@
         ],
         "host": "any"
       },
-      "evidence": "static",
-      "verdict": "Hace una pregunta de sí o no a cada función de un código y devuelve la probabilidad de cada una, ordenadas, con umbral (`--above`) y `--json`. Es una colección con probabilidad por ítem y salida documentada. `--selftest` mide recall, falsos positivos y AUROC con 20 funciones etiquetadas. Evidencia solo de README.",
+      "evidence": "measured",
+      "verdict": "Hace una pregunta de sí o no a cada función de un código y devuelve la probabilidad de cada una, ordenadas, con umbral (`--above`) y `--json`. Es una colección con probabilidad por ítem y salida documentada. `--selftest` mide recall, falsos positivos y AUROC con 20 funciones etiquetadas. Evidencia solo de README. MEDIDO por nosotros sin clave real (paquete PyPI every-cli 0.1.0, solo ruedas; el repositorio no se comparó; 22 casos, 22 pasan). Todo lo que pregunta al modelo necesita clave y su dirección va fija en el código, así que se midió lo que ocurre ANTES de la primera petición, que es qué código sale de la máquina: parte en funciones y métodos Python, JavaScript, TypeScript/TSX, Go, Java, Rust, C#, Ruby y PHP (con funciones anidadas calificadas), trocea en 150 líneas lo reconocido sin analizador (shell) y lo que no se puede analizar, y excluye node_modules, vendor, dist, build, bin, target, lo minificado, lo generado y lo vacío. Hallazgos: los ficheros llamados `secrets.py` o `credentials.go` SÍ se juzgan y se enviarían (su README no promete excluirlos); y su dependencia tree-sitter-language-pack se baja las gramáticas nativas (22 MB desde GitHub Releases) la primera vez que las usa y, si no puede, `extract_all` devuelve cero funciones sin error: un «0 hits» puede significar «no leí nada». NO medido: ninguna respuesta del modelo, el ranking, el coste real, `--selftest`, la clasificación de la pregunta ni repositorios con git (se usó `os.walk`).",
       "blockers": [
         "el código de cada función se envía a la API de TypeSafe",
         "se ignora qué hace `--yes` y qué confirmación salta",
-        "se ignora el exit code"
-      ]
+        "se ignora el exit code",
+        "envía a TypeSafe el código fuente de cada función, también el de ficheros llamados secrets o credentials",
+        "su dependencia descarga gramáticas nativas en la primera ejecución; sin ellas no encuentra funciones y no avisa"
+      ],
+      "run": "runs/2026-10-31-sufianetaouil-every"
     },
     {
       "repo": "jyatesdotdev/jev-logtriage",
@@ -2826,13 +2835,16 @@
         "requires_key": [],
         "host": "any"
       },
-      "evidence": "static",
-      "verdict": "Compilador que convierte una regla en prosa («NUNCA hacer commit salvo que el usuario lo pida») en un programa de Jev: unas pocas preguntas tipadas y un reductor que calcula el veredicto en código corriente, de modo que la regla es una invariante legible, versionable y comprobable. Instalación `npm i -g jev-compiler` (el comando es `jevc`); `jevc check` repite un corpus grabado sin conexión y todo su README se ejecuta sin clave ni red. Es una herramienta de diseño: genera y prueba las barreras, y no queda claro cómo se invoca después un programa compilado sobre una entrada real. Evidencia solo de README.",
+      "evidence": "measured",
+      "verdict": "Compilador que convierte una regla en prosa («NUNCA hacer commit salvo que el usuario lo pida») en un programa de Jev: unas pocas preguntas tipadas y un reductor que calcula el veredicto en código corriente, de modo que la regla es una invariante legible, versionable y comprobable. Instalación `npm i -g jev-compiler` (el comando es `jevc`); `jevc check` repite un corpus grabado sin conexión y todo su README se ejecuta sin clave ni red. Es una herramienta de diseño: genera y prueba las barreras, y no queda claro cómo se invoca después un programa compilado sobre una entrada real. Evidencia solo de README. MEDIDO por nosotros sin clave (paquete npm jev-compiler 0.1.0, instalado con `--ignore-scripts`; todo lo medido es local y determinista; 25 casos, 24 pasan): `scan` cuenta y clasifica las reglas de un AGENTS.md (decidibles, procedimientos, generación); `compile` de un esquema emite un módulo TypeScript con preguntas noul y choice y el veredicto calculado en código, y declara lo que no puede bajar (texto libre, enteros) en vez de callarlo; `compile --lift` imprime la petición para el agente sin llamar a ningún modelo; `emit-policy` genera YAML de toolgate y de bouncer (este último arranca en modo observe); `check` repite offline los 58 fixtures grabados y pasan. Hallazgo: `--help` imprime el uso por stderr y sale con 1. Cuidado con `check`: compara una grabación consigo misma, así que no puede fallar aunque la grabación sea mala. NO medido: `check --live`, que las preguntas compiladas salgan bien con un modelo, ni las políticas emitidas cargadas en toolgate o bouncer reales.",
       "blockers": [
         "herramienta de diseño y compilación, no una decisión en línea",
         "no se leyó cómo se ejecuta un programa compilado sobre una entrada viva",
-        "la compilación de reglas se apoya en el agente del usuario"
-      ]
+        "la compilación de reglas se apoya en el agente del usuario",
+        "`check` sin `--live` no puede fallar: compara una grabación consigo misma",
+        "`--help` sale con exit 1 y por stderr"
+      ],
+      "run": "runs/2026-10-31-doronp-jevc"
     },
     {
       "repo": "keltokhy/jlink",

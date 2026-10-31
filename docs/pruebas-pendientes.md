@@ -6,14 +6,13 @@ Un veredicto leído no es un veredicto probado. Cada ficha de esta lista pasa a 
 
 **Reglas de cada prueba** (la política de código de terceros es obligatoria): directorio nuevo y vacío, `--ignore-scripts`, HOME y cwd propios, sin claves reales, jamás `setup`/`install`/`doctor` de un gate, y autorización explícita antes de instalar nada ajeno. Cada contrato de salida necesita su juego de casos en `scripts/probe-gate.mjs`.
 
-## Primera tanda: sin clave y con instalación documentada (2)
+## Primera tanda: sin clave y con instalación documentada (1)
 
 Las más baratas de medir: se instalan según su README y corren sin credenciales.
 
 - [ ] `DataZooDE/anofox-decide` · yes · exec · lib
-- [ ] `doronp/jevc` · unclear · exec · cli
 
-## Segunda tanda: piden clave o no traen instalación clara (63)
+## Segunda tanda: piden clave o no traen instalación clara (60)
 
 Necesitan una clave de prueba acotada, un modo `--dry-run`/`--mock` o leer el código antes de decidir cómo medirlas.
 
@@ -23,7 +22,6 @@ Necesitan una clave de prueba acotada, un modo `--dry-run`/`--mock` o leer el c�
 - [ ] `Dicklesworthstone/skillranker` · yes · exec · cli/lib · clave: typesafe
 - [ ] `qkal/Canny` · yes · exec · cli · clave: typesafe
 - [ ] `openlayer-ai/jevals` · yes · exec · cli/lib/mcp · clave: typesafe
-- [ ] `sharziki/semdecide` · yes · exec · cli · clave: typesafe
 - [ ] `PyModel/jev-judge-mcp` · yes · exec · mcp/cli · clave: typesafe
 - [ ] `TheoOliveira/pi-jev` · yes · exec · cli · clave: typesafe
 - [ ] `kyu1204/jgrep` · yes · exec · cli · clave: typesafe
@@ -32,10 +30,8 @@ Necesitan una clave de prueba acotada, un modo `--dry-run`/`--mock` o leer el c�
 - [ ] `Brainwires/jevwire` · yes · exec · cli/mcp/hook/lib · clave: typesafe
 - [ ] `agencyenterprise/jev-recipes` · yes · exec · cli/lib · clave: typesafe
 - [ ] `reachjalil/jevlogs` · yes · exec · cli/lib · clave: typesafe
-- [ ] `iamtoomas/JevLint` · yes · exec · cli · clave: typesafe
 - [ ] `caiovicentino/jev-risk-check-provider` · yes · http · http/mcp · clave: x402-payment
 - [ ] `Tech-Byte-Frontier/jevgate` · yes · exec · cli/hook · clave: typesafe/openrouter
-- [ ] `sufianetaouil/every` · yes · exec · cli · clave: typesafe
 - [ ] `ItisShikhar/gg-friggin-ez` · yes · exec · lib · clave: typesafe
 - [ ] `typakon4/jev-layer` · yes · exec · cli/mcp · clave: openrouter
 - [ ] `godspede/construct-auto-classifier` · yes · exec · cli/lib · clave: typesafe

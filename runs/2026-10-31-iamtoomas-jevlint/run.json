@@ -1,0 +1,195 @@
+{
+  "repo": "iamtoomas/JevLint",
+  "date": "2026-10-31",
+  "scope": "directo: se ejecuta el CLI del especialista, sin pasar por el hub de jevalan",
+  "environment": {
+    "node": "v24.8.0",
+    "specialist": "0.1.4",
+    "keys": "ninguna: entorno vacío, HOME y cwd propios; el especialista no puede llamar a ningún modelo"
+  },
+  "measured": [
+    "`--dry-run`: imprime las peticiones (modelo, fuente de cada fichero y pregunta noul de la regla) sin clave y sin llamar a Jev",
+    "qué ficheros elige: recorre carpetas sin node_modules, dist, secrets/credentials ni lo que no es JS/TS; `--ignore`, `ignore`, `files` y `maxFileBytes` de la configuración",
+    "los dos plugins que trae (`magic-strings`, `descriptive-names`) elegidos por configuración; `--model` llega a la petición",
+    "sin clave y sin `--dry-run`, se niega con exit 2 nombrando JEV_API_KEY",
+    "errores de uso y de configuración (umbral, formato, config ilegible o ausente, ruta sin ficheros, opción desconocida)",
+    "`init` crea la configuración y nunca la sobrescribe; huella en disco del sandbox"
+  ],
+  "not_measured": [
+    "cualquier veredicto de un modelo: sin clave nunca se ve si un fichero se marca, ni la probabilidad ni el umbral de 0,8 aplicado",
+    "plugins ajenos o propios: `--dry-run` los ejecuta con los permisos normales de Node, y no se cargó ninguno",
+    "la caché de juicios y el coste real de una ejecución",
+    "el comportamiento con `.env` y con `apiKeyEnv` personalizada"
+  ],
+  "footprint": [
+    "cfg-bad.json",
+    "cfg-ignore.json",
+    "cfg-plugin.json",
+    "cfg-small.json",
+    "credentials.ts",
+    "dist/o.js",
+    "jevlint.config.json",
+    "node_modules/x/i.js",
+    "secrets.mjs",
+    "secrets/k.ts",
+    "src/a.test.ts",
+    "src/a.ts",
+    "src/b.ts",
+    "src/c.py",
+    "src/types.d.ts"
+  ],
+  "cases": [
+    {
+      "id": "help",
+      "why": "`--help` muestra el uso y sale con 0.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "no-version-flag",
+      "why": "`--version` imprime la versión, como cualquier CLI instalable.",
+      "pass": false,
+      "problems": [
+        "exit 2, se esperaba 0"
+      ],
+      "exit": 2
+    },
+    {
+      "id": "unknown-option",
+      "why": "Una opción desconocida es un error de uso (exit 2).",
+      "pass": true,
+      "problems": [],
+      "exit": 2
+    },
+    {
+      "id": "no-key-refuses",
+      "why": "Sin clave y sin `--dry-run`, se niega (exit 2), nombra la variable y no imprime ninguna petición.",
+      "pass": true,
+      "problems": [],
+      "exit": 2
+    },
+    {
+      "id": "dry-run-needs-no-key",
+      "why": "`--dry-run` imprime las peticiones sin clave y sale con 0, sin llamar a Jev.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "dry-run-request-shape",
+      "why": "Cada petición lleva el modelo, el fichero con su fuente y una pregunta NOUL de la regla `magic-strings`.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "directory-scan-skips-dependencies-and-secrets",
+      "why": "Al recorrer una carpeta no entran node_modules, dist, los directorios secrets/credentials ni los ficheros con ese nombre, ni lo que no es JS/TS.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "ignore-flag",
+      "why": "`--ignore` quita del recorrido lo que casa con el patrón.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "config-ignore",
+      "why": "La clave `ignore` de un `--config` hace lo mismo que `--ignore`.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "config-selects-plugin-and-files",
+      "why": "Un `--config` elige los ficheros y el plugin: solo `src/b.ts`, con la pregunta de `descriptive-names`.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "cli-target-replaces-config-files",
+      "why": "Un objetivo en la línea de órdenes sustituye a los `files` de la configuración.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "model-flag",
+      "why": "`--model` llega a la petición.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "max-file-bytes",
+      "why": "Un fichero por encima de `maxFileBytes` no se envía; el fallo de análisis sale con 2, que es lo que documenta su ayuda.",
+      "pass": true,
+      "problems": [],
+      "exit": 2,
+      "observed": {
+        "stderr": "src/a.ts: File exceeds the 10 byte limit."
+      }
+    },
+    {
+      "id": "no-files-found",
+      "why": "Una ruta que no existe es un error (exit 2) y lo dice, no una ejecución vacía.",
+      "pass": true,
+      "problems": [],
+      "exit": 2
+    },
+    {
+      "id": "threshold-out-of-range",
+      "why": "Un umbral fuera de [0, 1] es un error de configuración (exit 2).",
+      "pass": true,
+      "problems": [],
+      "exit": 2
+    },
+    {
+      "id": "format-invalid",
+      "why": "Un formato que no es text ni json es un error (exit 2).",
+      "pass": true,
+      "problems": [],
+      "exit": 2
+    },
+    {
+      "id": "config-unreadable",
+      "why": "Una configuración ilegible es un error (exit 2), no se ignora.",
+      "pass": true,
+      "problems": [],
+      "exit": 2
+    },
+    {
+      "id": "config-missing",
+      "why": "Una configuración que no existe es un error (exit 2).",
+      "pass": true,
+      "problems": [],
+      "exit": 2
+    },
+    {
+      "id": "init-writes-config",
+      "why": "`init` crea `jevlint.config.json` con el plugin magic-strings, sin clave.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "init-never-overwrites",
+      "why": "Un segundo `init` no sobrescribe la configuración existente: sale con 2 y lo dice.",
+      "pass": true,
+      "problems": [],
+      "exit": 2
+    },
+    {
+      "id": "footprint-stays-in-sandbox",
+      "why": "Lo que el CLI deja en disco queda dentro del sandbox y dentro de lo que su documentación declara.",
+      "pass": true,
+      "problems": []
+    }
+  ],
+  "pass": false
+}

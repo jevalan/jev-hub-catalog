@@ -1,0 +1,313 @@
+{
+  "repo": "sharziki/semdecide",
+  "date": "2026-10-31",
+  "scope": "directo: se ejecuta el CLI del especialista, sin pasar por el hub de jevalan",
+  "environment": {
+    "node": "v24.8.0",
+    "specialist": "0.2.1",
+    "keys": "inventada («clave-inventada-de-pruebas»), válida solo contra un proveedor simulado nuestro en 127.0.0.1; ninguna petición sale de la máquina y ninguna clave real entra en el entorno"
+  },
+  "measured": [
+    "la lógica del envoltorio frente a un proveedor simulado nuestro (NO es Jev): umbral por defecto 0,70, `--threshold`, margen de incertidumbre y los códigos 0/1/3/4 de su README",
+    "`is`, `choose`, `score`, `filter` y `guard`: veredicto, esquema JSON versionado, `--quiet`, `--raw`, orden de los registros y metadata `_semdecide`",
+    "qué sale al proveedor: forma de la petición, clave por cabecera Authorization, y que nada sale cuando la entrada es inválida o falta la clave",
+    "fallos de proveedor: 500 reintentado (3 peticiones, `--retries 0` = 1), 401 sin reintento, cuerpo que no es JSON, respuesta sin `answers`, probabilidad fuera de rango; error JSON versionado y sin detalles",
+    "entrada: stdin, `--text`, `--file`, exclusión mutua, vacío, fichero ausente, `--max-input-bytes`, JSONL mal formado, `--max-records`",
+    "`guard` falla cerrado a escalar (exit 10) y bloquea o deja pasar según las señales",
+    "huella en disco del sandbox"
+  ],
+  "not_measured": [
+    "lo que Jev contesta de verdad: probabilidades, calibración, coste y latencia; el proveedor simulado dicta la respuesta",
+    "las cinco señales concretas de `guard` (autorización, destructividad, ambigüedad, secretos, consecuencia) y cómo las pondera: el simulador pone la misma probabilidad en todas",
+    "texto binario o UTF-8 inválido por la entrada estándar",
+    "la instalación con pipx/uv desde el wheel de la release: se ejecutó la fuente"
+  ],
+  "footprint": [
+    "bad.jsonl",
+    "input.txt",
+    "none.jsonl",
+    "tickets.jsonl"
+  ],
+  "cases": [
+    {
+      "id": "version",
+      "why": "`--version` imprime la versión del paquete.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "no-command",
+      "why": "Sin comando es un error de uso (exit 2).",
+      "pass": true,
+      "problems": [],
+      "exit": 2
+    },
+    {
+      "id": "unknown-command",
+      "why": "Un comando desconocido es un error de uso (exit 2).",
+      "pass": true,
+      "problems": [],
+      "exit": 2
+    },
+    {
+      "id": "is-true",
+      "why": "Una probabilidad por encima del umbral por defecto (0,70) es TRUE: exit 0 y la línea `TRUE probability=… threshold=…` de su README.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "is-false",
+      "why": "Una probabilidad muy por debajo del umbral es FALSE: exit 1.",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "is-uncertain-inside-margin",
+      "why": "Dentro del margen de incertidumbre alrededor del umbral no se fuerza a verdadero ni a falso: exit 3 e `uncertain`.",
+      "pass": true,
+      "problems": [],
+      "exit": 3
+    },
+    {
+      "id": "is-outside-margin-is-definite",
+      "why": "Con el mismo margen, una probabilidad fuera de él sí es definitiva.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "is-threshold-is-configurable",
+      "why": "Subir `--threshold` por encima de la probabilidad convierte el mismo texto en FALSE.",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "is-json-shape",
+      "why": "`--json` entrega el esquema versionado de su README: schema_version, command, verdict, probability, threshold, model y usage.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "is-quiet",
+      "why": "`--quiet` no escribe nada y deja solo el código de salida.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "is-request-shape",
+      "why": "La petición va al proveedor con el criterio como pregunta noul, el texto como estado y la clave por la cabecera Authorization, nunca en la línea de órdenes.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "is-reads-stdin",
+      "why": "Sin `--text` ni `--file`, el texto llega por la entrada estándar (el uso de tubería de su README).",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "is-reads-file",
+      "why": "`--file` lee el texto de un fichero UTF-8.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "is-text-and-file-exclusive",
+      "why": "`--text` y `--file` a la vez es un error de uso (exit 2) y no sale ninguna petición.",
+      "pass": true,
+      "problems": [],
+      "exit": 2
+    },
+    {
+      "id": "is-empty-input",
+      "why": "Una entrada vacía se rechaza antes de llamar a Jev (exit 2).",
+      "pass": true,
+      "problems": [],
+      "exit": 2
+    },
+    {
+      "id": "is-missing-file",
+      "why": "Un fichero que no existe es un error de uso (exit 2) y no sale ninguna petición.",
+      "pass": true,
+      "problems": [],
+      "exit": 2
+    },
+    {
+      "id": "is-oversized-input",
+      "why": "Una entrada por encima de `--max-input-bytes` se rechaza antes de llamar a Jev (exit 2).",
+      "pass": true,
+      "problems": [],
+      "exit": 2
+    },
+    {
+      "id": "is-threshold-out-of-range",
+      "why": "Un umbral fuera de [0, 1] es un error de uso (exit 2).",
+      "pass": true,
+      "problems": [],
+      "exit": 2
+    },
+    {
+      "id": "no-key-fails-before-any-request",
+      "why": "Sin clave, el fallo es de proveedor (exit 4) y no sale ninguna petición: no se envía texto sin autenticar.",
+      "pass": true,
+      "problems": [],
+      "exit": 4
+    },
+    {
+      "id": "provider-error-json-redacted",
+      "why": "Con `--json`, el fallo sale como objeto versionado por stderr y sin los detalles del proveedor (su README promete redactarlos).",
+      "pass": true,
+      "problems": [],
+      "exit": 4
+    },
+    {
+      "id": "server-error-is-retried",
+      "why": "Un 500 es transitorio: se reintenta dos veces (tres peticiones en total, el valor por defecto de su README) antes de fallar con exit 4.",
+      "pass": true,
+      "problems": [],
+      "exit": 4
+    },
+    {
+      "id": "retries-zero",
+      "why": "`--retries 0` no reintenta: una sola petición.",
+      "pass": true,
+      "problems": [],
+      "exit": 4
+    },
+    {
+      "id": "auth-error-is-not-retried",
+      "why": "Un 401 no es transitorio: no se reintenta (una petición) y falla con exit 4.",
+      "pass": true,
+      "problems": [],
+      "exit": 4
+    },
+    {
+      "id": "invalid-json-response",
+      "why": "Una respuesta que no es JSON es un fallo de proveedor (exit 4), no una decisión.",
+      "pass": true,
+      "problems": [],
+      "exit": 4
+    },
+    {
+      "id": "missing-answers-response",
+      "why": "Una respuesta sin `answers` es un fallo de proveedor (exit 4).",
+      "pass": true,
+      "problems": [],
+      "exit": 4
+    },
+    {
+      "id": "probability-out-of-range",
+      "why": "Una probabilidad fuera de [0, 1] en la respuesta es un fallo de proveedor (exit 4), no un TRUE.",
+      "pass": true,
+      "problems": [],
+      "exit": 4
+    },
+    {
+      "id": "choose-picks-option",
+      "why": "`choose` devuelve la opción elegida con las probabilidades de todas y la confianza (exit 0).",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "choose-low-confidence-is-uncertain",
+      "why": "Con la confianza por debajo de `--min-confidence`, `choose` sale con 3 (incierto) en vez de dar una opción como segura.",
+      "pass": true,
+      "problems": [],
+      "exit": 3
+    },
+    {
+      "id": "choose-needs-two-options",
+      "why": "Con una sola opción es un error de uso (exit 2) y no sale ninguna petición.",
+      "pass": true,
+      "problems": [],
+      "exit": 2
+    },
+    {
+      "id": "score-picks-level",
+      "why": "`score` devuelve el nivel elegido de la escala ordenada (exit 0).",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "filter-keeps-matches-in-order",
+      "why": "`filter` deja pasar solo los registros que cumplen, en el orden de entrada, con la clave `_semdecide` (exit 0).",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "filter-raw-omits-metadata",
+      "why": "`--raw` emite los registros originales, sin `_semdecide`.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "filter-no-match",
+      "why": "Si ningún registro cumple, `filter` sale con 1 y sin salida, como grep.",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "filter-malformed-line",
+      "why": "Una línea que no es JSON se rechaza antes de llamar a Jev (exit 2) y dice cuál.",
+      "pass": true,
+      "problems": [],
+      "exit": 2
+    },
+    {
+      "id": "filter-max-records",
+      "why": "`--max-records` limita cuántos registros se aceptan: con 3 registros y un límite de 2 se rechaza (exit 2) sin llamar a Jev.",
+      "pass": true,
+      "problems": [],
+      "exit": 2
+    },
+    {
+      "id": "guard-fails-closed",
+      "why": "`guard` ante un fallo de proveedor escala en vez de dejar pasar: exit 10 (su contrato dice que falla cerrado a `escalate`).",
+      "pass": true,
+      "problems": [],
+      "exit": 10
+    },
+    {
+      "id": "guard-blocks-when-every-signal-fires",
+      "why": "Con todas las señales altas, `guard` bloquea: exit 20.",
+      "pass": true,
+      "problems": [],
+      "exit": 20
+    },
+    {
+      "id": "guard-allows-clear-authorized-low-risk-action",
+      "why": "Con peligro bajo y la acción autorizada y clara, `guard` deja pasar: exit 0 y ruta `allow`.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "guard-escalates-when-nothing-is-authorized",
+      "why": "Sin autorización ni objetivo claro, `guard` escala aunque nada sea peligroso: exit 10 y ruta `escalate`.",
+      "pass": true,
+      "problems": [],
+      "exit": 10
+    },
+    {
+      "id": "footprint-stays-in-sandbox",
+      "why": "Lo que el CLI deja en disco queda dentro del sandbox y dentro de lo que su documentación declara.",
+      "pass": true,
+      "problems": []
+    }
+  ],
+  "pass": true
+}

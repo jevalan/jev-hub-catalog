@@ -8,8 +8,9 @@
  * evidencia en `runs/<fecha>-<repo>/`. Lo que mide es el especialista, no el camino del hub, y el
  * run lo declara. Las rutas llegan por argumento y no se escriben en el run.
  */
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { createInterface } from "node:readline";
 import { tmpdir } from "node:os";
 import { dirname, join, relative, resolve } from "node:path";
 import { ROOT } from "./lib/paths.mjs";
@@ -19,6 +20,10 @@ import { FIXTURES as PG_FIXTURES, pkgGateCases } from "./lib/cli-cases-pkggate.m
 import { FIXTURES as SN_FIXTURES, snifftestCases } from "./lib/cli-cases-snifftest.mjs";
 import { FIXTURES as JL_FIXTURES, jevLintCases } from "./lib/cli-cases-jevlint.mjs";
 import { FIXTURES as RF_FIXTURES, riffCases } from "./lib/cli-cases-riff.mjs";
+import { FIXTURES as JC_FIXTURES, jevLintCliCases } from "./lib/cli-cases-jevlintcli.mjs";
+import { FIXTURES as JV_FIXTURES, jevcCases } from "./lib/cli-cases-jevc.mjs";
+import { FIXTURES as SD_FIXTURES, semdecideCases } from "./lib/cli-cases-semdecide.mjs";
+import { FIXTURES as EV_FIXTURES, everyCases, EXTRACT_HARNESS } from "./lib/cli-cases-every.mjs";
 
 const arg = (name) => {
   const i = process.argv.indexOf(`--${name}`);
@@ -151,6 +156,120 @@ const CLIS = {
       "`--outline` y `--debug-jev`",
     ],
   },
+  "iamtoomas/jevlint": {
+    cases: jevLintCliCases,
+    fixtures: JC_FIXTURES,
+    // `init` escribe jevlint.config.json en el directorio actual: es lo único que documenta dejar en disco.
+    allowed: /^jevlint\.config\.json$/,
+    // `--cli` es dist/src/index.mjs de @jevlint/cli instalado con --ignore-scripts (ya viene compilado).
+    launch: (cli) => ({ command: process.execPath, prefix: [resolve(cli)] }),
+    env: { NO_COLOR: "1" },
+    measured: [
+      "`--dry-run`: imprime las peticiones (modelo, fuente de cada fichero y pregunta noul de la regla) sin clave y sin llamar a Jev",
+      "qué ficheros elige: recorre carpetas sin node_modules, dist, secrets/credentials ni lo que no es JS/TS; `--ignore`, `ignore`, `files` y `maxFileBytes` de la configuración",
+      "los dos plugins que trae (`magic-strings`, `descriptive-names`) elegidos por configuración; `--model` llega a la petición",
+      "sin clave y sin `--dry-run`, se niega con exit 2 nombrando JEV_API_KEY",
+      "errores de uso y de configuración (umbral, formato, config ilegible o ausente, ruta sin ficheros, opción desconocida)",
+      "`init` crea la configuración y nunca la sobrescribe; huella en disco del sandbox",
+    ],
+    not_measured: [
+      "cualquier veredicto de un modelo: sin clave nunca se ve si un fichero se marca, ni la probabilidad ni el umbral de 0,8 aplicado",
+      "plugins ajenos o propios: `--dry-run` los ejecuta con los permisos normales de Node, y no se cargó ninguno",
+      "la caché de juicios y el coste real de una ejecución",
+      "el comportamiento con `.env` y con `apiKeyEnv` personalizada",
+    ],
+  },
+  "doronp/jevc": {
+    cases: jevcCases,
+    fixtures: JV_FIXTURES,
+    allowed: /^$/,
+    // `--cli` es dist/cli.js del paquete jev-compiler instalado con --ignore-scripts.
+    launch: (cli) => ({ command: process.execPath, prefix: [resolve(cli)] }),
+    env: { NO_COLOR: "1" },
+    measured: [
+      "`scan`: cuenta y clasifica las reglas de un AGENTS.md (decidibles, procedimientos, generación) y avisa cuando no hay ficheros de instrucciones",
+      "`check`: repite offline el corpus grabado de 58 fixtures; rechaza `--model` sin `--live`, un directorio de fixtures ausente y `--live` sin clave",
+      "`show` y `explain`: listan y enseñan los fixtures; los inexistentes son error",
+      "`compile` de un esquema: módulo TypeScript con preguntas noul y choice y veredicto calculado en código; declara lo que no puede bajar (texto libre, enteros) en vez de callarlo",
+      "`compile --lift`: imprime la petición de bajada sin llamar a ningún modelo",
+      "`emit-policy` a toolgate y bouncer: YAML con preguntas booleanas, umbrales y arranque en modo observe; destino desconocido, programa inválido y uso incorrecto son error",
+      "contrato de salida y huella en disco del sandbox",
+    ],
+    not_measured: [
+      "`check --live`: re-medir contra la API necesita clave de TypeSafe",
+      "que las preguntas compiladas salgan bien con un modelo (la calidad de la bajada `--lift`, que hace el agente)",
+      "las políticas emitidas cargadas en toolgate o bouncer reales",
+      "la corrección de los 58 fixtures: `check` compara una grabación consigo misma y no puede fallar si la grabación es mala",
+    ],
+  },
+  "sharziki/semdecide": {
+    cases: semdecideCases,
+    fixtures: SD_FIXTURES,
+    allowed: /^$/,
+    stub: true,
+    keys: "inventada («clave-inventada-de-pruebas»), válida solo contra un proveedor simulado nuestro en 127.0.0.1; ninguna petición sale de la máquina y ninguna clave real entra en el entorno",
+    // `--cli` es el directorio src/ del repositorio; `--python` es cualquier intérprete (semdecide no tiene dependencias).
+    launch: () => ({ command: arg("python") ?? which("python"), prefix: ["-s", "-B", "-c", "import sys; from reflex_guard.cli import main; sys.exit(main())"] }),
+    pythonPath: true,
+    env: { PYTHONDONTWRITEBYTECODE: "1", PYTHONIOENCODING: "utf-8" },
+    version: (cli) => {
+      const m = readFileSync(join(resolve(cli), "..", "pyproject.toml"), "utf8").match(/^version = "([^"]+)"/m);
+      return m ? m[1] : "desconocida";
+    },
+    measured: [
+      "la lógica del envoltorio frente a un proveedor simulado nuestro (NO es Jev): umbral por defecto 0,70, `--threshold`, margen de incertidumbre y los códigos 0/1/3/4 de su README",
+      "`is`, `choose`, `score`, `filter` y `guard`: veredicto, esquema JSON versionado, `--quiet`, `--raw`, orden de los registros y metadata `_semdecide`",
+      "qué sale al proveedor: forma de la petición, clave por cabecera Authorization, y que nada sale cuando la entrada es inválida o falta la clave",
+      "fallos de proveedor: 500 reintentado (3 peticiones, `--retries 0` = 1), 401 sin reintento, cuerpo que no es JSON, respuesta sin `answers`, probabilidad fuera de rango; error JSON versionado y sin detalles",
+      "entrada: stdin, `--text`, `--file`, exclusión mutua, vacío, fichero ausente, `--max-input-bytes`, JSONL mal formado, `--max-records`",
+      "`guard` falla cerrado a escalar (exit 10) y bloquea o deja pasar según las señales",
+      "huella en disco del sandbox",
+    ],
+    not_measured: [
+      "lo que Jev contesta de verdad: probabilidades, calibración, coste y latencia; el proveedor simulado dicta la respuesta",
+      "las cinco señales concretas de `guard` (autorización, destructividad, ambigüedad, secretos, consecuencia) y cómo las pondera: el simulador pone la misma probabilidad en todas",
+      "texto binario o UTF-8 inválido por la entrada estándar",
+      "la instalación con pipx/uv desde el wheel de la release: se ejecutó la fuente",
+    ],
+  },
+  "sufianetaouil/every": {
+    cases: everyCases,
+    fixtures: EV_FIXTURES,
+    // Solo el intento de crear la caché de gramáticas que el caso de la caché vacía provoca a propósito.
+    allowed: /^cache-vacia\/tree-sitter-language-pack\//,
+    keys: "inventada («clave-inventada-de-pruebas») solo en los casos que terminan antes de la primera petición; la dirección de la API va fija en su código, así que no hay proveedor simulado",
+    // `--cli` es el site-packages de un venv con every-cli y sus dependencias (solo ruedas); `--python` es ese intérprete.
+    launch: () => ({ command: arg("python") ?? which("python"), prefix: ["-s", "-B", "-c", EXTRACT_HARNESS] }),
+    // Su dependencia tree-sitter-language-pack se baja las gramáticas nativas la primera vez que las usa. `--grammars` es
+    // una copia privada de esa caché (con la carpeta `tree-sitter-language-pack/` dentro), ya descargada y con el hash
+    // comprobado. El proxy apunta a un puerto muerto: si intentara conectarse, fallaría, y el resultado lo delataría.
+    env: {
+      PYTHONDONTWRITEBYTECODE: "1",
+      PYTHONIOENCODING: "utf-8",
+      HTTPS_PROXY: "http://127.0.0.1:9",
+      HTTP_PROXY: "http://127.0.0.1:9",
+      ALL_PROXY: "http://127.0.0.1:9",
+      ...(arg("grammars") ? { TREE_SITTER_LANGUAGE_PACK_CACHE_DIR: resolve(arg("grammars")) } : {}),
+    },
+    version: (cli) => {
+      const d = readdirSync(resolve(cli)).find((n) => /^every_cli-.*\.dist-info$/.test(n));
+      return d ? d.replace(/^every_cli-/, "").replace(/\.dist-info$/, "") : "desconocida";
+    },
+    measured: [
+      "qué código selecciona y cómo lo parte en funciones antes de enviar nada: Python, JavaScript, TypeScript/TSX, Go, Java, Rust, C#, Ruby y PHP, funciones anidadas y métodos",
+      "lenguajes reconocidos sin analizador (shell) en trozos de 150 líneas, y la caída a trozos con código que no se puede analizar",
+      "qué excluye: node_modules, vendor, dist, build, bin, target, lo minificado, lo generado, ficheros vacíos y lo que no es código",
+      "si se juzgan ficheros llamados secrets o credentials (observación: su README no promete excluirlos)",
+      "contrato de la línea de órdenes: sin clave se niega (exit 2), uso incorrecto y carpeta sin funciones (cero peticiones, coste 0)",
+      "huella en disco del sandbox",
+    ],
+    not_measured: [
+      "cualquier respuesta del modelo, el ranking, el coste real y el segundo pase de las puntuaciones cercanas al umbral",
+      "`--selftest` (necesita clave) y la clasificación de la pregunta, que usa el modelo",
+      "repositorios con git: se usó `os.walk`, no `git ls-files`",
+      "la versión de PyPI (0.1.0) es la medida; no se comparó con el HEAD del repositorio",
+    ],
+  },
   "ismaelsoilet/jev-harness": {
     cases: jevHarnessCases,
     fixtures: {},
@@ -209,7 +328,7 @@ function walk(dir, base = dir) {
   });
 }
 
-function main() {
+async function main() {
   const repo = arg("repo");
   const cli = arg("cli");
   if (![repo, cli].every(Boolean)) {
@@ -223,6 +342,19 @@ function main() {
   const FIXTURES = spec.fixtures ?? {};
 
   const sandbox = mkdtempSync(join(tmpdir(), "scout-cli-"));
+  // Proveedor simulado local (solo 127.0.0.1) para los envoltorios que exigen un servidor al otro lado.
+  const stubLog = join(sandbox, "..", `scout-stub-${process.pid}.jsonl`);
+  let stub = null;
+  let stubEnv = {};
+  if (spec.stub) {
+    writeFileSync(stubLog, "");
+    stub = spawn(process.execPath, [join(ROOT, "scripts", "lib", "stub-provider.mjs"), stubLog], { stdio: ["ignore", "pipe", "inherit"] });
+    const port = await new Promise((ok, fail) => {
+      createInterface({ input: stub.stdout }).once("line", (l) => ok(JSON.parse(l).port));
+      stub.once("error", fail);
+    });
+    stubEnv = { SEMDECIDE_API_URL: `http://127.0.0.1:${port}/v1/systemone`, TYPESAFE_API_KEY: "clave-inventada-de-pruebas" };
+  }
   // Entorno mínimo a propósito: ninguna clave, y todo lo que el CLI escribe cae dentro del sandbox.
   const env = {
     PATH: [dirname(process.execPath), join(process.env.SystemRoot ?? "C:\\Windows", "System32")].join(process.platform === "win32" ? ";" : ":"),
@@ -236,10 +368,14 @@ function main() {
     XDG_CACHE_HOME: join(sandbox, ".cache"),
     ...(spec.pythonPath ? { PYTHONPATH: resolve(cli) } : {}),
     ...spec.env,
+    ...stubEnv,
   };
   const tool = spec.launch(cli).command;
   env.PATH += (process.platform === "win32" ? ";" : ":") + dirname(tool);
-  for (const [name, text] of Object.entries(FIXTURES)) writeFileSync(join(sandbox, name), text);
+  for (const [name, text] of Object.entries(FIXTURES)) {
+    mkdirSync(dirname(join(sandbox, name)), { recursive: true });
+    writeFileSync(join(sandbox, name), text);
+  }
   const scrub = (t) => (typeof t === "string" ? t.replaceAll(sandbox, "<sandbox>") : t);
 
   let results;
@@ -253,14 +389,17 @@ function main() {
       for (const pre of c.prelude ?? []) {
         spawnSync(command, [...prefix, ...pre], { cwd: sandbox, env, input: "", encoding: "utf8", timeout: 30000 });
       }
+      if (stub) writeFileSync(stubLog, "");
       const r = spawnSync(command, [...prefix, ...c.args], {
         cwd: sandbox,
-        env,
-        input: c.stdinFixture ? FIXTURES[c.stdinFixture] : "",
+        env: { ...env, ...(typeof c.env === "function" ? c.env(sandbox) : c.env ?? {}) },
+        input: c.stdin ?? (c.stdinFixture ? FIXTURES[c.stdinFixture] : ""),
         encoding: "utf8",
         timeout: 30000,
       });
       const res = { status: r.status, stdout: r.stdout ?? "", stderr: r.stderr ?? "" };
+      // Lo que llegó al proveedor simulado durante este caso: la prueba de qué sale (y qué no) del proceso.
+      res.requests = stub ? readFileSync(stubLog, "utf8").split(/\r?\n/).filter(Boolean).map((l) => JSON.parse(l)) : [];
       try {
         res.json = JSON.parse(res.stdout);
       } catch {
@@ -279,6 +418,8 @@ function main() {
     });
     footprint = walk(sandbox).sort();
   } finally {
+    stub?.kill();
+    rmSync(stubLog, { force: true });
     rmSync(sandbox, { recursive: true, force: true });
   }
   // Cualquier fichero que no sea una petición escrita por nosotros es algo que el CLI dejó en disco.
@@ -298,7 +439,7 @@ function main() {
     environment: {
       node: process.version,
       specialist: version,
-      keys: "ninguna: entorno vacío, HOME y cwd propios; el especialista no puede llamar a ningún modelo",
+      keys: spec.keys ?? "ninguna: entorno vacío, HOME y cwd propios; el especialista no puede llamar a ningún modelo",
     },
     measured: spec.measured,
     not_measured: spec.not_measured,
@@ -316,7 +457,7 @@ function main() {
 }
 
 try {
-  main();
+  await main();
 } catch (e) {
   console.error(`probe-cli: ${e.message}`);
   process.exit(1);

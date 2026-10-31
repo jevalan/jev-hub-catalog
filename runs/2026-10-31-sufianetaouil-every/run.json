@@ -1,0 +1,223 @@
+{
+  "repo": "sufianetaouil/every",
+  "date": "2026-10-31",
+  "scope": "directo: se ejecuta el CLI del especialista, sin pasar por el hub de jevalan",
+  "environment": {
+    "node": "v24.8.0",
+    "specialist": "0.1.0",
+    "keys": "inventada («clave-inventada-de-pruebas») solo en los casos que terminan antes de la primera petición; la dirección de la API va fija en su código, así que no hay proveedor simulado"
+  },
+  "measured": [
+    "qué código selecciona y cómo lo parte en funciones antes de enviar nada: Python, JavaScript, TypeScript/TSX, Go, Java, Rust, C#, Ruby y PHP, funciones anidadas y métodos",
+    "lenguajes reconocidos sin analizador (shell) en trozos de 150 líneas, y la caída a trozos con código que no se puede analizar",
+    "qué excluye: node_modules, vendor, dist, build, bin, target, lo minificado, lo generado, ficheros vacíos y lo que no es código",
+    "si se juzgan ficheros llamados secrets o credentials (observación: su README no promete excluirlos)",
+    "contrato de la línea de órdenes: sin clave se niega (exit 2), uso incorrecto y carpeta sin funciones (cero peticiones, coste 0)",
+    "huella en disco del sandbox"
+  ],
+  "not_measured": [
+    "cualquier respuesta del modelo, el ranking, el coste real y el segundo pase de las puntuaciones cercanas al umbral",
+    "`--selftest` (necesita clave) y la clasificación de la pregunta, que usa el modelo",
+    "repositorios con git: se usó `os.walk`, no `git ls-files`",
+    "la versión de PyPI (0.1.0) es la medida; no se comparó con el HEAD del repositorio"
+  ],
+  "footprint": [
+    "cache-vacia/tree-sitter-language-pack/v1.22.1/.download.lock",
+    "empty/readme.md",
+    "ex/broken/broken.py",
+    "ex/chunk/run.sh",
+    "ex/cs/App.cs",
+    "ex/go/app.go",
+    "ex/java/App.java",
+    "ex/js/app.js",
+    "ex/php/app.php",
+    "ex/py/app.py",
+    "ex/rb/app.rb",
+    "ex/rust/app.rs",
+    "ex/sensitive/config.py",
+    "ex/sensitive/credentials.go",
+    "ex/sensitive/secrets.py",
+    "ex/skip/api.pb.go",
+    "ex/skip/app.min.js",
+    "ex/skip/bin/tool.go",
+    "ex/skip/build/b.py",
+    "ex/skip/data_pb2.py",
+    "ex/skip/dist/out.js",
+    "ex/skip/empty.py",
+    "ex/skip/kept.py",
+    "ex/skip/node_modules/dep/index.js",
+    "ex/skip/notes.md",
+    "ex/skip/target/t.rs",
+    "ex/skip/vendor/v.go",
+    "ex/ts/app.ts",
+    "ex/tsx/app.tsx"
+  ],
+  "cases": [
+    {
+      "id": "version",
+      "why": "`--version` imprime la versión del paquete.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "help",
+      "why": "`--help` muestra el uso y sale con 0.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "no-key-refuses",
+      "why": "Sin clave se niega (exit 2) y explica cómo conseguir acceso, antes de leer ningún fichero.",
+      "pass": true,
+      "problems": [],
+      "exit": 2
+    },
+    {
+      "id": "missing-arguments",
+      "why": "Sin pregunta ni ruta es un error de uso (exit 2) y no llega a ninguna petición.",
+      "pass": true,
+      "problems": [],
+      "exit": 2
+    },
+    {
+      "id": "folder-without-functions",
+      "why": "Una carpeta sin código dice que no hay funciones y termina bien (exit 0) sin pedir nada a nadie: coste 0 y cero peticiones en el JSON.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "splits-python-into-functions",
+      "why": "En python parte el código en funciones y métodos (alpha, beta, inner), no en trozos: cada pregunta lleva una sola función.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "splits-javascript-into-functions",
+      "why": "En javascript parte el código en funciones y métodos (alpha, beta), no en trozos: cada pregunta lleva una sola función.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "splits-typescript-into-functions",
+      "why": "En typescript parte el código en funciones y métodos (alpha, beta), no en trozos: cada pregunta lleva una sola función.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "splits-tsx-into-functions",
+      "why": "En tsx parte el código en funciones y métodos (alpha), no en trozos: cada pregunta lleva una sola función.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "splits-go-into-functions",
+      "why": "En go parte el código en funciones y métodos (alpha, beta), no en trozos: cada pregunta lleva una sola función.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "splits-java-into-functions",
+      "why": "En java parte el código en funciones y métodos (alpha, beta), no en trozos: cada pregunta lleva una sola función.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "splits-rust-into-functions",
+      "why": "En rust parte el código en funciones y métodos (alpha, beta), no en trozos: cada pregunta lleva una sola función.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "splits-csharp-into-functions",
+      "why": "En csharp parte el código en funciones y métodos (alpha, beta), no en trozos: cada pregunta lleva una sola función.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "splits-ruby-into-functions",
+      "why": "En ruby parte el código en funciones y métodos (alpha, beta), no en trozos: cada pregunta lleva una sola función.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "splits-php-into-functions",
+      "why": "En php parte el código en funciones y métodos (alpha, beta), no en trozos: cada pregunta lleva una sola función.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "nested-function-is-qualified",
+      "why": "Una función anidada se nombra con su exterior (`outer.inner`), como dice su código.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "unparsed-language-is-chunked",
+      "why": "Un lenguaje reconocido pero sin analizador (shell) se juzga en trozos de 150 líneas: 300 líneas, dos trozos.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "unparsable-source-falls-back-to-chunks",
+      "why": "Un fichero con errores de sintaxis y sin funciones reconocibles no se pierde: se parte en trozos.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "skips-dependencies-build-output-and-generated",
+      "why": "No entran node_modules, vendor, dist, build, bin, target, lo minificado, lo generado (_pb2, .pb.go), los ficheros vacíos ni lo que no es código; solo `kept.py`.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "missing-grammars-silently-find-nothing",
+      "why": "Observación: si no están las gramáticas nativas de su dependencia (primera ejecución sin red), ¿avisa o devuelve cero funciones en silencio? El caso arranca con una caché vacía y el proxy muerto.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "units_found": 0,
+        "unsupported": 1,
+        "stderr_has_warning": false
+      }
+    },
+    {
+      "id": "secret-named-files-are-sent",
+      "why": "Observación, no exigencia: qué pasa con ficheros llamados secrets/credentials. Su README no promete excluirlos; el caso deja constancia de si se enviarían.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "files_that_would_be_judged": [
+          "config.py",
+          "credentials.go",
+          "secrets.py"
+        ]
+      }
+    },
+    {
+      "id": "footprint-stays-in-sandbox",
+      "why": "Lo que el CLI deja en disco queda dentro del sandbox y dentro de lo que su documentación declara.",
+      "pass": true,
+      "problems": []
+    }
+  ],
+  "pass": true
+}
