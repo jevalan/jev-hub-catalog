@@ -35,7 +35,7 @@ Cero dependencias: **no hay `npm install`**, solo stdlib de Node (≥ 20), ESM
 (`.mjs`).
 
 ```bash
-npm test                       # node --test, 97 pruebas, todo offline
+npm test                       # node --test, 102 pruebas, todo offline
 node --test tests/triage.test.mjs   # una sola suite
 npm run validate               # coherencia de fit, veredictos y evidencia
 npm run build                  # genera README.md, site/index.html (directorio) y site/veredictos.html (tabla) (falla si validate falla)
@@ -206,6 +206,12 @@ reproducir `callable` en **13/13** de la cohorte A — si lo cambias, corre
   datos sin romper el resto.
 - Dato con `repo: null` (artículos sin repo) y entradas `gone` son casos límite
   ya cubiertos: no los rompas.
+
+## Portada bilingüe y ranking
+
+`npm run build` genera el sitio en español (raíz) y en inglés (`site/en/`): `index.html` (directorio con barra lateral y filtros) y `ranking.html`. Las cadenas de la interfaz viven en `scripts/lib/i18n.mjs` (ambos idiomas con las mismas claves, lo fija un test); las etiquetas de filtro usan claves neutras y solo cambia el rótulo. El resumen inglés de cada ficha sale de `data/i18n-en.json` (una entrada por proyecto evaluado, también fijado por test); el veredicto completo y los *blockers* siguen en español y se marcan con `lang="es"`. Al añadir un veredicto nuevo, añade su resumen inglés.
+
+El **ranking** (`scripts/lib/ranking.mjs`) lee solo los `runs/*/run.json` de las entradas `measured`: menos casos fallidos, luego más cobertura (medido frente a no medido declarado), luego más casos. No es una nota de calidad y la página lo dice. Sin prueba propia no se puntúa.
 
 ## Probar por nuestra cuenta es obligatorio
 

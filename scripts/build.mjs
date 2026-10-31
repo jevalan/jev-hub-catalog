@@ -1,8 +1,10 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname } from "node:path";
+import { dirname, resolve } from "node:path";
 import { readJson } from "./lib/json.mjs";
-import { ASSESSMENTS, CATALOG, DIRECTORY, EXAMPLES, FIT, README, SHELF, SITE, TEMPLATE } from "./lib/paths.mjs";
+import { ASSESSMENTS, CATALOG, DIRECTORY, EXAMPLES, FIT, I18N_EN, ROOT, README, SHELF, SITE, TEMPLATE } from "./lib/paths.mjs";
 import { buildDirectory } from "./lib/directory.mjs";
+import { rankRuns } from "./lib/ranking.mjs";
+import { buildRankingPage } from "./lib/ranking-page.mjs";
 import { hasRun } from "./lib/runs.mjs";
 import { validateAll } from "./lib/validate-rules.mjs";
 
@@ -124,7 +126,19 @@ if (process.argv[1] && process.argv[1].endsWith("build.mjs")) {
   writeFileSync(SITE, buildSite(assessments, catalog, readFileSync(TEMPLATE, "utf8")));
   // Los ejemplos son opcionales: sin `npm run examples` el directorio sale igual, solo sin desplegables.
   const examples = existsSync(EXAMPLES) ? readJson(EXAMPLES) : { entries: {} };
-  writeFileSync(DIRECTORY, buildDirectory(assessments, examples, new Date().toISOString().slice(0, 10)));
+  const i18n = existsSync(I18N_EN) ? readJson(I18N_EN) : {};
+  const generated = new Date().toISOString().slice(0, 10);
+  // Solo puntúa lo que tiene prueba nuestra: el ranking lee los run.json, no los veredictos.
+  const measured = assessments.filter((a) => a.evidence === "measured");
+  const ranked = rankRuns(measured.map((a) => ({ assessment: a, run: readJson(resolve(ROOT, a.run, "run.json")) })));
+  const pending = assessments.length - measured.length;
+  const outDir = dirname(DIRECTORY);
+  mkdirSync(resolve(outDir, "en"), { recursive: true });
+  for (const lang of ["es", "en"]) {
+    const dir = lang === "es" ? outDir : resolve(outDir, "en");
+    writeFileSync(resolve(dir, "index.html"), buildDirectory(assessments, examples, generated, { lang, i18n }));
+    writeFileSync(resolve(dir, "ranking.html"), buildRankingPage(ranked, pending, lang));
+  }
   const c = coverage(assessments, catalog);
   console.log(`build: ${c.triaged} triadas, ${c.evaluated} evaluadas, ${c.untouched} sin tocar, de ${c.total}`);
 }
