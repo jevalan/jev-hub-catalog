@@ -17,6 +17,7 @@ import { dirname, join, relative, resolve } from "node:path";
 import { ROOT } from "./lib/paths.mjs";
 import { CASES as FIREWALL_CASES, judge, judgeAudit } from "./lib/gate-cases.mjs";
 import { REFLEX_CASES } from "./lib/gate-cases-reflex.mjs";
+import { SENTINEL_CASES } from "./lib/gate-cases-sentinel.mjs";
 
 const arg = (name) => {
   const i = process.argv.indexOf(`--${name}`);
@@ -44,6 +45,30 @@ const GATES = {
       "coste y latencia con modelo",
       "cómo trata Claude Code el valor `block` que emite el hook (no se ejecutó Claude Code)",
       "`setup`, `install` y `doctor`, que tocan la configuración del usuario o necesitan clave",
+    ],
+  },
+  "harshwasan/jev-sentinel": {
+    cases: SENTINEL_CASES,
+    audit: false,
+    footprint: true,
+    // El hook lee su configuración de ~/.jev-sentinel/config.json; HOME del sandbox.
+    configPath: join(".jev-sentinel", "config.json"),
+    keys: "ninguna real: HOME y cwd propios; unos casos llevan un valor de relleno y un baseUrl a un puerto local cerrado, así que ninguna petición sale de la máquina",
+    measured: [
+      "sin clave: toda llamada a una herramienta pregunta, incluso la inofensiva y la destructiva; nunca permite",
+      "sin clave la regla determinista de rutas protegidas no se aplica: se pregunta antes de mirarlas",
+      "con clave y Jev inalcanzable (baseUrl a un puerto local cerrado): la regla determinista deniega los cambios de configuración del anfitrión y del propio hook",
+      "con clave y Jev inalcanzable: se pregunta, no se permite",
+      "evento ilegible o vacío: sale en silencio con exit 0 (lo que en este protocolo equivale a permitir)",
+      "sin clave la salida de las herramientas no se revisa",
+      "huella en disco del sandbox",
+    ],
+    not_measured: [
+      "cualquier decisión que dependa de la respuesta de Jev (intención, riesgo, inyección en salidas, respuestas)",
+      "coste y latencia con modelo, y el comportamiento ante un plazo agotado real",
+      "la extensión de Pi y el hook de Codex: solo se ejerció el contrato de Claude Code",
+      "la compilación a `dist/` y el binario `jev-sentinel-hook`: se ejecutó la fuente TypeScript con el Node de la sonda",
+      "cómo trata cada anfitrión los valores `ask` y `deny` (no se ejecutó ningún anfitrión)",
     ],
   },
   "ursuciprian/reflex": {
@@ -117,7 +142,7 @@ function main() {
     REFLEX_DATA_DIR: join(sandbox, "reflex-data"),
   };
   const errorsLog = join(baseEnv.REFLEX_DATA_DIR, "health", "errors.jsonl");
-  const configFile = join(sandbox, ".config", "reflex", "config.json");
+  const configFile = join(sandbox, gate.configPath ?? join(".config", "reflex", "config.json"));
   const scrub = (text) => (typeof text === "string" ? text.replaceAll(sandbox, "<sandbox>") : text);
 
   let results;
@@ -166,7 +191,7 @@ function main() {
     environment: {
       node: process.version,
       specialist: specialistVersion(cli),
-      keys: "ninguna: entorno vacío, HOME y cwd propios; el especialista no puede llamar a ningún modelo",
+      keys: gate.keys ?? "ninguna: entorno vacío, HOME y cwd propios; el especialista no puede llamar a ningún modelo",
     },
     measured: gate.measured,
     not_measured: gate.not_measured,

@@ -2,7 +2,7 @@
  * Frontera del grupo `gates`: lanza la misma batería de órdenes contra cada gate medido y guarda el
  * mapa de dónde aguanta y dónde no en `runs/<fecha>-frontier-gates/frontier.json`.
  *
- *   node scripts/frontier-gates.mjs --firewall <ruta a dist/cli.js> --reflex <ruta a scripts/reflex>
+ *   node scripts/frontier-gates.mjs --firewall <ruta a dist/cli.js> --reflex <ruta a scripts/reflex> --sentinel <ruta a src/hook.ts>
  *
  * Igual que probe-gate.mjs: ejecución directa, sin hub, en un sandbox con HOME y cwd propios y sin
  * ninguna clave. No lanza `setup`, `install` ni `doctor`. Las rutas llegan por argumento y no se escriben.
@@ -27,6 +27,12 @@ const GATES = {
     flag: "firewall",
     invoke: (cli, cmd) => ({ args: [resolve(cli), "check", "claude"], input: bash(cmd) }),
     read: (stdout) => observe("check", stdout),
+  },
+  "harshwasan/jev-sentinel": {
+    flag: "sentinel",
+    // Sin clave: es la postura que se compara con los demás gates (todos medidos sin modelo).
+    invoke: (cli, cmd) => ({ args: [resolve(cli)], input: JSON.stringify({ hook_event_name: "PreToolUse", session_id: "frontier", cwd: ".", tool_name: "Bash", tool_input: { command: cmd } }) + "\n" }),
+    read: (stdout) => observe("sentinel-hook", stdout),
   },
   "ursuciprian/reflex": {
     flag: "reflex",

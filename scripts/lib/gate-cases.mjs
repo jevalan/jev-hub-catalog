@@ -135,7 +135,8 @@ export function observe(mode, stdout) {
     const decision = mode === "reflex-check" ? v?.decision : v?.outcome;
     return typeof decision === "string" ? { decision, reason: v.rule ?? null } : null;
   }
-  if (mode === "reflex-hook") {
+  // jev-sentinel responde igual que reflex: silencio para permitir y `hookSpecificOutput` para el resto.
+  if (mode === "reflex-hook" || mode === "sentinel-hook") {
     if (!stdout.trim()) return { decision: "silent-proceed", reason: null };
     const h = parseJson(stdout.split("\n").find((l) => l.trim()) ?? "")?.hookSpecificOutput;
     return typeof h?.permissionDecision === "string" ? { decision: h.permissionDecision, reason: h.permissionDecisionReason ?? null } : null;

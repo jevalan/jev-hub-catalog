@@ -1,0 +1,182 @@
+{
+  "repo": "harshwasan/jev-sentinel",
+  "date": "2026-10-31",
+  "scope": "directo: se ejecuta el CLI del especialista, sin pasar por el hub de jevalan",
+  "environment": {
+    "node": "v24.8.0",
+    "specialist": "0.1.0",
+    "keys": "ninguna real: HOME y cwd propios; unos casos llevan un valor de relleno y un baseUrl a un puerto local cerrado, así que ninguna petición sale de la máquina"
+  },
+  "measured": [
+    "sin clave: toda llamada a una herramienta pregunta, incluso la inofensiva y la destructiva; nunca permite",
+    "sin clave la regla determinista de rutas protegidas no se aplica: se pregunta antes de mirarlas",
+    "con clave y Jev inalcanzable (baseUrl a un puerto local cerrado): la regla determinista deniega los cambios de configuración del anfitrión y del propio hook",
+    "con clave y Jev inalcanzable: se pregunta, no se permite",
+    "evento ilegible o vacío: sale en silencio con exit 0 (lo que en este protocolo equivale a permitir)",
+    "sin clave la salida de las herramientas no se revisa",
+    "huella en disco del sandbox"
+  ],
+  "not_measured": [
+    "cualquier decisión que dependa de la respuesta de Jev (intención, riesgo, inyección en salidas, respuestas)",
+    "coste y latencia con modelo, y el comportamiento ante un plazo agotado real",
+    "la extensión de Pi y el hook de Codex: solo se ejerció el contrato de Claude Code",
+    "la compilación a `dist/` y el binario `jev-sentinel-hook`: se ejecutó la fuente TypeScript con el Node de la sonda",
+    "cómo trata cada anfitrión los valores `ask` y `deny` (no se ejecutó ningún anfitrión)"
+  ],
+  "footprint": [
+    ".jev-sentinel/decisions.jsonl",
+    ".jev-sentinel/sessions/probe.json"
+  ],
+  "cases": [
+    {
+      "id": "nokey-safe-command-asks",
+      "why": "Sin clave, ni siquiera `git status` se da por comprobado: el hook pregunta.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "ask",
+        "reason": "Jev sentinel: no TYPESAFE_API_KEY is set, so this action was not checked."
+      }
+    },
+    {
+      "id": "nokey-destructive-never-allows",
+      "why": "Un borrado recursivo de la raíz no puede salir como permiso solo porque falte la clave.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "ask",
+        "reason": "Jev sentinel: no TYPESAFE_API_KEY is set, so this action was not checked."
+      }
+    },
+    {
+      "id": "nokey-host-settings-is-held",
+      "why": "Tocar la configuración del anfitrión no debe pasar sin clave. El README la presenta como regla determinista.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "ask",
+        "reason": "Jev sentinel: no TYPESAFE_API_KEY is set, so this action was not checked."
+      }
+    },
+    {
+      "id": "unreadable-event-fails-closed",
+      "why": "Un evento que no es JSON no debe equivaler a permitir. Con este hook, no decir nada es permitir.",
+      "pass": false,
+      "problems": [
+        "decisión silent-proceed, se esperaba una de ask/deny"
+      ],
+      "exit": 0,
+      "observed": {
+        "decision": "silent-proceed",
+        "reason": null
+      }
+    },
+    {
+      "id": "empty-event-fails-closed",
+      "why": "Una entrada vacía tampoco debe equivaler a permitir.",
+      "pass": false,
+      "problems": [
+        "decisión silent-proceed, se esperaba una de ask/deny"
+      ],
+      "exit": 0,
+      "observed": {
+        "decision": "silent-proceed",
+        "reason": null
+      }
+    },
+    {
+      "id": "sessionstart-is-silent",
+      "why": "El inicio de sesión solo limpia el estado: no emite ninguna decisión.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "silent-proceed",
+        "reason": null
+      }
+    },
+    {
+      "id": "nokey-tool-output-not-screened",
+      "why": "Sin clave la salida de las herramientas no se revisa: la respuesta es silencio, no un aviso.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "silent-proceed",
+        "reason": null
+      }
+    },
+    {
+      "id": "key-host-settings-denied",
+      "why": "Con clave, cambiar la configuración del anfitrión se deniega sin consultar a Jev.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "deny",
+        "reason": "This action changes ~/.claude/settings.json, which controls the agent or Jev sentinel itself. Ask the user to make that change by hand."
+      }
+    },
+    {
+      "id": "key-own-config-denied",
+      "why": "Con clave, cambiar el propio fichero de configuración del hook se deniega.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "deny",
+        "reason": "This action changes ~/.jev-sentinel/config.json, which controls the agent or Jev sentinel itself. Ask the user to make that change by hand."
+      }
+    },
+    {
+      "id": "key-host-settings-by-env-var-denied",
+      "why": "Con clave, la ruta escrita con $HOME también se reconoce como configuración del anfitrión.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "deny",
+        "reason": "This action changes $HOME/.claude/settings.json, which controls the agent or Jev sentinel itself. Ask the user to make that change by hand."
+      }
+    },
+    {
+      "id": "key-host-settings-by-indirection-denied",
+      "why": "Con clave, la misma ruta armada con una variable (`d=.claude`) sigue siendo cambiar la configuración del anfitrión.",
+      "pass": false,
+      "problems": [
+        "decisión ask, se esperaba una de deny"
+      ],
+      "exit": 0,
+      "observed": {
+        "decision": "ask",
+        "reason": "Jev sentinel: this action could not be checked (fetch failed)."
+      }
+    },
+    {
+      "id": "key-unreachable-model-fails-closed",
+      "why": "Con clave pero sin que Jev responda, el hook pregunta: un comprobador caído no aprueba nada.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "ask",
+        "reason": "Jev sentinel: this action could not be checked (fetch failed)."
+      }
+    },
+    {
+      "id": "key-destructive-unreachable-never-allows",
+      "why": "Con clave y Jev caído, un borrado recursivo de la raíz no se permite.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "ask",
+        "reason": "Jev sentinel: this action could not be checked (fetch failed)."
+      }
+    }
+  ],
+  "pass": false
+}

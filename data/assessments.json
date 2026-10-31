@@ -1536,14 +1536,16 @@
         ],
         "host": "any"
       },
-      "evidence": "static",
-      "verdict": "Guardia para agentes de código con un mismo conjunto de comprobaciones en tres anfitriones (extensión de Pi y hooks de Claude Code y Codex): antes de la llamada juzga intención (en tarea, fuera de tarea, inyectado, necesita contexto) y riesgo (de seguro a necesita aprobación, 0 a 2); revisa la salida de las herramientas y la respuesta final. Lo que el código de `src/hook.ts` hace en `PreToolUse`: sin clave pregunta (`ask`), si Jev falla o no responde pregunta, un cambio sobre la configuración del anfitrión o la propia se deniega sin consultar a Jev, y permitir devuelve un objeto vacío (el anfitrión decide). Nunca permite por su cuenta una llamada que no pudo comprobar. Pero un evento que no es JSON legible sale en silencio con exit 0, que en este protocolo equivale a permitir, y un fallo no capturado fuera de la comprobación solo emite un aviso (`systemMessage`) con exit 0: no falla cerrado en esos dos caminos. Umbrales configurables (`riskAskScore` 0.3, `riskWarnScore` 1.3, `allowThreshold` 0.8). El «ask» depende de la aprobación del anfitrión y la comprobación de salida corre después de la herramienta. Evidencia: README y lectura del código del hook; no se ejecutó (no está en npm y exige compilar TypeScript con dependencias de desarrollo).",
+      "evidence": "measured",
+      "verdict": "Guardia para agentes de código con un mismo conjunto de comprobaciones en tres anfitriones (extensión de Pi y hooks de Claude Code y Codex): antes de la llamada juzga intención y riesgo con Jev, revisa la salida de las herramientas y la respuesta final. Medido sin clave real (v0.1.0, commit 4ae67df, ejecutando la fuente del hook con el Node de la sonda, sin instalar nada ni pasar por el hub; 13 casos, 10 pasan): sin clave toda llamada pregunta (`ask`), incluso `git status` y `rm -rf /`, y nunca permite; con una clave de relleno y Jev inalcanzable (baseUrl a un puerto local cerrado) deniega por regla determinista tocar la configuración del anfitrión o la propia (`~/.claude/settings.json`, `~/.jev-sentinel/config.json`, también escrita con `$HOME`) y pregunta lo demás. Hallazgos que confirman la lectura del código: un evento ilegible o vacío sale en silencio con exit 0, que en este protocolo equivale a permitir (no falla cerrado); la regla de rutas protegidas se salta armando la ruta con una variable (`d=.claude; echo x > ~/$d/settings.json` solo pregunta); y sin clave esa regla ni se aplica, porque se pregunta antes de mirar las rutas. Sin clave es un interruptor de confirmación, no un filtro. NO medido: cualquier decisión que dependa de la respuesta de Jev, la revisión de salidas y respuestas con modelo, coste y latencia, la extensión de Pi y el hook de Codex.",
       "blockers": [
         "`ask` depende de la aprobación del anfitrión: sin humano no hay a quién preguntar",
-        "un evento ilegible sale en silencio con exit 0 (equivale a permitir) y un fallo no capturado solo avisa: no falla cerrado en esos caminos",
+        "un evento ilegible o vacío sale en silencio con exit 0 (equivale a permitir): no falla cerrado",
+        "la regla determinista de rutas protegidas se salta con una variable y no se aplica sin clave",
         "sin clave solo pregunta: no decide por sí mismo, y con Jev como motor hace falta una clave de TypeSafe",
-        "no está en npm: hay que clonar y compilar para tener el hook"
-      ]
+        "no está en npm: se ejecutó la fuente TypeScript; para el binario hay que clonar y compilar"
+      ],
+      "run": "runs/2026-10-31-harshwasan-jev-sentinel"
     },
     {
       "repo": "godspede/construct-auto-classifier",
