@@ -27,7 +27,7 @@
   "iamtoomas/JevLint": "Natural-language convention rules; returns the probability that each file breaks them against a threshold (`--threshold`).",
   "Tech-Byte-Frontier/jevgate": "Review gate that parses the repository, builds evidence units (function, file schema, copy pair, test) and asks Jev typed questions about each one.",
   "scale-venture-partners/riff": "Prose linter with ruff-style rule codes.",
-  "suraj-phanindra/wellposed": "Linter for Jev requests: 45 deterministic structural checks, no key or network, plus optional semantic checks with `--semantic` that do need a typesafe key.",
+  "suraj-phanindra/wellposed": "Linter for Jev requests: 45 deterministic structural checks that need no key, plus optional semantic checks with `--semantic` that do need a typesafe key. Tested by us: 18 cases passed.",
   "NomenAK/jev-tools": "Six tools for pi, omp and any MCP client: navigate unfamiliar code, ask typed questions about repository evidence, review changes and pick tests.",
   "kindintelligence/jev-rust-review": "Claude Code plugin for reviewing Rust: an MCP server runs rustc, Clippy and cargo-semver-checks filtered to the change, and Jev triages and verifies the findings.",
   "ariel-frischer/jevkit": "Generic Jev command-line client: the caller supplies the questions (`noul`, `choice`, `score`) and the text, so there is no domain decision to serve.",

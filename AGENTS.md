@@ -20,7 +20,7 @@ jevalan solo conserva dos o tres capacidades de ejemplo; el catálogo, los
 veredictos y las medidas crecen aquí. `scripts/probe.mjs` mide un especialista
 arrancando un `jevalan serve` en un sandbox sin claves, y `scripts/probe-gate.mjs`
 mide un gate de hook ejecutando su CLI directamente (sin pasar por el hub). **No es
-un registro**: la spec del hub deja fuera empuje, descarga y firma. Solo toolgate,
+un registro**: la spec del hub deja fuera empuje, descarga y firma. Solo toolgate, wellposed,
 jev-firewall y reflex están medidos (`runs/`); lo demás es lectura de código
 (`static`).
 
@@ -35,7 +35,7 @@ Cero dependencias: **no hay `npm install`**, solo stdlib de Node (≥ 20), ESM
 (`.mjs`).
 
 ```bash
-npm test                       # node --test, 102 pruebas, todo offline
+npm test                       # node --test, 107 pruebas, todo offline
 node --test tests/triage.test.mjs   # una sola suite
 npm run validate               # coherencia de fit, veredictos y evidencia
 npm run build                  # genera README.md, site/index.html (directorio) y site/veredictos.html (tabla) (falla si validate falla)
@@ -47,6 +47,8 @@ npm run fit -- --doc=<ruta>    # importa desde otro documento
 npm run fixtures               # congela los árboles de la cohorte A
 node scripts/probe.mjs --repo <o/r> --capability <cap> --jevalan <bin> --capabilities <dir> --cli <cli>
                                # mide un especialista exec sin claves y escribe runs/<fecha>-<repo>/
+node scripts/probe-cli.mjs --repo <o/r> --cli <ruta al CLI>
+                               # mide un CLI de linter/filtro (wellposed) en un sandbox, sin claves; casos propios en scripts/lib/cli-cases-*.mjs
 node scripts/probe-gate.mjs --repo <o/r> --cli <ruta al CLI>
                                # mide un gate de hook (jev-firewall, reflex) en un sandbox, sin hub ni claves;
                                # cada gate tiene su juego de casos registrado en el propio script

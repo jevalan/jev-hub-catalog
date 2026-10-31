@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-30",
+  "updated": "2026-10-31",
   "assessments": [
     {
       "repo": "RiskAverseTech/toolgate",
@@ -763,9 +763,14 @@
         "requires_key": [],
         "host": "any"
       },
-      "evidence": "static",
-      "verdict": "Linter de peticiones a Jev: 45 comprobaciones estructurales deterministas, sin clave ni red, más comprobaciones semánticas opcionales con `--semantic` que sí piden clave de typesafe. Lee un fichero o stdin, tiene `--json` y sale con 1 si algún fichero tiene errores. Su valor es más de herramienta propia, para validar los manifiestos de capacidades del hub, que de capacidad servida. Evidencia solo de README y árbol.",
-      "blockers": []
+      "evidence": "measured",
+      "verdict": "Linter de peticiones a Jev: 45 comprobaciones estructurales deterministas y sin clave, más comprobaciones semánticas opcionales con `--semantic` que sí piden clave de typesafe. Lee un fichero o stdin, tiene `--json` y sale con 1 si algún fichero tiene errores. Su valor es más de herramienta propia, para validar los manifiestos de capacidades del hub, que de capacidad servida. Evidencia solo de README y árbol. Medido el 2026-10-31 (v0.7.1, ejecutado directo en un sandbox sin claves, 18 casos, todos superados): contrato de salida exit 0 limpio, 1 con errores y 2 uso incorrecto, `--json` estable, `--config`, `--max-warnings`, `--quiet` y lectura por stdin, y las 45 reglas estructurales que declara el README. Sin clave, `--semantic` no llama a ningún modelo: avisa por stderr y entrega el informe estructural, pero la salida de texto dice «OK no findings» con exit 0, así que quien solo mire el código de salida no distingue «limpio» de «lo semántico no se ejecutó». No se midió la capa semántica con modelo. El chequeo de actualizaciones (GET a registry.npmjs.org) está activo salvo `WELLPOSED_NO_UPDATE_CHECK=1`, que es lo que se usó.",
+      "blockers": [
+        "`--semantic` sin clave sale con exit 0 y «OK no findings»; solo stderr avisa de que se saltó",
+        "hace una petición de red a registry.npmjs.org y escribe caché salvo WELLPOSED_NO_UPDATE_CHECK=1 (o CI)",
+        "la capa semántica con modelo no está medida"
+      ],
+      "run": "runs/2026-10-31-suraj-phanindra-wellposed"
     },
     {
       "repo": "NomenAK/jev-tools",

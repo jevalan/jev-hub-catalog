@@ -1,0 +1,168 @@
+{
+  "repo": "suraj-phanindra/wellposed",
+  "date": "2026-10-31",
+  "scope": "directo: se ejecuta el CLI del especialista, sin pasar por el hub de jevalan",
+  "environment": {
+    "node": "v24.8.0",
+    "specialist": "0.7.1",
+    "keys": "ninguna: entorno vacío, HOME y cwd propios; el especialista no puede llamar a ningún modelo"
+  },
+  "measured": [
+    "contrato de salida de `lint`: exit 0 limpio, 1 con errores, 2 uso incorrecto",
+    "el JSON de `--json` (ok, counts, findings con regla, severidad y pregunta; files con varios ficheros)",
+    "reglas estructurales comprobadas con peticiones propias: ruta rota, sin modelo, campo prohibido, sin vía de escape",
+    "`--config` (silenciar una regla, lista `forbidden`), `--max-warnings`, `--quiet`, lectura por stdin",
+    "sin clave, `--semantic` no llama a ningún modelo y lo avisa por stderr",
+    "recuento de reglas estructurales frente a las 45 que declara el README",
+    "huella en disco del sandbox (nada fuera de las peticiones escritas)"
+  ],
+  "not_measured": [
+    "las comprobaciones semánticas con modelo (`--semantic` con clave), su coste y su latencia",
+    "el chequeo de actualizaciones contra registry.npmjs.org, apagado con WELLPOSED_NO_UPDATE_CHECK",
+    "`eval`, que lanza otro proceso del paquete contra su corpus etiquetado",
+    "la calidad de cada una de las reglas: solo se ejercitaron cinco",
+    "el paquete como skill dentro de Claude Code o Codex"
+  ],
+  "footprint": [
+    "bad.json",
+    "broken-path.json",
+    "cfg-escape-off.json",
+    "cfg-forbid.json",
+    "clean.json",
+    "no-model.json",
+    "password.json",
+    "warn-only.json"
+  ],
+  "cases": [
+    {
+      "id": "version",
+      "why": "`--version` imprime la versión del paquete instalado.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "help",
+      "why": "`--help` muestra el uso y sale con 0.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "unknown-command",
+      "why": "Un comando desconocido es un error de uso (exit 2), no un éxito silencioso.",
+      "pass": true,
+      "problems": [],
+      "exit": 2
+    },
+    {
+      "id": "missing-file",
+      "why": "Un fichero que no existe es un error de uso (exit 2).",
+      "pass": true,
+      "problems": [],
+      "exit": 2
+    },
+    {
+      "id": "invalid-json",
+      "why": "Un JSON ilegible es un error de uso (exit 2) y nombra el fichero.",
+      "pass": true,
+      "problems": [],
+      "exit": 2
+    },
+    {
+      "id": "clean-request-passes",
+      "why": "Una petición bien formada sale limpia: exit 0, `ok: true` y cero hallazgos.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "broken-path-is-error",
+      "why": "Una pregunta que cita una ruta que el estado no tiene es un error (exit 1) con regla y pregunta.",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "missing-model-is-error",
+      "why": "Una petición sin `model` es un error (exit 1).",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "warning-does-not-fail",
+      "why": "Un aviso solo no hace fallar el proceso: exit 0 con el aviso presente.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "max-warnings-zero-fails",
+      "why": "`--max-warnings 0` convierte ese aviso en fallo (exit 1).",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "config-silences-rule",
+      "why": "`--config` con la regla en `off` la quita del informe.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "forbidden-field-is-error",
+      "why": "Un campo de la lista `forbidden` presente en el estado es un error (exit 1).",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "stdin",
+      "why": "`lint -` lee la petición de la entrada estándar.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "several-files-one-bad",
+      "why": "Con varios ficheros, uno con error basta para exit 1 y el informe lista cada fichero.",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "quiet-hides-warnings",
+      "why": "`--quiet` deja solo los errores en la salida de texto.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "semantic-without-key-is-structural-only",
+      "why": "`--semantic` sin clave no llama a ningún modelo: avisa por stderr de que se saltó y entrega el informe estructural.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "stderr": "semantic checks skipped: no API key\n  the structural report is complete and unaffected"
+    },
+    {
+      "id": "rules-lists-structural-section",
+      "why": "`rules` lista las reglas estructurales; el README cuenta 45.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "structural_rules": 45
+      }
+    },
+    {
+      "id": "footprint-stays-in-fixtures",
+      "why": "El CLI no deja nada en disco aparte de las peticiones que le dimos.",
+      "pass": true,
+      "problems": []
+    }
+  ],
+  "pass": true
+}
