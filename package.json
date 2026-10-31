@@ -11,7 +11,8 @@
     "triage": "node scripts/triage.mjs",
     "fixtures": "node scripts/make-fixtures.mjs",
     "test": "node --test",
-    "examples": "node scripts/examples.mjs"
+    "examples": "node scripts/examples.mjs",
+    "backlog": "node scripts/backlog.mjs"
   },
   "engines": {
     "node": ">=20"

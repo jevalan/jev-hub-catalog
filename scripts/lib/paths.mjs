@@ -8,9 +8,9 @@ export const ASSESSMENTS = resolve(ROOT, "data", "assessments.json");
 export const TRIAGE_CACHE = resolve(ROOT, "data", "triage-cache");
 export const SHELF = resolve(ROOT, "data", "shelf.json");
 export const EXAMPLES = resolve(ROOT, "data", "examples.json");
-export const DIRECTORY = resolve(ROOT, "site", "directorio.html");
+export const DIRECTORY = resolve(ROOT, "site", "index.html");
 export const README = resolve(ROOT, "README.md");
-export const SITE = resolve(ROOT, "site", "index.html");
+export const SITE = resolve(ROOT, "site", "veredictos.html");
 export const TEMPLATE = resolve(ROOT, "scripts", "template.html");
 
 // El árbol de análisis (universo y clasificación) vive fuera de este repo. Por

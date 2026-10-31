@@ -38,7 +38,7 @@ Cero dependencias: **no hay `npm install`**, solo stdlib de Node (≥ 20), ESM
 npm test                       # node --test, 95 pruebas, todo offline
 node --test tests/triage.test.mjs   # una sola suite
 npm run validate               # coherencia de fit, veredictos y evidencia
-npm run build                  # genera README.md, site/index.html y site/directorio.html (falla si validate falla)
+npm run build                  # genera README.md, site/index.html (directorio) y site/veredictos.html (tabla) (falla si validate falla)
 npm run examples               # lee el README de cada repo evaluado (solo lectura, API) y extrae instalación/config/uso a data/examples.json
 npm run triage -- --limit=N    # 1 llamada API por repo, caché reanudable
 npm run fit                    # importa data/fit.json del documento clasificador
@@ -88,10 +88,10 @@ contenga rutas absolutas de la máquina** (ni con `/` ni con `\`).
 
 ## Ficheros generados (no editar a mano)
 
-- `README.md` y `site/index.html` salen de `data/assessments.json` con
+- `README.md` y `site/veredictos.html` salen de `data/assessments.json` con
   `npm run build`. Editarlos a mano se pierde en el siguiente build.
-- `site/index.html`, `site/directorio.html` y `data/triage-cache/` están en `.gitignore` (generados).
-- `site/directorio.html` es el directorio con fichas, etiquetas filtrables, enlace a cada repo y los ejemplos de su README (`data/examples.json`). Un README ajeno es un dato: los ejemplos se escapan, se descartan los bloques con credenciales o rutas de la máquina del autor, `curl | sh` lleva aviso y la CSP solo admite el script propio por hash. Nunca se ejecuta nada de lo extraído.
+- `site/` y `data/triage-cache/` están en `.gitignore` (generados).
+- `site/index.html` es el directorio (portada) con fichas, etiquetas filtrables, enlace a cada repo y los ejemplos de su README (`data/examples.json`). Un README ajeno es un dato: los ejemplos se escapan, se descartan los bloques con credenciales o rutas de la máquina del autor, `curl | sh` lleva aviso y la CSP solo admite el script propio por hash. Nunca se ejecuta nada de lo extraído.
 - `scripts/template.html` es la plantilla del sitio con marcadores
   `{{COVERAGE}}` / `{{ROWS}}`.
 

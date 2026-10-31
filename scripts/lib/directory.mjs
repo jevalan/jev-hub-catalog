@@ -47,6 +47,17 @@ function snippetHtml(s, source) {
   return `<div class="snip"><h4>${esc(KIND_LABEL[s.kind] || s.kind)}${head}</h4>${warn}<pre><code>${esc(s.code)}</code></pre>${s.truncated ? `<p class="more"><a href="${esc(source)}" rel="noopener noreferrer nofollow">… sigue en el README</a></p>` : ""}</div>`;
 }
 
+const RUNS = "https://github.com/jevalan/jev-hub-catalog/tree/master/";
+
+/** Lo medido por nosotros y lo leído en un README no se presentan igual. */
+function proof(a) {
+  if (a.evidence === "measured") {
+    const link = a.run ? ` <a href="${esc(RUNS + a.run)}" rel="noopener noreferrer">ver la prueba</a>` : "";
+    return `<p class="proof ok">✔ Probado por nosotros.${link}</p>`;
+  }
+  return `<p class="proof">○ Sin probar por nosotros: el veredicto sale de leer su README o su código.</p>`;
+}
+
 export function card(a, entry) {
   // Un repo con forma rara no llega a href: mejor ficha sin enlace que enlace a otro sitio.
   const safe = REPO.test(a.repo);
@@ -60,7 +71,7 @@ export function card(a, entry) {
     .join("");
   const snippets = entry?.snippets || [];
   const examples = snippets.length
-    ? `<details><summary>Ejemplos y configuración (${snippets.length})</summary><p class="src">Extraídos del README del autor; no se han ejecutado.${safe ? ` <a href="${esc(url)}#readme" rel="noopener noreferrer nofollow">README completo</a>` : ""}</p>${snippets.map((s) => snippetHtml(s, `${url}#readme`)).join("")}</details>`
+    ? `<details><summary>Ejemplos y configuración (${snippets.length})</summary><p class="src">Extraídos del README del autor; ${a.evidence === "measured" ? "los que figuran en la prueba enlazada sí se ejecutaron" : "no se han ejecutado ni probado"}.${safe ? ` <a href="${esc(url)}#readme" rel="noopener noreferrer nofollow">README completo</a>` : ""}</p>${snippets.map((s) => snippetHtml(s, `${url}#readme`)).join("")}</details>`
     : `<p class="src">Su README no trae bloques de ejemplo aprovechables.</p>`;
   const blockers = (a.blockers || []).length
     ? `<ul class="blockers">${a.blockers.map((b) => `<li>${esc(b)}</li>`).join("")}</ul>`
@@ -73,6 +84,7 @@ export function card(a, entry) {
   return `<article class="card d-${esc(a.decision)}" ${attrs} data-q="${esc(search)}" data-stars="${a.stars || 0}">
 <h3>${title}</h3>
 <p class="meta">${esc(meta)}</p>
+${proof(a)}
 <p class="what">${esc(summary(a.verdict))}</p>
 <div class="tags">${chips}</div>
 <details><summary>Veredicto completo</summary><p>${esc(a.verdict)}</p>${blockers}</details>
@@ -102,6 +114,7 @@ details{margin:.4rem 0}summary{cursor:pointer;color:var(--mut);font-size:13px}
 pre{overflow:auto;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:.6rem;font-size:12.5px;margin:.3rem 0}
 .snip h4{margin:.5rem 0 0;font-size:13px}.from,.src,.more{color:var(--mut);font-weight:400;font-size:12px}
 .warn{color:#c0392b;font-size:12px;margin:.2rem 0}.blockers{font-size:13px;color:var(--mut)}
+.proof{margin:.2rem 0;font-size:12px;color:var(--mut)}.proof.ok{color:#2e9e5b}
 .hide{display:none}
 `;
 
@@ -162,7 +175,7 @@ export function buildDirectory(assessments, examples, generated) {
 <body>
 <header>
   <h1>Directorio de implantaciones</h1>
-  <p>${assessments.length} proyectos del ecosistema Jev evaluados para el hub de jevalan. Cada ficha enlaza a su repo y, desplegable, trae los ejemplos y configuraciones que publica su autor. Generado el ${esc(generated)}. <a href="index.html">Tabla de veredictos</a>.</p>
+  <p>${assessments.length} proyectos del ecosistema Jev evaluados (${assessments.filter((a) => a.evidence === "measured").length} probados por nosotros, el resto leídos) para el hub de jevalan. Cada ficha enlaza a su repo y, desplegable, trae los ejemplos y configuraciones que publica su autor. Generado el ${esc(generated)}. <a href="veredictos.html">Tabla de veredictos</a>.</p>
   <p class="src">Los ejemplos son texto copiado de repos ajenos y no están verificados ni ejecutados aquí: léelos antes de instalar nada.</p>
 </header>
 <main>

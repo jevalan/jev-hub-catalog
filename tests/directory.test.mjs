@@ -41,7 +41,7 @@ test("un README hostil se muestra como texto y no abre marcado", () => {
 });
 
 test("un repo con forma rara no genera enlace", () => {
-  assert.ok(!card({ ...base, repo: 'x" onmouseover="y' }, null).includes("github.com"));
+  assert.ok(!card({ ...base, evidence: "static", run: undefined, repo: 'x" onmouseover="y' }, null).includes("github.com"));
 });
 
 test("la CSP solo admite el script propio, por hash", () => {
@@ -75,4 +75,19 @@ test("los ejemplos publicados no llevan rutas de máquina ni credenciales", () =
   const text = JSON.stringify(examples);
   assert.ok(!/sk-[A-Za-z0-9_-]{16,}|gh[pousr]_[A-Za-z0-9]{20,}/.test(text));
   assert.ok(!/(?:^|[^A-Za-z])(?:[A-Za-z]:[\/]{1,2}|\/(?:home|Users|workspace)\/)/.test(text.replace(/\\/g, "\\")));
+});
+
+test("lo medido enlaza a su prueba y lo leído lo dice sin rodeos", () => {
+  const measured = assessments.find((a) => a.evidence === "measured");
+  const read = assessments.find((a) => a.evidence === "static");
+  assert.ok(card(measured, null).includes(`tree/master/${measured.run}`));
+  assert.match(card(read, null), /Sin probar por nosotros/);
+});
+
+test("el backlog deja fuera lo medido, lo descartado y lo que no aplica", async () => {
+  const { buildBacklog } = await import("../scripts/backlog.mjs");
+  const md = buildBacklog(assessments, examples);
+  for (const a of assessments.filter((x) => x.evidence === "measured" || x.decision === "no" || x.form === "n_a")) {
+    assert.ok(!md.includes(`\`${a.repo}\``), a.repo);
+  }
 });
