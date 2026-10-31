@@ -23,7 +23,7 @@
   "NiazMorshed2007/jev-review": "A single MCP tool, `jev_review`, returning a 1-to-10 score with confidence per quality dimension.",
   "keeltrace/hermes-nerve": "A supervisor plugin living inside Hermes, which keeps the authority to stop or continue.",
   "rbalch/typesafeai-review": "`ts-review`: a code reviewer where code is in charge. It runs deterministic checks, splits the diff, asks Jev typed questions per chunk and composes the `APPROVE` / `CHANGES_REQUESTED` / `NEEDS_HUMAN` verdict in code.",
-  "DanRWilloughby/snifftest": "Lints prose with accounting-style rules (regular expressions, no network) and judgment rules that return a probability per rule.",
+  "DanRWilloughby/snifftest": "Prose linter with fifteen rules: five countable ones (dashes, colons, sentence rhythm, filler vocabulary and your own banned-word list) that are local regular expressions, and ten judgment rules that need a model. Measured by us without a key: the five countable rules do what the documentation promises, including its exemptions, and a 67-text frontier catches 41 of 42 defects with one false alarm (a literal use of a listed word). The judgment rules were not measured.",
   "iamtoomas/JevLint": "Natural-language convention rules; returns the probability that each file breaks them against a threshold (`--threshold`).",
   "Tech-Byte-Frontier/jevgate": "Review gate that parses the repository, builds evidence units (function, file schema, copy pair, test) and asks Jev typed questions about each one.",
   "scale-venture-partners/riff": "Prose linter with ruff-style rule codes.",

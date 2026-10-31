@@ -1,0 +1,789 @@
+{
+  "group": "prose-lint",
+  "date": "2026-10-31",
+  "scope": "directo: se ejecuta el CLI de cada linter, sin pasar por el hub de jevalan",
+  "environment": {
+    "node": "v24.8.0",
+    "keys": "ninguna: entorno vacío, HOME y cwd propios; con `--dry-run` ningún linter puede enviar texto"
+  },
+  "corpus": {
+    "size": 67
+  },
+  "not_measured": [
+    "las reglas de juicio con modelo: la frontera es solo la capa contable (expresiones regulares locales)",
+    "prosa real de un proyecto: son textos cortos y sintéticos con un único defecto",
+    "defectos combinados: cada texto lleva uno solo",
+    "idiomas distintos del inglés: la prosa de las reglas y de su lista de vocabulario es inglesa"
+  ],
+  "projects": {
+    "DanRWilloughby/snifftest": {
+      "version": "0.2.0",
+      "summary": {
+        "byTechnique": {
+          "dash": {
+            "defects": 8,
+            "caught": 8,
+            "missed": 0,
+            "clean": 6,
+            "falseAlarms": 0
+          },
+          "colons": {
+            "defects": 4,
+            "caught": 4,
+            "missed": 0,
+            "clean": 6,
+            "falseAlarms": 0
+          },
+          "rhythm": {
+            "defects": 4,
+            "caught": 4,
+            "missed": 0,
+            "clean": 3,
+            "falseAlarms": 0
+          },
+          "slop-words": {
+            "defects": 20,
+            "caught": 20,
+            "missed": 0,
+            "clean": 4,
+            "falseAlarms": 1
+          },
+          "slop-words-beyond-suffixes": {
+            "defects": 2,
+            "caught": 1,
+            "missed": 1,
+            "clean": 0,
+            "falseAlarms": 0
+          },
+          "banned-words": {
+            "defects": 4,
+            "caught": 4,
+            "missed": 0,
+            "clean": 2,
+            "falseAlarms": 0
+          },
+          "plain-prose": {
+            "defects": 0,
+            "caught": 0,
+            "missed": 0,
+            "clean": 4,
+            "falseAlarms": 0
+          }
+        },
+        "defectTotal": 42,
+        "caught": 41,
+        "missed": 1,
+        "cleanTotal": 25,
+        "cleanPass": 24,
+        "falseAlarms": 1,
+        "unreadable": 0
+      },
+      "results": [
+        {
+          "id": "dash-em-prose",
+          "technique": "dash",
+          "truth": "defect",
+          "expect": [
+            "dash_present"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "dash_present"
+          ]
+        },
+        {
+          "id": "dash-en-prose",
+          "technique": "dash",
+          "truth": "defect",
+          "expect": [
+            "dash_present"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "dash_present"
+          ]
+        },
+        {
+          "id": "dash-in-list-item",
+          "technique": "dash",
+          "truth": "defect",
+          "expect": [
+            "dash_present"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "dash_present"
+          ]
+        },
+        {
+          "id": "dash-in-heading",
+          "technique": "dash",
+          "truth": "defect",
+          "expect": [
+            "dash_present"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "dash_present"
+          ]
+        },
+        {
+          "id": "dash-inline-quote",
+          "technique": "dash",
+          "truth": "defect",
+          "expect": [
+            "dash_present"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "dash_present"
+          ]
+        },
+        {
+          "id": "dash-crlf",
+          "technique": "dash",
+          "truth": "defect",
+          "expect": [
+            "dash_present"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "dash_present"
+          ]
+        },
+        {
+          "id": "dash-late-line",
+          "technique": "dash",
+          "truth": "defect",
+          "expect": [
+            "dash_present"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "dash_present"
+          ]
+        },
+        {
+          "id": "dash-after-code-fence",
+          "technique": "dash",
+          "truth": "defect",
+          "expect": [
+            "dash_present"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "dash_present"
+          ]
+        },
+        {
+          "id": "dash-range-numbers",
+          "technique": "dash",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "clean",
+          "rules": []
+        },
+        {
+          "id": "dash-hyphen-compound",
+          "technique": "dash",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "clean",
+          "rules": []
+        },
+        {
+          "id": "dash-block-quote",
+          "technique": "dash",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "clean",
+          "rules": []
+        },
+        {
+          "id": "dash-fenced-code",
+          "technique": "dash",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "clean",
+          "rules": []
+        },
+        {
+          "id": "dash-front-matter",
+          "technique": "dash",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "clean",
+          "rules": []
+        },
+        {
+          "id": "dash-table",
+          "technique": "dash",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "clean",
+          "rules": []
+        },
+        {
+          "id": "colon-three",
+          "technique": "colons",
+          "truth": "defect",
+          "expect": [
+            "colon_heavy"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "colon_heavy"
+          ]
+        },
+        {
+          "id": "colon-four",
+          "technique": "colons",
+          "truth": "defect",
+          "expect": [
+            "colon_heavy"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "colon_heavy"
+          ]
+        },
+        {
+          "id": "colon-soft-wrapped",
+          "technique": "colons",
+          "truth": "defect",
+          "expect": [
+            "colon_heavy"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "colon_heavy"
+          ]
+        },
+        {
+          "id": "colon-in-block-quote",
+          "technique": "colons",
+          "truth": "defect",
+          "expect": [
+            "colon_heavy"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "colon_heavy"
+          ]
+        },
+        {
+          "id": "colon-two",
+          "technique": "colons",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "clean",
+          "rules": []
+        },
+        {
+          "id": "colon-urls",
+          "technique": "colons",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "clean",
+          "rules": []
+        },
+        {
+          "id": "colon-clock-times",
+          "technique": "colons",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "clean",
+          "rules": []
+        },
+        {
+          "id": "colon-list-items",
+          "technique": "colons",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "clean",
+          "rules": []
+        },
+        {
+          "id": "colon-fenced-code",
+          "technique": "colons",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "clean",
+          "rules": []
+        },
+        {
+          "id": "colon-html-comment",
+          "technique": "colons",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "clean",
+          "rules": []
+        },
+        {
+          "id": "rhythm-uniform",
+          "technique": "rhythm",
+          "truth": "defect",
+          "expect": [
+            "sentence_rhythm"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "sentence_rhythm"
+          ]
+        },
+        {
+          "id": "rhythm-uniform-exclaim",
+          "technique": "rhythm",
+          "truth": "defect",
+          "expect": [
+            "sentence_rhythm"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "sentence_rhythm"
+          ]
+        },
+        {
+          "id": "rhythm-uniform-five",
+          "technique": "rhythm",
+          "truth": "defect",
+          "expect": [
+            "sentence_rhythm"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "sentence_rhythm"
+          ]
+        },
+        {
+          "id": "rhythm-uniform-block-quote",
+          "technique": "rhythm",
+          "truth": "defect",
+          "expect": [
+            "sentence_rhythm"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "sentence_rhythm"
+          ]
+        },
+        {
+          "id": "rhythm-varied",
+          "technique": "rhythm",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "clean",
+          "rules": []
+        },
+        {
+          "id": "rhythm-short-note",
+          "technique": "rhythm",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "clean",
+          "rules": []
+        },
+        {
+          "id": "rhythm-three-sentences",
+          "technique": "rhythm",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "clean",
+          "rules": []
+        },
+        {
+          "id": "slop-delve",
+          "technique": "slop-words",
+          "truth": "defect",
+          "expect": [
+            "slop_vocab"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "slop_vocab"
+          ]
+        },
+        {
+          "id": "slop-tapestry",
+          "technique": "slop-words",
+          "truth": "defect",
+          "expect": [
+            "slop_vocab"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "slop_vocab"
+          ]
+        },
+        {
+          "id": "slop-landscape",
+          "technique": "slop-words",
+          "truth": "defect",
+          "expect": [
+            "slop_vocab"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "slop_vocab"
+          ]
+        },
+        {
+          "id": "slop-unlock",
+          "technique": "slop-words",
+          "truth": "defect",
+          "expect": [
+            "slop_vocab"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "slop_vocab"
+          ]
+        },
+        {
+          "id": "slop-testament",
+          "technique": "slop-words",
+          "truth": "defect",
+          "expect": [
+            "slop_vocab"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "slop_vocab"
+          ]
+        },
+        {
+          "id": "slop-navigate",
+          "technique": "slop-words",
+          "truth": "defect",
+          "expect": [
+            "slop_vocab"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "slop_vocab"
+          ]
+        },
+        {
+          "id": "slop-realm",
+          "technique": "slop-words",
+          "truth": "defect",
+          "expect": [
+            "slop_vocab"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "slop_vocab"
+          ]
+        },
+        {
+          "id": "slop-myriad",
+          "technique": "slop-words",
+          "truth": "defect",
+          "expect": [
+            "slop_vocab"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "slop_vocab"
+          ]
+        },
+        {
+          "id": "slop-intricate",
+          "technique": "slop-words",
+          "truth": "defect",
+          "expect": [
+            "slop_vocab"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "slop_vocab"
+          ]
+        },
+        {
+          "id": "slop-pivotal",
+          "technique": "slop-words",
+          "truth": "defect",
+          "expect": [
+            "slop_vocab"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "slop_vocab"
+          ]
+        },
+        {
+          "id": "slop-seamless",
+          "technique": "slop-words",
+          "truth": "defect",
+          "expect": [
+            "slop_vocab"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "slop_vocab"
+          ]
+        },
+        {
+          "id": "slop-showcase",
+          "technique": "slop-words",
+          "truth": "defect",
+          "expect": [
+            "slop_vocab"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "slop_vocab"
+          ]
+        },
+        {
+          "id": "slop-capitalised",
+          "technique": "slop-words",
+          "truth": "defect",
+          "expect": [
+            "slop_vocab"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "slop_vocab"
+          ]
+        },
+        {
+          "id": "slop-ing",
+          "technique": "slop-words",
+          "truth": "defect",
+          "expect": [
+            "slop_vocab"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "slop_vocab"
+          ]
+        },
+        {
+          "id": "slop-adverb",
+          "technique": "slop-words",
+          "truth": "defect",
+          "expect": [
+            "slop_vocab"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "slop_vocab"
+          ]
+        },
+        {
+          "id": "slop-ment",
+          "technique": "slop-words",
+          "truth": "defect",
+          "expect": [
+            "slop_vocab"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "slop_vocab"
+          ]
+        },
+        {
+          "id": "slop-in-heading",
+          "technique": "slop-words",
+          "truth": "defect",
+          "expect": [
+            "slop_vocab"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "slop_vocab"
+          ]
+        },
+        {
+          "id": "slop-in-list",
+          "technique": "slop-words",
+          "truth": "defect",
+          "expect": [
+            "slop_vocab"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "slop_vocab"
+          ]
+        },
+        {
+          "id": "slop-in-block-quote",
+          "technique": "slop-words",
+          "truth": "defect",
+          "expect": [
+            "slop_vocab"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "slop_vocab"
+          ]
+        },
+        {
+          "id": "slop-hyphenated",
+          "technique": "slop-words",
+          "truth": "defect",
+          "expect": [
+            "slop_vocab"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "slop_vocab"
+          ]
+        },
+        {
+          "id": "slop-plural-ies",
+          "technique": "slop-words-beyond-suffixes",
+          "truth": "defect",
+          "expect": [
+            "slop_vocab"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "slop_vocab"
+          ]
+        },
+        {
+          "id": "slop-derived-noun",
+          "technique": "slop-words-beyond-suffixes",
+          "truth": "defect",
+          "expect": [
+            "slop_vocab"
+          ],
+          "outcome": "missed",
+          "rules": []
+        },
+        {
+          "id": "slop-except-landscape",
+          "technique": "slop-words",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "clean",
+          "rules": []
+        },
+        {
+          "id": "slop-except-navigate-to",
+          "technique": "slop-words",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "clean",
+          "rules": []
+        },
+        {
+          "id": "slop-literal-tapestry",
+          "technique": "slop-words",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "false-alarm",
+          "rules": [
+            "slop_vocab"
+          ]
+        },
+        {
+          "id": "slop-near-word",
+          "technique": "slop-words",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "clean",
+          "rules": []
+        },
+        {
+          "id": "banned-listed",
+          "technique": "banned-words",
+          "truth": "defect",
+          "expect": [
+            "banned_words"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "banned_words"
+          ]
+        },
+        {
+          "id": "banned-second",
+          "technique": "banned-words",
+          "truth": "defect",
+          "expect": [
+            "banned_words"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "banned_words"
+          ]
+        },
+        {
+          "id": "banned-inflected",
+          "technique": "banned-words",
+          "truth": "defect",
+          "expect": [
+            "banned_words"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "banned_words"
+          ]
+        },
+        {
+          "id": "banned-capitalised",
+          "technique": "banned-words",
+          "truth": "defect",
+          "expect": [
+            "banned_words"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "banned_words"
+          ]
+        },
+        {
+          "id": "banned-unlisted",
+          "technique": "banned-words",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "clean",
+          "rules": []
+        },
+        {
+          "id": "banned-empty-by-default",
+          "technique": "banned-words",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "clean",
+          "rules": []
+        },
+        {
+          "id": "plain-note",
+          "technique": "plain-prose",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "clean",
+          "rules": []
+        },
+        {
+          "id": "plain-with-heading",
+          "technique": "plain-prose",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "clean",
+          "rules": []
+        },
+        {
+          "id": "plain-list",
+          "technique": "plain-prose",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "clean",
+          "rules": []
+        },
+        {
+          "id": "plain-spanish",
+          "technique": "plain-prose",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "clean",
+          "rules": []
+        }
+      ]
+    }
+  }
+}

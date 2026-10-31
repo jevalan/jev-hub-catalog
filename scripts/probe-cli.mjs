@@ -16,6 +16,7 @@ import { ROOT } from "./lib/paths.mjs";
 import { FIXTURES as WP_FIXTURES, judgeCase, wellposedCases } from "./lib/cli-cases-wellposed.mjs";
 import { jevHarnessCases } from "./lib/cli-cases-jevharness.mjs";
 import { FIXTURES as PG_FIXTURES, pkgGateCases } from "./lib/cli-cases-pkggate.mjs";
+import { FIXTURES as SN_FIXTURES, snifftestCases } from "./lib/cli-cases-snifftest.mjs";
 
 const arg = (name) => {
   const i = process.argv.indexOf(`--${name}`);
@@ -71,6 +72,29 @@ const CLIS = {
       "resolver un nombre de paquete: consulta el registro de npm y no se hizo ninguna petición de red",
       "qué hace si la API de Jev falla con clave: por su código cae al simulador, y no se ejecutó",
       "el modo interactivo (`warn` con confirmación en terminal) y el TUI",
+    ],
+  },
+  "danrwilloughby/snifftest": {
+    cases: snifftestCases,
+    fixtures: SN_FIXTURES,
+    allowed: /^$/,
+    // `--cli` es dist/snifftest.js, un único fichero empaquetado sin dependencias.
+    launch: (cli) => ({ command: process.execPath, prefix: [resolve(cli)] }),
+    // Sin caché de respuestas: nada se guarda fuera del sandbox aunque alguna vez hubiera una.
+    env: { NO_COLOR: "1", SNIFFTEST_CACHE_DIR: "off" },
+    measured: [
+      "las cinco reglas contables (raya, dos puntos, ritmo de frases, vocabulario de relleno, palabras prohibidas) frente a lo que su documentación dice que debe y no debe marcar",
+      "contrato de salida: exit 0 limpio, 1 con marcas, 2 error de uso o de reglas; `--format json` con fichero, línea, regla y probabilidad",
+      "`--dry-run` no deja pasar ninguna petición y declara que el veredicto es solo de las reglas contables",
+      "sin clave y sin `--dry-run`, las reglas de juicio no corren: exit 2 y lo dice",
+      "reglas propias (`--rules`: patrón y lista prohibida), fichero de reglas ilegible, umbral inválido y etiqueta desconocida",
+      "huella en disco del sandbox",
+    ],
+    not_measured: [
+      "las diez reglas de juicio con modelo, su coste y su latencia",
+      "el consentimiento para enviar texto: sin clave no se llega a preguntar",
+      "`eval`, `bench` y `serve`, que llaman a modelos o abren un servidor",
+      "`--judge-url` contra un servidor propio",
     ],
   },
   "ismaelsoilet/jev-harness": {

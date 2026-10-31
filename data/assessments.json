@@ -660,9 +660,14 @@
         ],
         "host": "any"
       },
-      "evidence": "static",
-      "verdict": "Lintea prosa con reglas contables (expresiones regulares, sin red) y reglas de juicio que devuelven una probabilidad por regla. Salidas documentadas: 0 si no salta nada, 1 si salta alguna, 2 si la herramienta no pudo trabajar y 3 si las reglas de juicio necesitaban un sí que no llegó. Tiene `--format json` y `--dry-run`. Pide consentimiento explícito la primera vez antes de enviar texto; fuera de un terminal acaba en el exit 3. Evidencia solo de README y árbol.",
-      "blockers": []
+      "evidence": "measured",
+      "verdict": "Lintea prosa con quince reglas: cinco contables (raya, dos puntos, ritmo de frases, vocabulario de relleno y una lista propia de palabras prohibidas), que son expresiones regulares locales sin red, y diez de juicio que necesitan un modelo. Salidas: 0 limpio, 1 con marcas, 2 error de uso o de reglas, 3 si las reglas de juicio necesitaban un sí que no llegó; `--format json` y `--dry-run`. Medido sin clave (v0.2.0, ejecutando el `dist/snifftest.js` empaquetado, sin dependencias ni instalación, siempre con `--dry-run` o sin clave; 31 casos, 31 pasan): las cinco reglas contables hacen lo que su documentación promete, incluidas las exenciones (rango numérico, cita en bloque, código vallado, URL, lista `except`), `--rules` con una regla propia, y sin clave las reglas de juicio no corren y lo dice con exit 2. Frontera con 67 textos sintéticos: atrapa 41 de 42 defectos y da una falsa alarma sobre 25 textos sanos. Se le escapa `intricacies` (que su propia documentación admite como palabra aparte) y marca el uso literal de `tapestry` (un tapiz) porque solo exime las frases de su lista. Hallazgo menor: sin `--dry-run` y sin clave sale con exit 2 pero imprime igualmente las marcas contables. NO medido: las diez reglas de juicio con modelo, el consentimiento para enviar texto, `eval`, `bench`, `serve` y `--judge-url`.",
+      "blockers": [
+        "las diez reglas de juicio necesitan una clave de TypeSafe (o un servidor propio con `--judge-url`)",
+        "sin clave solo corren las cinco reglas contables, y solo con `--dry-run` sale un veredicto sin error",
+        "el vocabulario de relleno es una lista corta en inglés: lo que no esté en la lista (o se derive de otra forma) no se marca"
+      ],
+      "run": "runs/2026-10-31-danrwilloughby-snifftest"
     },
     {
       "repo": "iamtoomas/JevLint",

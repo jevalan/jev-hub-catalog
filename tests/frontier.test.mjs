@@ -169,3 +169,22 @@ test("la página pinta un grupo install-scripts con su propia unidad", () => {
   assert.match(buildFrontierPage([run], "en"), /Group install-scripts · 29 npm lifecycle scripts/);
   assert.match(buildFrontierPage([run], "es"), /Grupo install-scripts · 29 scripts de ciclo de vida de npm/);
 });
+
+// — grupo prose-lint —
+import * as proseLint from "../scripts/lib/frontier-prose-lint.mjs";
+
+test("el corpus de prose-lint tiene ids únicos, verdad de terreno, reglas esperadas y técnicas con rótulo en ambos idiomas", () => {
+  assert.equal(new Set(proseLint.CORPUS.map((c) => c.id)).size, proseLint.CORPUS.length);
+  for (const c of proseLint.CORPUS) {
+    assert.ok(["defect", "clean"].includes(c.truth) && typeof c.md === "string", c.id);
+    assert.equal(c.truth === "defect", c.expect.length > 0, c.id);
+  }
+  for (const lang of ["es", "en"]) for (const k of proseLint.TECHNIQUES) assert.ok(STR[lang].techniques[k], `${lang}:${k}`);
+});
+
+test("la página pinta un grupo prose-lint con su unidad y su aviso propios", () => {
+  const run = { ...reviewSample, group: "prose-lint", corpus: { size: 67 } };
+  assert.match(buildFrontierPage([run], "en"), /Group prose-lint · 67 texts/);
+  assert.match(buildFrontierPage([run], "es"), /Grupo prose-lint · 67 textos/);
+  assert.match(buildFrontierPage([run], "en"), /countable rules/);
+});

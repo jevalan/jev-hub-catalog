@@ -13,7 +13,7 @@ Las más baratas de medir: se instalan según su README y corren sin credenciale
 - [ ] `DataZooDE/anofox-decide` · yes · exec · lib
 - [ ] `doronp/jevc` · unclear · exec · cli
 
-## Segunda tanda: piden clave o no traen instalación clara (66)
+## Segunda tanda: piden clave o no traen instalación clara (65)
 
 Necesitan una clave de prueba acotada, un modo `--dry-run`/`--mock` o leer el código antes de decidir cómo medirlas.
 
@@ -28,7 +28,6 @@ Necesitan una clave de prueba acotada, un modo `--dry-run`/`--mock` o leer el c�
 - [ ] `PyModel/jev-judge-mcp` · yes · exec · mcp/cli · clave: typesafe
 - [ ] `TheoOliveira/pi-jev` · yes · exec · cli · clave: typesafe
 - [ ] `kyu1204/jgrep` · yes · exec · cli · clave: typesafe
-- [ ] `DanRWilloughby/snifftest` · yes · exec · cli · clave: typesafe
 - [ ] `mizchi/jev-test-filter` · yes · exec · cli · clave: typesafe
 - [ ] `GodsBoy/jev-agent-skill-router` · yes · exec · cli/lib · clave: typesafe
 - [ ] `Brainwires/jevwire` · yes · exec · cli/mcp/hook/lib · clave: typesafe

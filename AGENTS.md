@@ -21,7 +21,7 @@ veredictos y las medidas crecen aquí. `scripts/probe.mjs` mide un especialista
 arrancando un `jevalan serve` en un sandbox sin claves, y `scripts/probe-gate.mjs`
 mide un gate de hook ejecutando su CLI directamente (sin pasar por el hub). **No es
 un registro**: la spec del hub deja fuera empuje, descarga y firma. Solo toolgate, wellposed, jev-harness,
-jev-firewall, reflex, jev-sentinel y pkg-gate están medidos (`runs/`); lo demás es lectura de código
+jev-firewall, reflex, jev-sentinel, pkg-gate y snifftest están medidos (`runs/`); lo demás es lectura de código
 (`static`).
 
 Fuentes de contexto (leer antes de tocar el diseño):
@@ -35,7 +35,7 @@ Cero dependencias: **no hay `npm install`**, solo stdlib de Node (≥ 20), ESM
 (`.mjs`).
 
 ```bash
-npm test                       # node --test, 125 pruebas, todo offline
+npm test                       # node --test, 127 pruebas, todo offline
 node --test tests/triage.test.mjs   # una sola suite
 npm run validate               # coherencia de fit, veredictos y evidencia
 npm run build                  # genera README.md, site/index.html (directorio) y site/veredictos.html (tabla) (falla si validate falla)
@@ -51,6 +51,8 @@ node scripts/frontier-gates.mjs --firewall <cli> --reflex <cli> --sentinel <src/
                                # batería de frontera del grupo gates: las mismas órdenes contra todos los gates medidos
 node scripts/frontier-install-scripts.mjs --pkg-gate <ruta a bin/cli.js, con su SDK al lado>
                                # batería de frontera de las puertas de instalación de npm: 40 scripts de ciclo de vida contra cada puerta medida
+node scripts/frontier-prose-lint.mjs --snifftest <ruta a dist/snifftest.js>
+                               # batería de frontera de los linters de prosa: 67 textos con un defecto o ninguno (solo reglas contables, con --dry-run)
 node scripts/frontier-review.mjs --wellposed <ruta a wellposed.mjs>
                                # batería de frontera del grupo review: las mismas peticiones (un defecto inyectado o ninguno) contra cada linter medido
 node scripts/probe-cli.mjs --repo <o/r> --cli <ruta al CLI>
@@ -141,7 +143,7 @@ Cambiar estos implica actualizar tests, docs y el plan a la vez:
 - Cohorte A: **13** entradas; solo toolgate es `measured`, con su run en disco.
 - La cobertura publicada **no es un invariante fijo**: crece con cada veredicto de
   la cohorte B y los tests la derivan de `assessments.json`. Solo se fijan las
-  **1340** entradas visibles. Hoy: **118** triadas, **7** evaluadas (**123** de las 125
+  **1340** entradas visibles. Hoy: **117** triadas, **8** evaluadas (**123** de las 125
   en el catálogo), **1217** sin tocar.
 
 ## Reglas inviolables (validadas por `validate-rules.mjs`)
