@@ -21,7 +21,7 @@ veredictos y las medidas crecen aquí. `scripts/probe.mjs` mide un especialista
 arrancando un `jevalan serve` en un sandbox sin claves, y `scripts/probe-gate.mjs`
 mide un gate de hook ejecutando su CLI directamente (sin pasar por el hub). **No es
 un registro**: la spec del hub deja fuera empuje, descarga y firma. Solo toolgate, wellposed, jev-harness,
-jev-firewall, reflex, jev-sentinel, pkg-gate, snifftest y jev-lint están medidos (`runs/`); lo demás es lectura de código
+jev-firewall, reflex, jev-sentinel, pkg-gate, snifftest, jev-lint y riff están medidos (`runs/`); lo demás es lectura de código
 (`static`).
 
 Fuentes de contexto (leer antes de tocar el diseño):
@@ -145,7 +145,7 @@ Cambiar estos implica actualizar tests, docs y el plan a la vez:
 - Cohorte A: **13** entradas; solo toolgate es `measured`, con su run en disco.
 - La cobertura publicada **no es un invariante fijo**: crece con cada veredicto de
   la cohorte B y los tests la derivan de `assessments.json`. Solo se fijan las
-  **1340** entradas visibles. Hoy: **116** triadas, **9** evaluadas (**123** de las 125
+  **1340** entradas visibles. Hoy: **115** triadas, **10** evaluadas (**123** de las 125
   en el catálogo), **1217** sin tocar.
 
 ## Reglas inviolables (validadas por `validate-rules.mjs`)

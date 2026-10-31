@@ -1,0 +1,244 @@
+{
+  "repo": "scale-venture-partners/riff",
+  "date": "2026-10-31",
+  "scope": "directo: se ejecuta el CLI del especialista, sin pasar por el hub de jevalan",
+  "environment": {
+    "node": "v24.8.0",
+    "specialist": "0.2.0",
+    "keys": "ninguna: entorno vacío, HOME y cwd propios; el especialista no puede llamar a ningún modelo"
+  },
+  "measured": [
+    "las ocho reglas estáticas (RIF001-005 y CLR001-003) con `--no-jev`, frente a lo que su README y `--explain` dicen que deben y no deben marcar",
+    "reglas propias de frase (también con distinción de mayúsculas) desde `--config`, sin red",
+    "`--select`, `--ignore`, `--max-sentence-words` y el JSON de `--format json`",
+    "el recuento del catálogo frente a las 69 reglas (61 semánticas y 8 estáticas) que declara el README",
+    "sin `--no-jev` y sin clave, se niega con exit 2 y ofrece `--no-jev`, en lugar de saltarse las semánticas",
+    "errores de uso y de configuración; huella en disco del sandbox"
+  ],
+  "not_measured": [
+    "las 61 reglas semánticas con Jev (u otro modelo) y su coste y latencia",
+    "la clasificación del tipo de documento, que usa el modelo",
+    "lectura de .docx, .pptx, .html y de URL (no se hizo ninguna petición de red)",
+    "`--outline` y `--debug-jev`"
+  ],
+  "footprint": [
+    "arrow.md",
+    "bad.toml",
+    "badge.md",
+    "bold-one.md",
+    "bold-three.md",
+    "clean.md",
+    "curly.md",
+    "duplicate.md",
+    "founders.md",
+    "long-sentence.md",
+    "phrases.md",
+    "riff.toml",
+    "sentence-case.md",
+    "steps-in-order.md",
+    "steps-out-of-order.md",
+    "straight.md",
+    "title-case.md"
+  ],
+  "cases": [
+    {
+      "id": "version",
+      "why": "`--version` imprime la versión del paquete.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "help",
+      "why": "`--help` muestra el uso y sale con 0.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "list-rules-counts",
+      "why": "`--list-rules` imprime el catálogo: el README cuenta 69 reglas, 61 semánticas y 8 estáticas.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "rules": 69
+      }
+    },
+    {
+      "id": "explain-known-code",
+      "why": "`--explain` imprime la explicación de una regla.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "explain-unknown-code",
+      "why": "`--explain` de un código que no existe es un error (exit 2).",
+      "pass": true,
+      "problems": [],
+      "exit": 2
+    },
+    {
+      "id": "missing-file",
+      "why": "Un fichero que no existe es un error (exit 2) y lo dice.",
+      "pass": true,
+      "problems": [],
+      "exit": 2
+    },
+    {
+      "id": "clean-text-passes",
+      "why": "Un texto sin defectos sale limpio: exit 0 y ninguna marca.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "title-case-flagged",
+      "why": "Un título con todas las palabras en mayúscula inicial se marca con RIF002.",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "sentence-case-allowed",
+      "why": "El mismo título en minúsculas salvo la primera palabra no se marca.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "curly-quotes-flagged",
+      "why": "Las comillas tipográficas se marcan con RIF001.",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "unicode-arrow-flagged",
+      "why": "Una flecha unicode (→) se marca con RIF001.",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "straight-quotes-and-ascii-arrow-allowed",
+      "why": "Las comillas rectas y la flecha ASCII no se marcan.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "bold-lead-ins-flagged",
+      "why": "Tres viñetas de tres que abren con negrita se marcan con RIF003.",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "single-bold-lead-in-allowed",
+      "why": "Una sola viñeta con negrita (no la mayoría) no se marca.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "revision-badge-flagged",
+      "why": "Una nota de edición («(+2 companies added)») se marca con RIF004.",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "steps-out-of-order-flagged",
+      "why": "Un paso numerado que llega después de uno posterior (3 y luego 2) se marca con RIF005.",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "steps-in-order-allowed",
+      "why": "Los pasos en orden no se marcan.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "long-sentence-flagged",
+      "why": "Una frase de más de 45 palabras se marca con CLR001.",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "sentence-limit-configurable",
+      "why": "`--max-sentence-words` sube el límite y la misma frase deja de marcarse.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "duplicate-paragraph-flagged",
+      "why": "Un párrafo repetido casi literalmente se marca con CLR003.",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "custom-phrase-rule",
+      "why": "Con `--config`, una regla propia de frase corre sin red y marca las frases de su lista.",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "custom-phrase-case-sensitive",
+      "why": "Una regla de frase con `case-sensitive` marca «Founders» y no «founders».",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "select-limits-rules",
+      "why": "`--select RIF002` corre solo esa regla: un texto con otro defecto sale limpio.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "ignore-drops-rule",
+      "why": "`--ignore RIF002` quita esa regla del informe.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "json-shape",
+      "why": "`--format json` entrega por fichero su ruta y sus marcas con código, línea, columna, severidad y fragmento.",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "invalid-config",
+      "why": "Un fichero de configuración ilegible es un error (exit 2), no se ignora en silencio.",
+      "pass": true,
+      "problems": [],
+      "exit": 2
+    },
+    {
+      "id": "no-key-semantic-refuses",
+      "why": "Sin `--no-jev` y sin clave, riff se niega (exit 2) y ofrece `--no-jev`, en lugar de saltarse en silencio las reglas semánticas.",
+      "pass": true,
+      "problems": [],
+      "exit": 2
+    },
+    {
+      "id": "footprint-stays-in-sandbox",
+      "why": "Lo que el CLI deja en disco queda dentro del sandbox y dentro de lo que su documentación declara.",
+      "pass": true,
+      "problems": []
+    }
+  ],
+  "pass": true
+}

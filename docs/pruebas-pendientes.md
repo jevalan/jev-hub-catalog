@@ -13,7 +13,7 @@ Las más baratas de medir: se instalan según su README y corren sin credenciale
 - [ ] `DataZooDE/anofox-decide` · yes · exec · lib
 - [ ] `doronp/jevc` · unclear · exec · cli
 
-## Segunda tanda: piden clave o no traen instalación clara (64)
+## Segunda tanda: piden clave o no traen instalación clara (63)
 
 Necesitan una clave de prueba acotada, un modo `--dry-run`/`--mock` o leer el código antes de decidir cómo medirlas.
 
@@ -35,7 +35,6 @@ Necesitan una clave de prueba acotada, un modo `--dry-run`/`--mock` o leer el c�
 - [ ] `iamtoomas/JevLint` · yes · exec · cli · clave: typesafe
 - [ ] `caiovicentino/jev-risk-check-provider` · yes · http · http/mcp · clave: x402-payment
 - [ ] `Tech-Byte-Frontier/jevgate` · yes · exec · cli/hook · clave: typesafe/openrouter
-- [ ] `scale-venture-partners/riff` · yes · exec · cli/lib · clave: typesafe
 - [ ] `sufianetaouil/every` · yes · exec · cli · clave: typesafe
 - [ ] `ItisShikhar/gg-friggin-ez` · yes · exec · lib · clave: typesafe
 - [ ] `typakon4/jev-layer` · yes · exec · cli/mcp · clave: openrouter

@@ -18,6 +18,7 @@ import { jevHarnessCases } from "./lib/cli-cases-jevharness.mjs";
 import { FIXTURES as PG_FIXTURES, pkgGateCases } from "./lib/cli-cases-pkggate.mjs";
 import { FIXTURES as SN_FIXTURES, snifftestCases } from "./lib/cli-cases-snifftest.mjs";
 import { FIXTURES as JL_FIXTURES, jevLintCases } from "./lib/cli-cases-jevlint.mjs";
+import { FIXTURES as RF_FIXTURES, riffCases } from "./lib/cli-cases-riff.mjs";
 
 const arg = (name) => {
   const i = process.argv.indexOf(`--${name}`);
@@ -120,6 +121,34 @@ const CLIS = {
       "`review`, `commits`, `gaps`, `calibrate`, `eval` e `init --pre-commit/--pre-push` (necesitan git o piden al modelo)",
       "coste real de una ejecución: solo se leyó la tasación de `--dry-run`",
       "lenguajes distintos de TypeScript y shell",
+    ],
+  },
+  "scale-venture-partners/riff": {
+    cases: riffCases,
+    fixtures: RF_FIXTURES,
+    allowed: /^$/,
+    // `--cli` es el directorio src/ del repositorio; `--python` es el intérprete de un venv que ya tiene sus
+    // dependencias (instaladas solo como ruedas). Python `-s -B`, sin `-I`, que ignoraría PYTHONPATH.
+    launch: () => ({ command: arg("python") ?? which("python"), prefix: ["-s", "-B", "-c", "import sys; from riff.cli import main; sys.exit(main())"] }),
+    pythonPath: true,
+    env: { PYTHONDONTWRITEBYTECODE: "1", PYTHONIOENCODING: "utf-8" },
+    version: (cli) => {
+      const m = readFileSync(join(resolve(cli), "..", "pyproject.toml"), "utf8").match(/^version = "([^"]+)"/m);
+      return m ? m[1] : "desconocida";
+    },
+    measured: [
+      "las ocho reglas estáticas (RIF001-005 y CLR001-003) con `--no-jev`, frente a lo que su README y `--explain` dicen que deben y no deben marcar",
+      "reglas propias de frase (también con distinción de mayúsculas) desde `--config`, sin red",
+      "`--select`, `--ignore`, `--max-sentence-words` y el JSON de `--format json`",
+      "el recuento del catálogo frente a las 69 reglas (61 semánticas y 8 estáticas) que declara el README",
+      "sin `--no-jev` y sin clave, se niega con exit 2 y ofrece `--no-jev`, en lugar de saltarse las semánticas",
+      "errores de uso y de configuración; huella en disco del sandbox",
+    ],
+    not_measured: [
+      "las 61 reglas semánticas con Jev (u otro modelo) y su coste y latencia",
+      "la clasificación del tipo de documento, que usa el modelo",
+      "lectura de .docx, .pptx, .html y de URL (no se hizo ninguna petición de red)",
+      "`--outline` y `--debug-jev`",
     ],
   },
   "ismaelsoilet/jev-harness": {

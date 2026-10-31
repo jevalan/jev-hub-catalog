@@ -749,11 +749,14 @@
         ],
         "host": "any"
       },
-      "evidence": "static",
-      "verdict": "Linter de prosa con códigos de regla al estilo de ruff. Las reglas estáticas son Python puro; las semánticas hacen una llamada a Jev cada una y devuelven una probabilidad (`p=0.92`). `--format json` y exit 0 limpio, 1 con hallazgos y 2 por error de uso o de fichero. `--no-jev` corre solo las estáticas, sin clave. No está en PyPI: se instala desde el código con uv. Evidencia solo de README y árbol.",
+      "evidence": "measured",
+      "verdict": "Linter de prosa con códigos de regla al estilo de ruff: 69 reglas, 61 semánticas que llaman a Jev (u otro modelo) y 8 estáticas en Python puro (RIF001-005: símbolos decorativos, título en mayúscula inicial, viñetas con negrita, nota de edición, pasos fuera de orden; CLR001-003: frase larga, nivel de lectura, párrafo duplicado), más reglas propias de frase o de expresión regular que corren sin red. Medido sin clave (commit 0cc0a39, versión 0.2.0 ejecutada desde su fuente con sus dependencias instaladas solo como ruedas en un venv vacío; en PyPI hay una 0.1.0 anterior; siempre con `--no-jev` o sin clave, así que ninguna petición sale; 28 casos, 28 pasan): las reglas estáticas marcan lo que su documentación dice y respetan sus excepciones (pasos en orden, una sola viñeta con negrita, comillas rectas), las reglas propias de frase funcionan con y sin distinción de mayúsculas, `--select`, `--ignore` y `--max-sentence-words` hacen lo que dicen, el recuento del catálogo coincide con el del README, y sin `--no-jev` y sin clave se niega con exit 2 y ofrece `--no-jev` en lugar de saltarse las semánticas en silencio (es la conducta opuesta a la de wellposed). NO medido: las 61 reglas semánticas, la clasificación del tipo de documento (usa el modelo), la lectura de .docx, .pptx, .html y URL, y el coste.",
       "blockers": [
-        "no está en PyPI: instalación desde el código con uv"
-      ]
+        "61 de sus 69 reglas son semánticas y exigen una clave de TypeSafe (u otro modelo): sin clave solo corren las 8 estáticas",
+        "la versión de PyPI (0.1.0) va por detrás del repositorio (0.2.0); se midió el repositorio",
+        "arrastra pydantic-ai-slim, python-docx, python-pptx y beautifulsoup4 como dependencias"
+      ],
+      "run": "runs/2026-10-31-scale-venture-partners-riff"
     },
     {
       "repo": "suraj-phanindra/wellposed",
