@@ -35,11 +35,12 @@ Cero dependencias: **no hay `npm install`**, solo stdlib de Node (≥ 20), ESM
 (`.mjs`).
 
 ```bash
-npm test                       # node --test, 95 pruebas, todo offline
+npm test                       # node --test, 97 pruebas, todo offline
 node --test tests/triage.test.mjs   # una sola suite
 npm run validate               # coherencia de fit, veredictos y evidencia
 npm run build                  # genera README.md, site/index.html (directorio) y site/veredictos.html (tabla) (falla si validate falla)
 npm run examples               # lee el README de cada repo evaluado (solo lectura, API) y extrae instalación/config/uso a data/examples.json
+npm run backlog                # regenera docs/pruebas-pendientes.md: la cola de lo que aún no hemos probado nosotros
 npm run triage -- --limit=N    # 1 llamada API por repo, caché reanudable
 npm run fit                    # importa data/fit.json del documento clasificador
 npm run fit -- --doc=<ruta>    # importa desde otro documento
@@ -205,3 +206,12 @@ reproducir `callable` en **13/13** de la cohorte A — si lo cambias, corre
   datos sin romper el resto.
 - Dato con `repo: null` (artículos sin repo) y entradas `gone` son casos límite
   ya cubiertos: no los rompas.
+
+## Probar por nuestra cuenta es obligatorio
+
+La portada pública (`hub.jevalan.com`) distingue en cada ficha lo **probado por nosotros**
+(`measured`, con enlace a su `runs/`) de lo **leído** (`static`). Los ejemplos de terceros
+no se dan por buenos hasta que una prueba nuestra los respalde. La cola vive en
+`docs/pruebas-pendientes.md` (generada); cada prueba sigue la política de código de
+terceros: directorio vacío, `--ignore-scripts`, HOME propio, sin claves reales y con
+autorización explícita antes de instalar nada ajeno.
