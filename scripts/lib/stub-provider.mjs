@@ -13,6 +13,7 @@
  *   [p=0.85]        probabilidad de un predicado (noul); sin marca, 0.5
  *   [p.id=0.85]     lo mismo, solo para la pregunta con ese id (gana a [p=…]); sirve para `guard`
  *   [pick=nombre]   opción elegida (choice) o nivel elegido (score, por índice); sin marca, la primera
+ *   [force=id]      choice: devuelve ese id aunque NO esté entre las opciones ofrecidas (para probar si el envoltorio lo rechaza)
  *   [conf=0.20]     confianza de choice y score; sin marca, 0.9
  *   [http=500]      responde con ese estado HTTP y sin cuerpo útil
  *   [badjson]       responde 200 con un cuerpo que no es JSON
@@ -30,20 +31,22 @@ function answer(text, question, id, state) {
   if (question.type === "noul") {
     const field = question.instructions?.match(/For state field (\w+)/)?.[1];
     const own = field && state && typeof state === "object" ? JSON.stringify(state[field] ?? "") : text;
-    return { noul: Number(mark(own, `p\\.${id}`) ?? mark(own, "p") ?? 0.5) };
+    return { type: "noul", noul: Number(mark(own, `p\\.${id}`) ?? mark(own, "p") ?? 0.5) };
   }
   if (question.type === "choice") {
     const names = Object.keys(question.criteria);
-    const pick = names.includes(mark(text, "pick")) ? mark(text, "pick") : names[0];
+    const forced = mark(text, "force");
+    const pick = forced ?? (names.includes(mark(text, "pick")) ? mark(text, "pick") : names[0]);
     const rest = names.length > 1 ? 0.2 / (names.length - 1) : 0;
     const probabilities = Object.fromEntries(names.map((n) => [n, n === pick ? (names.length > 1 ? 0.8 : 1) : rest]));
-    return { choice: pick, probabilities, confidence: conf };
+    if (forced && !names.includes(forced)) probabilities[forced] = 1;
+    return { type: "choice", choice: pick, probabilities, confidence: conf };
   }
   const count = question.criteria.length;
   const pick = Math.min(count - 1, Number(mark(text, "pick") ?? 0));
   const rest = count > 1 ? 0.2 / (count - 1) : 0;
   const probabilities = Array.from({ length: count }, (_, i) => (i === pick ? (count > 1 ? 0.8 : 1) : rest));
-  return { score: pick, probabilities, confidence: conf };
+  return { type: "score", score: pick, probabilities, confidence: conf };
 }
 
 const server = createServer((req, res) => {

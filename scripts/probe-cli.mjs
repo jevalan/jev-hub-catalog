@@ -24,6 +24,7 @@ import { FIXTURES as JC_FIXTURES, jevLintCliCases } from "./lib/cli-cases-jevlin
 import { FIXTURES as JV_FIXTURES, jevcCases } from "./lib/cli-cases-jevc.mjs";
 import { FIXTURES as SD_FIXTURES, semdecideCases } from "./lib/cli-cases-semdecide.mjs";
 import { FIXTURES as SDL_FIXTURES, semdecideLiveCases } from "./lib/cli-cases-semdecide-live.mjs";
+import { FIXTURES as JY_FIXTURES, jevLayerCases, jevLayerLiveCases } from "./lib/cli-cases-jevlayer.mjs";
 import { FIXTURES as EV_FIXTURES, everyCases, EXTRACT_HARNESS } from "./lib/cli-cases-every.mjs";
 
 const arg = (name) => {
@@ -287,6 +288,48 @@ const CLIS = {
       "la versión de PyPI (0.1.0) es la medida; no se comparó con el HEAD del repositorio",
     ],
   },
+  "typakon4/jev-layer": {
+    cases: jevLayerCases,
+    fixtures: JY_FIXTURES,
+    allowed: /^$/,
+    stub: true,
+    // El simulador y el adaptador escuchan en 127.0.0.1; la capa lee el endpoint y la clave de su configuración por entorno.
+    stubEnv: (port) => ({ JEV_LAYER_PROVIDER: "openrouter", OPENROUTER_API_KEY: "clave-inventada-de-pruebas", OPENROUTER_DECISIONS_ENDPOINT: `http://127.0.0.1:${port}/api/alpha/decisions` }),
+    keys: "inventada («clave-inventada-de-pruebas») válida solo contra un proveedor local en 127.0.0.1; ninguna petición sale de la máquina y ninguna clave real entra en el entorno",
+    // `--cli` es bin/jev.mjs. Solo se ejecuta `help` y `cli`: `install`, `init`, `add` y `doctor` escriben configuración de otros programas.
+    launch: (cli) => ({ command: process.execPath, prefix: [resolve(cli)] }),
+    env: { NO_COLOR: "1" },
+    live: {
+      cases: jevLayerLiveCases,
+      passModel: true,
+      keys: "inventada para el especialista; la real (OpenRouter) vive solo en el entorno de un adaptador local en 127.0.0.1 con tope de gasto",
+      measured: [
+        "Jev de verdad (typesafe/jev-1.14 por la Decisions API de OpenRouter) a través del enrutador, con capacidades y textos inventados: tests, búsqueda, correo, despliegue y español",
+        "una orden incrustada en la intención y una descripción envenenada de capacidad no deciden la elección",
+        "la confianza y las probabilidades de cada caso quedan en `observed`; cinco peticiones idénticas en un proceso miden la estabilidad",
+      ],
+      not_measured: [
+        "casos ambiguos en volumen y catálogos grandes (aquí hay 4 capacidades)",
+        "imágenes, Box y `jev_computer_step`, el servidor MCP, la supervisión, el filtrado de contexto y la ruta de modelos",
+        "los adaptadores de Hermes, OMP y Codex, y los comandos que escriben configuración (`install`, `init`, `add`, `doctor`)",
+        "latencia y comportamiento ante límites de tasa",
+      ],
+    },
+    measured: [
+      "el adaptador JSONL `jev cli` con el proveedor `demo` (sin HTTP) y con un proveedor simulado nuestro (NO es Jev) para lo que la capa hace con una respuesta dada",
+      "filtrado por permisos: la capacidad prohibida queda marcada y no se envía al modelo; la decisión nunca ejecuta (`execution.enabled: false`)",
+      "redacción de claves con nombre de secreto en el contexto, y observación de qué pasa con un secreto escrito en el texto libre",
+      "fallos abiertos: 500, respuesta que no es JSON, falta de clave y una opción que no se ofreció se convierten en `fallback` sin elegir nada",
+      "una decisión por línea y en orden, línea mal formada y listas de capacidades vacías o sin permiso",
+      "huella en disco del sandbox",
+    ],
+    not_measured: [
+      "lo que Jev contesta de verdad con el proveedor simulado: lo dicta una marca en el texto",
+      "el servidor MCP (`jev mcp`), los adaptadores de Hermes, OMP y Codex, y los comandos que escriben configuración (`install`, `init`, `add`, `doctor`)",
+      "imágenes, Box, supervisión, filtrado de contexto, ruta de modelos y navegador",
+      "el endpoint HTTPS real: el simulador usa HTTP en loopback",
+    ],
+  },
   "ismaelsoilet/jev-harness": {
     cases: jevHarnessCases,
     fixtures: {},
@@ -358,6 +401,7 @@ async function main() {
   const live = Boolean(liveEnv && base?.live);
   const spec = live ? { ...base, ...base.live } : base;
   let spent = 0;
+  const modelsSeen = new Set();
   if (!spec) throw new Error(`sin juego de casos para ${repo}: ${Object.keys(CLIS).join(", ")}`);
   if (!existsSync(cli)) throw new Error(`no existe: ${cli}`);
   const version = spec.version ? spec.version(cli) : specialistVersion(cli);
@@ -374,7 +418,7 @@ async function main() {
       // La clave real solo entra en el entorno del adaptador; el especialista recibe una inventada.
       const key = readFileSync(liveEnv, "utf8").split(/\r?\n/).map((l) => l.match(/^\s*OPENROUTER_API_KEY\s*=\s*(.*)$/)?.[1]).find(Boolean)?.trim().replace(/^["']|["']$/g, "");
       if (!key) throw new Error("el .env no tiene OPENROUTER_API_KEY");
-      stub = spawn(process.execPath, [join(ROOT, "scripts", "lib", "openrouter-adapter.mjs"), stubLog, arg("cap") ?? "1"], {
+      stub = spawn(process.execPath, [join(ROOT, "scripts", "lib", "openrouter-adapter.mjs"), stubLog, arg("cap") ?? "1", spec.passModel ? "passthrough" : "fixed"], {
         stdio: ["ignore", "pipe", "inherit"],
         env: { PATH: process.env.PATH, SystemRoot: process.env.SystemRoot ?? "", OPENROUTER_API_KEY: key },
       });
@@ -385,7 +429,7 @@ async function main() {
       createInterface({ input: stub.stdout }).once("line", (l) => ok(JSON.parse(l).port));
       stub.once("error", fail);
     });
-    stubEnv = { SEMDECIDE_API_URL: `http://127.0.0.1:${port}/v1/systemone`, TYPESAFE_API_KEY: "clave-inventada-de-pruebas" };
+    stubEnv = spec.stubEnv ? spec.stubEnv(port) : { SEMDECIDE_API_URL: `http://127.0.0.1:${port}/v1/systemone`, TYPESAFE_API_KEY: "clave-inventada-de-pruebas" };
   }
   // Entorno mínimo a propósito: ninguna clave, y todo lo que el CLI escribe cae dentro del sandbox.
   const env = {
@@ -433,6 +477,7 @@ async function main() {
       // Lo que llegó al proveedor simulado durante este caso: la prueba de qué sale (y qué no) del proceso.
       res.requests = stub ? readFileSync(stubLog, "utf8").split(/\r?\n/).filter(Boolean).map((l) => JSON.parse(l)) : [];
       spent += res.requests.reduce((s, q) => s + (q.cost ?? 0), 0);
+      for (const q of res.requests) if (q.response?.model) modelsSeen.add(q.response.model);
       try {
         res.json = JSON.parse(res.stdout);
       } catch {
@@ -474,7 +519,7 @@ async function main() {
       specialist: version,
       keys: spec.keys ?? "ninguna: entorno vacío, HOME y cwd propios; el especialista no puede llamar a ningún modelo",
     },
-    ...(live ? { live: { backend: "OpenRouter Decisions API", model: "typesafe/jev-1.13", spend_usd: Number(spent.toFixed(6)), cap_usd: Number(arg("cap") ?? "1") } } : {}),
+    ...(live ? { live: { backend: "OpenRouter Decisions API", models_seen: [...modelsSeen], spend_usd: Number(spent.toFixed(6)), cap_usd: Number(arg("cap") ?? "1") } } : {}),
     measured: spec.measured,
     not_measured: spec.not_measured,
     footprint,

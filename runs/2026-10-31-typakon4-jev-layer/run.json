@@ -1,0 +1,158 @@
+{
+  "repo": "typakon4/jev-layer",
+  "date": "2026-10-31",
+  "scope": "directo: se ejecuta el CLI del especialista, sin pasar por el hub de jevalan",
+  "environment": {
+    "node": "v24.8.0",
+    "specialist": "0.3.0",
+    "keys": "inventada («clave-inventada-de-pruebas») válida solo contra un proveedor local en 127.0.0.1; ninguna petición sale de la máquina y ninguna clave real entra en el entorno"
+  },
+  "measured": [
+    "el adaptador JSONL `jev cli` con el proveedor `demo` (sin HTTP) y con un proveedor simulado nuestro (NO es Jev) para lo que la capa hace con una respuesta dada",
+    "filtrado por permisos: la capacidad prohibida queda marcada y no se envía al modelo; la decisión nunca ejecuta (`execution.enabled: false`)",
+    "redacción de claves con nombre de secreto en el contexto, y observación de qué pasa con un secreto escrito en el texto libre",
+    "fallos abiertos: 500, respuesta que no es JSON, falta de clave y una opción que no se ofreció se convierten en `fallback` sin elegir nada",
+    "una decisión por línea y en orden, línea mal formada y listas de capacidades vacías o sin permiso",
+    "huella en disco del sandbox"
+  ],
+  "not_measured": [
+    "lo que Jev contesta de verdad con el proveedor simulado: lo dicta una marca en el texto",
+    "el servidor MCP (`jev mcp`), los adaptadores de Hermes, OMP y Codex, y los comandos que escriben configuración (`install`, `init`, `add`, `doctor`)",
+    "imágenes, Box, supervisión, filtrado de contexto, ruta de modelos y navegador",
+    "el endpoint HTTPS real: el simulador usa HTTP en loopback"
+  ],
+  "footprint": [],
+  "cases": [
+    {
+      "id": "help",
+      "why": "`help` lista los comandos y sale con 0.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "unknown-command",
+      "why": "Un comando desconocido muestra la ayuda y sale con 1.",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "demo-selects-the-read-only-capability",
+      "why": "Con el proveedor `demo` (sin HTTP), la intención de buscar elige `repo_search` y la decisión trae su recibo.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "never-executes",
+      "why": "Una decisión nunca ejecuta nada: `execution.enabled` es false y el estado `not_started`.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "permission-filter-marks-the-forbidden-capability",
+      "why": "Una capacidad que exige un permiso que el actor no tiene queda marcada como filtrada, con el motivo.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "forbidden-capability-never-reaches-the-provider",
+      "why": "La capacidad filtrada por permisos no se le manda al modelo: no figura entre las opciones de la pregunta.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "secret-keys-in-context-are-redacted",
+      "why": "Las claves con nombre de secreto del contexto (`api_key`, `token`, `password`, `authorization`) salen redactadas hacia el proveedor.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "secret-values-in-free-text-are-not-redacted",
+      "why": "Observación, no exigencia: un secreto escrito dentro del texto libre de la intención (no en una clave con nombre de secreto), ¿sale hacia el proveedor?",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "secret_shaped_value_sent": true
+      }
+    },
+    {
+      "id": "provider-error-fails-open",
+      "why": "Un 500 del proveedor no rompe nada: estado `fallback`, motivo `provider_error`, ejecución desactivada y exit 0.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "malformed-provider-response-fails-open",
+      "why": "Una respuesta que no es JSON es un fallo del proveedor, no una decisión: `fallback` y nada elegido.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "answer-outside-the-offered-options-is-rejected",
+      "why": "Si el modelo contesta una capacidad que no se le ofreció (la filtrada), la capa no la acepta: nada elegido.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "no-key-fails-open-without-a-request",
+      "why": "Sin clave, cae a `fallback` nombrando la variable y no sale ninguna petición.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "bad-json-line-is-an-error-record",
+      "why": "Una línea que no es JSON produce un registro `status: error` con la ejecución desactivada, y el proceso termina con 0.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "one-decision-per-line-in-order",
+      "why": "Tres peticiones en tres líneas dan tres decisiones, en el mismo orden y con identificadores distintos.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "no-capability-allowed-for-the-actor",
+      "why": "Observación: si el actor no tiene permiso para ninguna capacidad, ¿qué devuelve la capa?",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "status": "no_decision",
+        "selected": null,
+        "reason": "no capability passed availability, risk, and permission policy"
+      }
+    },
+    {
+      "id": "empty-capability-list",
+      "why": "Observación: una lista de capacidades vacía.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "status": "no_decision",
+        "reason": "no capability passed availability, risk, and permission policy"
+      }
+    },
+    {
+      "id": "footprint-stays-in-sandbox",
+      "why": "Lo que el CLI deja en disco queda dentro del sandbox y dentro de lo que su documentación declara.",
+      "pass": true,
+      "problems": []
+    }
+  ],
+  "pass": true
+}

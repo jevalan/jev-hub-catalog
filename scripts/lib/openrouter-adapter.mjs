@@ -13,7 +13,7 @@
 import { appendFileSync } from "node:fs";
 import { createServer } from "node:http";
 
-const [log, capArg] = process.argv.slice(2);
+const [log, capArg, passModel] = process.argv.slice(2);
 const cap = Number(capArg);
 const key = process.env.OPENROUTER_API_KEY;
 if (!key || !(cap > 0)) {
@@ -38,7 +38,8 @@ const server = createServer((req, res) => {
       appendFileSync(log, JSON.stringify({ status: 429, cost: 0, reason: "tope de gasto alcanzado" }) + "\n");
       return res.writeHead(429).end();
     }
-    const sent = { ...parsed, model: MODEL };
+    // `passthrough`: el especialista pide su propio modelo (p. ej. jev-layer, typesafe/jev-1.14) y se respeta.
+    const sent = { ...parsed, model: passModel === "passthrough" ? parsed.model ?? MODEL : MODEL };
     for (const q of Object.values(sent.questions ?? {})) {
       if (q.type === "noul" && !q.criteria) q.criteria = { true: "The statement holds", false: "The statement does not hold" };
     }
