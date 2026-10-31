@@ -10,7 +10,8 @@
     "build": "node scripts/build.mjs",
     "triage": "node scripts/triage.mjs",
     "fixtures": "node scripts/make-fixtures.mjs",
-    "test": "node --test"
+    "test": "node --test",
+    "examples": "node scripts/examples.mjs"
   },
   "engines": {
     "node": ">=20"

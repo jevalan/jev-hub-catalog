@@ -1,7 +1,8 @@
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import { readJson } from "./lib/json.mjs";
-import { ASSESSMENTS, CATALOG, FIT, README, SHELF, SITE, TEMPLATE } from "./lib/paths.mjs";
+import { ASSESSMENTS, CATALOG, DIRECTORY, EXAMPLES, FIT, README, SHELF, SITE, TEMPLATE } from "./lib/paths.mjs";
+import { buildDirectory } from "./lib/directory.mjs";
 import { hasRun } from "./lib/runs.mjs";
 import { validateAll } from "./lib/validate-rules.mjs";
 
@@ -121,6 +122,9 @@ if (process.argv[1] && process.argv[1].endsWith("build.mjs")) {
   writeFileSync(README, buildReadme(assessments, catalog, shelf));
   mkdirSync(dirname(SITE), { recursive: true });
   writeFileSync(SITE, buildSite(assessments, catalog, readFileSync(TEMPLATE, "utf8")));
+  // Los ejemplos son opcionales: sin `npm run examples` el directorio sale igual, solo sin desplegables.
+  const examples = existsSync(EXAMPLES) ? readJson(EXAMPLES) : { entries: {} };
+  writeFileSync(DIRECTORY, buildDirectory(assessments, examples, new Date().toISOString().slice(0, 10)));
   const c = coverage(assessments, catalog);
   console.log(`build: ${c.triaged} triadas, ${c.evaluated} evaluadas, ${c.untouched} sin tocar, de ${c.total}`);
 }
