@@ -84,3 +84,66 @@ test("latestFrontiers se queda con la batería más reciente de cada grupo", () 
   }
   assert.deepEqual(latestFrontiers(dir), [{ mark: "new" }]);
 });
+
+// — grupo review —
+import * as review from "../scripts/lib/frontier-review.mjs";
+
+test("el corpus de review tiene ids únicos, verdad de terreno, reglas esperadas y técnicas con rótulo en ambos idiomas", () => {
+  assert.equal(new Set(review.CORPUS.map((c) => c.id)).size, review.CORPUS.length);
+  for (const c of review.CORPUS) {
+    assert.ok(["defect", "clean"].includes(c.truth) && c.request, c.id);
+    // Un defecto sin regla esperada no se puede juzgar; una petición sana no espera ninguna.
+    assert.equal(c.truth === "defect", c.expect.length > 0, c.id);
+  }
+  for (const lang of ["es", "en"]) for (const k of review.TECHNIQUES) assert.ok(STR[lang].techniques[k], `${lang}:${k}`);
+});
+
+test("review: un defecto es atrapado si sale alguna regla esperada, y una petición sana solo es limpia sin avisos ni errores", () => {
+  const defect = { truth: "defect", expect: ["jev/counting", "jev/arithmetic"] };
+  assert.equal(review.outcome(defect, [{ rule: "jev/arithmetic", severity: "warn" }]), "caught");
+  assert.equal(review.outcome(defect, [{ rule: "request/single-question", severity: "info" }]), "missed");
+  assert.equal(review.outcome(defect, []), "missed");
+  assert.equal(review.outcome(defect, null), "unreadable");
+  const sound = { truth: "clean", expect: [] };
+  assert.equal(review.outcome(sound, [{ rule: "request/single-question", severity: "info" }]), "clean");
+  assert.equal(review.outcome(sound, [{ rule: "choice/no-escape-hatch", severity: "warn" }]), "false-alarm");
+  assert.equal(review.outcome(sound, [{ rule: "request/no-questions", severity: "error" }]), "false-alarm");
+});
+
+test("review: summarize cuenta atrapados, escapados y falsas alarmas por técnica", () => {
+  const mk = (technique, truth, outcome) => ({ technique, truth, outcome });
+  const s = review.summarize([
+    mk("a", "defect", "caught"),
+    mk("a", "defect", "missed"),
+    mk("b", "clean", "clean"),
+    mk("b", "clean", "false-alarm"),
+  ]);
+  assert.deepEqual([s.caught, s.missed, s.defectTotal, s.cleanPass, s.falseAlarms, s.cleanTotal], [1, 1, 2, 1, 1, 2]);
+  assert.deepEqual(s.byTechnique.a, { defects: 2, caught: 1, missed: 1, clean: 0, falseAlarms: 0 });
+});
+
+const reviewSample = {
+  group: "review",
+  date: "2026-10-31",
+  corpus: { size: 4 },
+  projects: {
+    "x/sharp": { version: "1.0.0", summary: { caught: 2, missed: 0, defectTotal: 2, cleanPass: 2, falseAlarms: 0, cleanTotal: 2, byTechnique: { structure: { defects: 2, caught: 2, missed: 0, clean: 2, falseAlarms: 0 } } } },
+    "y/blind": { version: "2.0.0", summary: { caught: 0, missed: 2, defectTotal: 2, cleanPass: 1, falseAlarms: 1, cleanTotal: 2, byTechnique: { structure: { defects: 2, caught: 0, missed: 2, clean: 2, falseAlarms: 1 } } } },
+  },
+};
+
+test("la página de review ordena por defectos escapados y nombra las técnicas donde no atrapa nada", () => {
+  for (const lang of ["es", "en"]) {
+    const html = buildFrontierPage([reviewSample], lang);
+    assert.ok(html.indexOf("x/sharp") < html.indexOf("y/blind"));
+    assert.match(html, /script-src 'none'/);
+  }
+  assert.match(buildFrontierPage([reviewSample], "en"), /Catches no defect at all in: Request structure/);
+  assert.match(buildFrontierPage([reviewSample], "es"), /No atrapa ningún defecto de: Estructura de la petición/);
+});
+
+test("la página muestra a la vez un grupo de gates y uno de review", () => {
+  const html = buildFrontierPage([sample, reviewSample], "en");
+  assert.match(html, /Group gates/);
+  assert.match(html, /Group review/);
+});

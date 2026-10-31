@@ -1,0 +1,813 @@
+{
+  "group": "review",
+  "date": "2026-10-31",
+  "scope": "directo: se ejecuta el CLI de cada linter, sin pasar por el hub de jevalan",
+  "environment": {
+    "node": "v24.8.0",
+    "keys": "ninguna: entorno vacío, HOME y cwd propios; sin `--semantic`, ningún linter llama a un modelo"
+  },
+  "corpus": {
+    "size": 66
+  },
+  "not_measured": [
+    "las comprobaciones semánticas con modelo (`--semantic` con clave): la frontera es solo la capa estructural",
+    "peticiones reales de un proyecto: son peticiones sintéticas con un único defecto inyectado",
+    "defectos combinados: cada petición lleva uno solo",
+    "secretos en los valores del estado: `forbidden` mira nombres de campo, no el contenido"
+  ],
+  "projects": {
+    "suraj-phanindra/wellposed": {
+      "version": "0.7.1",
+      "summary": {
+        "byTechnique": {
+          "structure": {
+            "defects": 13,
+            "caught": 13,
+            "missed": 0,
+            "clean": 0,
+            "falseAlarms": 0
+          },
+          "limits": {
+            "defects": 2,
+            "caught": 2,
+            "missed": 0,
+            "clean": 1,
+            "falseAlarms": 1
+          },
+          "paths": {
+            "defects": 5,
+            "caught": 5,
+            "missed": 0,
+            "clean": 0,
+            "falseAlarms": 0
+          },
+          "lookalike-clean": {
+            "defects": 0,
+            "caught": 0,
+            "missed": 0,
+            "clean": 11,
+            "falseAlarms": 0
+          },
+          "forbidden": {
+            "defects": 4,
+            "caught": 4,
+            "missed": 0,
+            "clean": 1,
+            "falseAlarms": 0
+          },
+          "heuristic-plain": {
+            "defects": 6,
+            "caught": 6,
+            "missed": 0,
+            "clean": 0,
+            "falseAlarms": 0
+          },
+          "heuristic-path-cited": {
+            "defects": 6,
+            "caught": 3,
+            "missed": 3,
+            "clean": 0,
+            "falseAlarms": 0
+          },
+          "heuristic-paraphrase": {
+            "defects": 11,
+            "caught": 4,
+            "missed": 7,
+            "clean": 0,
+            "falseAlarms": 0
+          },
+          "heuristic-spanish": {
+            "defects": 6,
+            "caught": 0,
+            "missed": 6,
+            "clean": 0,
+            "falseAlarms": 0
+          }
+        },
+        "defectTotal": 53,
+        "caught": 37,
+        "missed": 16,
+        "cleanTotal": 13,
+        "cleanPass": 12,
+        "falseAlarms": 1,
+        "unreadable": 0
+      },
+      "results": [
+        {
+          "id": "no-model",
+          "technique": "structure",
+          "truth": "defect",
+          "expect": [
+            "request/missing-model"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "request/missing-model"
+          ]
+        },
+        {
+          "id": "no-state",
+          "technique": "structure",
+          "truth": "defect",
+          "expect": [
+            "request/missing-state"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "request/missing-state"
+          ]
+        },
+        {
+          "id": "no-questions",
+          "technique": "structure",
+          "truth": "defect",
+          "expect": [
+            "request/no-questions"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "request/no-questions"
+          ]
+        },
+        {
+          "id": "empty-key",
+          "technique": "structure",
+          "truth": "defect",
+          "expect": [
+            "question/empty-key"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "question/empty-key"
+          ]
+        },
+        {
+          "id": "invalid-type",
+          "technique": "structure",
+          "truth": "defect",
+          "expect": [
+            "question/invalid-type"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "question/invalid-type"
+          ]
+        },
+        {
+          "id": "missing-instructions",
+          "technique": "structure",
+          "truth": "defect",
+          "expect": [
+            "question/missing-instructions"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "question/missing-instructions"
+          ]
+        },
+        {
+          "id": "instructions-number",
+          "technique": "structure",
+          "truth": "defect",
+          "expect": [
+            "instructions/wrong-type"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "instructions/wrong-type",
+            "question/id-only-semantics"
+          ]
+        },
+        {
+          "id": "state-number",
+          "technique": "structure",
+          "truth": "defect",
+          "expect": [
+            "state/wrong-type"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "state/wrong-type"
+          ]
+        },
+        {
+          "id": "choice-no-criteria",
+          "technique": "structure",
+          "truth": "defect",
+          "expect": [
+            "choice/missing-criteria"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "question/id-only-semantics",
+            "choice/missing-criteria"
+          ]
+        },
+        {
+          "id": "score-one-level",
+          "technique": "structure",
+          "truth": "defect",
+          "expect": [
+            "score/too-few-levels"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "score/too-few-levels"
+          ]
+        },
+        {
+          "id": "score-eleven-levels",
+          "technique": "structure",
+          "truth": "defect",
+          "expect": [
+            "score/too-many-levels"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "score/too-many-levels"
+          ]
+        },
+        {
+          "id": "score-duplicate-levels",
+          "technique": "structure",
+          "truth": "defect",
+          "expect": [
+            "score/duplicate-levels"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "score/duplicate-levels"
+          ]
+        },
+        {
+          "id": "noul-stray-criteria",
+          "technique": "structure",
+          "truth": "defect",
+          "expect": [
+            "noul/unexpected-criteria-keys"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "noul/unexpected-criteria-keys"
+          ]
+        },
+        {
+          "id": "state-far-over-limits",
+          "technique": "limits",
+          "truth": "defect",
+          "expect": [
+            "context/over-total",
+            "context/over-state-plus-question"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "context/over-total",
+            "context/over-state-plus-question"
+          ]
+        },
+        {
+          "id": "state-prose-under-limits",
+          "technique": "limits",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "false-alarm",
+          "rules": [
+            "context/over-state-plus-question"
+          ]
+        },
+        {
+          "id": "choice-300-options",
+          "technique": "limits",
+          "truth": "defect",
+          "expect": [
+            "choice/too-many-options"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "choice/too-many-options"
+          ]
+        },
+        {
+          "id": "path-missing-leaf",
+          "technique": "paths",
+          "truth": "defect",
+          "expect": [
+            "state/broken-path"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "state/broken-path"
+          ]
+        },
+        {
+          "id": "path-typo",
+          "technique": "paths",
+          "truth": "defect",
+          "expect": [
+            "state/broken-path"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "state/broken-path"
+          ]
+        },
+        {
+          "id": "path-array-out-of-range",
+          "technique": "paths",
+          "truth": "defect",
+          "expect": [
+            "state/broken-path"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "state/broken-path"
+          ]
+        },
+        {
+          "id": "path-wrong-case",
+          "technique": "paths",
+          "truth": "defect",
+          "expect": [
+            "state/broken-path"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "state/broken-path"
+          ]
+        },
+        {
+          "id": "path-wrong-root",
+          "technique": "paths",
+          "truth": "defect",
+          "expect": [
+            "state/broken-path"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "state/broken-path"
+          ]
+        },
+        {
+          "id": "path-valid-nested",
+          "technique": "lookalike-clean",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "clean",
+          "rules": []
+        },
+        {
+          "id": "path-valid-array",
+          "technique": "lookalike-clean",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "clean",
+          "rules": []
+        },
+        {
+          "id": "path-valid-deep",
+          "technique": "lookalike-clean",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "clean",
+          "rules": []
+        },
+        {
+          "id": "forbidden-direct",
+          "technique": "forbidden",
+          "truth": "defect",
+          "expect": [
+            "state/forbidden-path"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "state/forbidden-path"
+          ]
+        },
+        {
+          "id": "forbidden-deep",
+          "technique": "forbidden",
+          "truth": "defect",
+          "expect": [
+            "state/forbidden-path"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "state/forbidden-path"
+          ]
+        },
+        {
+          "id": "forbidden-in-array",
+          "technique": "forbidden",
+          "truth": "defect",
+          "expect": [
+            "state/forbidden-path"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "state/forbidden-path"
+          ]
+        },
+        {
+          "id": "forbidden-other-case",
+          "technique": "forbidden",
+          "truth": "defect",
+          "expect": [
+            "state/forbidden-path"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "state/forbidden-path"
+          ]
+        },
+        {
+          "id": "forbidden-absent",
+          "technique": "forbidden",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "clean",
+          "rules": []
+        },
+        {
+          "id": "plain-arithmetic",
+          "technique": "heuristic-plain",
+          "truth": "defect",
+          "expect": [
+            "jev/arithmetic"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "jev/arithmetic"
+          ]
+        },
+        {
+          "id": "plain-counting",
+          "technique": "heuristic-plain",
+          "truth": "defect",
+          "expect": [
+            "jev/counting"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "jev/counting"
+          ]
+        },
+        {
+          "id": "plain-date",
+          "technique": "heuristic-plain",
+          "truth": "defect",
+          "expect": [
+            "jev/date-comparison"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "jev/date-comparison"
+          ]
+        },
+        {
+          "id": "plain-double-negative",
+          "technique": "heuristic-plain",
+          "truth": "defect",
+          "expect": [
+            "jev/double-negative"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "jev/double-negative"
+          ]
+        },
+        {
+          "id": "plain-bundled",
+          "technique": "heuristic-plain",
+          "truth": "defect",
+          "expect": [
+            "jev/bundled-judgments"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "jev/bundled-judgments"
+          ]
+        },
+        {
+          "id": "plain-degree",
+          "technique": "heuristic-plain",
+          "truth": "defect",
+          "expect": [
+            "noul/degree-question"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "noul/degree-question"
+          ]
+        },
+        {
+          "id": "path-arithmetic",
+          "technique": "heuristic-path-cited",
+          "truth": "defect",
+          "expect": [
+            "jev/arithmetic"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "jev/arithmetic"
+          ]
+        },
+        {
+          "id": "path-counting",
+          "technique": "heuristic-path-cited",
+          "truth": "defect",
+          "expect": [
+            "jev/counting"
+          ],
+          "outcome": "missed",
+          "rules": []
+        },
+        {
+          "id": "path-date",
+          "technique": "heuristic-path-cited",
+          "truth": "defect",
+          "expect": [
+            "jev/date-comparison"
+          ],
+          "outcome": "missed",
+          "rules": []
+        },
+        {
+          "id": "path-double-negative",
+          "technique": "heuristic-path-cited",
+          "truth": "defect",
+          "expect": [
+            "jev/double-negative"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "jev/double-negative"
+          ]
+        },
+        {
+          "id": "path-bundled",
+          "technique": "heuristic-path-cited",
+          "truth": "defect",
+          "expect": [
+            "jev/bundled-judgments"
+          ],
+          "outcome": "missed",
+          "rules": []
+        },
+        {
+          "id": "path-degree",
+          "technique": "heuristic-path-cited",
+          "truth": "defect",
+          "expect": [
+            "noul/degree-question"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "noul/degree-question"
+          ]
+        },
+        {
+          "id": "para-arithmetic-add",
+          "technique": "heuristic-paraphrase",
+          "truth": "defect",
+          "expect": [
+            "jev/arithmetic"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "jev/arithmetic"
+          ]
+        },
+        {
+          "id": "para-arithmetic-multiply",
+          "technique": "heuristic-paraphrase",
+          "truth": "defect",
+          "expect": [
+            "jev/arithmetic"
+          ],
+          "outcome": "missed",
+          "rules": []
+        },
+        {
+          "id": "para-arithmetic-percent",
+          "technique": "heuristic-paraphrase",
+          "truth": "defect",
+          "expect": [
+            "jev/arithmetic"
+          ],
+          "outcome": "missed",
+          "rules": []
+        },
+        {
+          "id": "para-counting-entries",
+          "technique": "heuristic-paraphrase",
+          "truth": "defect",
+          "expect": [
+            "jev/counting"
+          ],
+          "outcome": "missed",
+          "rules": []
+        },
+        {
+          "id": "para-counting-times",
+          "technique": "heuristic-paraphrase",
+          "truth": "defect",
+          "expect": [
+            "jev/counting"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "jev/counting"
+          ]
+        },
+        {
+          "id": "para-date-before",
+          "technique": "heuristic-paraphrase",
+          "truth": "defect",
+          "expect": [
+            "jev/date-comparison"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "jev/date-comparison"
+          ]
+        },
+        {
+          "id": "para-date-newer",
+          "technique": "heuristic-paraphrase",
+          "truth": "defect",
+          "expect": [
+            "jev/date-comparison"
+          ],
+          "outcome": "missed",
+          "rules": []
+        },
+        {
+          "id": "para-double-negative",
+          "technique": "heuristic-paraphrase",
+          "truth": "defect",
+          "expect": [
+            "jev/double-negative"
+          ],
+          "outcome": "missed",
+          "rules": []
+        },
+        {
+          "id": "para-bundled-and",
+          "technique": "heuristic-paraphrase",
+          "truth": "defect",
+          "expect": [
+            "jev/bundled-judgments"
+          ],
+          "outcome": "missed",
+          "rules": []
+        },
+        {
+          "id": "para-bundled-or",
+          "technique": "heuristic-paraphrase",
+          "truth": "defect",
+          "expect": [
+            "jev/bundled-judgments"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "jev/bundled-judgments"
+          ]
+        },
+        {
+          "id": "para-degree-rank",
+          "technique": "heuristic-paraphrase",
+          "truth": "defect",
+          "expect": [
+            "noul/degree-question"
+          ],
+          "outcome": "missed",
+          "rules": []
+        },
+        {
+          "id": "es-arithmetic",
+          "technique": "heuristic-spanish",
+          "truth": "defect",
+          "expect": [
+            "jev/arithmetic"
+          ],
+          "outcome": "missed",
+          "rules": []
+        },
+        {
+          "id": "es-counting",
+          "technique": "heuristic-spanish",
+          "truth": "defect",
+          "expect": [
+            "jev/counting"
+          ],
+          "outcome": "missed",
+          "rules": []
+        },
+        {
+          "id": "es-date",
+          "technique": "heuristic-spanish",
+          "truth": "defect",
+          "expect": [
+            "jev/date-comparison"
+          ],
+          "outcome": "missed",
+          "rules": []
+        },
+        {
+          "id": "es-double-negative",
+          "technique": "heuristic-spanish",
+          "truth": "defect",
+          "expect": [
+            "jev/double-negative"
+          ],
+          "outcome": "missed",
+          "rules": []
+        },
+        {
+          "id": "es-bundled",
+          "technique": "heuristic-spanish",
+          "truth": "defect",
+          "expect": [
+            "jev/bundled-judgments"
+          ],
+          "outcome": "missed",
+          "rules": []
+        },
+        {
+          "id": "es-degree",
+          "technique": "heuristic-spanish",
+          "truth": "defect",
+          "expect": [
+            "noul/degree-question"
+          ],
+          "outcome": "missed",
+          "rules": []
+        },
+        {
+          "id": "clean-mentions-sum",
+          "technique": "lookalike-clean",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "clean",
+          "rules": []
+        },
+        {
+          "id": "clean-states-how-much",
+          "technique": "lookalike-clean",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "clean",
+          "rules": []
+        },
+        {
+          "id": "clean-invoice",
+          "technique": "lookalike-clean",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "clean",
+          "rules": []
+        },
+        {
+          "id": "clean-cannot-login",
+          "technique": "lookalike-clean",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "clean",
+          "rules": []
+        },
+        {
+          "id": "clean-refund",
+          "technique": "lookalike-clean",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "clean",
+          "rules": []
+        },
+        {
+          "id": "clean-es-refund",
+          "technique": "lookalike-clean",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "clean",
+          "rules": []
+        },
+        {
+          "id": "clean-choice-with-other",
+          "technique": "lookalike-clean",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "clean",
+          "rules": []
+        },
+        {
+          "id": "clean-score-concrete",
+          "technique": "lookalike-clean",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "clean",
+          "rules": []
+        }
+      ]
+    }
+  }
+}

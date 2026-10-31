@@ -35,7 +35,7 @@ Cero dependencias: **no hay `npm install`**, solo stdlib de Node (≥ 20), ESM
 (`.mjs`).
 
 ```bash
-npm test                       # node --test, 117 pruebas, todo offline
+npm test                       # node --test, 122 pruebas, todo offline
 node --test tests/triage.test.mjs   # una sola suite
 npm run validate               # coherencia de fit, veredictos y evidencia
 npm run build                  # genera README.md, site/index.html (directorio) y site/veredictos.html (tabla) (falla si validate falla)
@@ -49,6 +49,8 @@ node scripts/probe.mjs --repo <o/r> --capability <cap> --jevalan <bin> --capabil
                                # mide un especialista exec sin claves y escribe runs/<fecha>-<repo>/
 node scripts/frontier-gates.mjs --firewall <cli> --reflex <cli>
                                # batería de frontera del grupo gates: las mismas órdenes contra todos los gates medidos
+node scripts/frontier-review.mjs --wellposed <ruta a wellposed.mjs>
+                               # batería de frontera del grupo review: las mismas peticiones (un defecto inyectado o ninguno) contra cada linter medido
 node scripts/probe-cli.mjs --repo <o/r> --cli <ruta al CLI>
                                # mide un CLI de linter/filtro (wellposed) en un sandbox, sin claves; casos propios en scripts/lib/cli-cases-*.mjs
 node scripts/probe-gate.mjs --repo <o/r> --cli <ruta al CLI>
@@ -219,7 +221,9 @@ El **ranking** (`scripts/lib/ranking.mjs`) lee solo los `runs/*/run.json` de las
 
 ## Frontera: exprimir cada grupo
 
-Medir que algo funciona no dice dónde deja de hacerlo. Cada grupo con miembros medidos lleva una **batería de frontera**: la misma lista de casos, con verdad de terreno clara y agrupada por técnica, lanzada contra todos sus miembros. Se guarda en `runs/<fecha>-frontier-<grupo>/frontier.json` y `npm run build` publica la última de cada grupo en `/frontier.html` (y `/en/`). La del grupo `gates` (`scripts/lib/frontier-gates.mjs`, 50 órdenes de shell: destructivas, exfiltración, ofuscación, envoltorios, compuestas, tamaño y codificación, y parecidos inofensivos) separa tres cosas: **brecha** (una orden peligrosa que pasa), **bloqueo por regla** frente a **solo preguntar**, y **fricción** (órdenes inofensivas interrumpidas). Una frontera que solo pregunta no filtra: interrumpe. Al añadir un grupo nuevo, escribe su corpus con verdad de terreno inequívoca (nada discutible), un adaptador por proyecto y las cadenas en ambos idiomas.
+Medir que algo funciona no dice dónde deja de hacerlo. Cada grupo con miembros medidos lleva una **batería de frontera**: la misma lista de casos, con verdad de terreno clara y agrupada por técnica, lanzada contra todos sus miembros. Se guarda en `runs/<fecha>-frontier-<grupo>/frontier.json` y `npm run build` publica la última de cada grupo en `/frontier.html` (y `/en/`). La del grupo `gates` (`scripts/lib/frontier-gates.mjs`, 50 órdenes de shell: destructivas, exfiltración, ofuscación, envoltorios, compuestas, tamaño y codificación, y parecidos inofensivos) separa tres cosas: **brecha** (una orden peligrosa que pasa), **bloqueo por regla** frente a **solo preguntar**, y **fricción** (órdenes inofensivas interrumpidas). Una frontera que solo pregunta no filtra: interrumpe.
+
+La del grupo `review` (`scripts/lib/frontier-review.mjs`, 66 peticiones con un único defecto inyectado o ninguno) mide **qué defectos atrapa, cuáles se le escapan y cuándo da falsas alarmas**, agrupado por técnica: estructura, límites, rutas, campos prohibidos y las heurísticas de «irregularidad» de jev en inglés llano, citando rutas con acentos graves, parafraseadas y en español. La verdad de terreno es el defecto que el propio linter declara detectar; un caso que depende de un umbral dudoso (los límites van en tokens estimados, no en caracteres) se descarta o se sube hasta que no haya duda. Ojo al corregir un fallo: antes de darlo por brecha del linter, comprueba que no sea un error del corpus (aquí ya pasó con el estado como texto y con los tamaños). Al añadir un grupo nuevo, escribe su corpus con verdad de terreno inequívoca (nada discutible), un adaptador por proyecto y las cadenas en ambos idiomas.
 
 ## Probar por nuestra cuenta es obligatorio
 
