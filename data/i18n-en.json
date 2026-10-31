@@ -17,7 +17,7 @@
   "TheoOliveira/pi-jev": "Almost entirely a Pi extension, which cannot be called from outside.",
   "gargpratyush/jev-router": "A Claude Code and Codex launcher and proxy: it picks the model tier on every turn inside its own process.",
   "rhighs/jev-code": "An SDK for building decisions and an interactive coding agent, not a decision to serve.",
-  "mizchi/jev-lint": "An ast-grep matcher picks the code and each match gets a one-sentence question; it returns the probability against a cutoff (`0.89 cutoff 0.56`), a typed decision per match.",
+  "mizchi/jev-lint": "Natural-language linter: an ast-grep matcher picks the code and a model is asked one sentence per match. Measured by us without a key and always with --dry-run: it plans and prices a run without sending anything, the matcher selects what its rules document, suppressions work, and a 52-fragment frontier shows the matcher reaches 41 of 44 constructs it should judge (it misses generator functions, bash <(curl ...) and a doc comment on an arrow function). A path that does not exist exits 0 and there is no --version. No model verdict was measured.",
   "supercorp-ai/supercov": "`quality` scores each file with yes/no questions and `quality patch` reviews only a change; `security` asks twelve checks per file.",
   "lakeday-org/perch": "Scans a whole repository and outputs a findings table with severity and confidence; `perch check <id>` re-asks about a single one, which would be a yes/no.",
   "NiazMorshed2007/jev-review": "A single MCP tool, `jev_review`, returning a 1-to-10 score with confidence per quality dimension.",

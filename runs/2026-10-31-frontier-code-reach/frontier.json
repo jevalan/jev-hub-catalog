@@ -1,0 +1,807 @@
+{
+  "group": "code-reach",
+  "date": "2026-10-31",
+  "scope": "directo: se ejecuta el CLI de cada linter con --dry-run, sin pasar por el hub de jevalan",
+  "environment": {
+    "node": "v24.8.0",
+    "keys": "ninguna: entorno vacío, HOME y cwd propios; con `--dry-run` ningún linter puede enviar código"
+  },
+  "corpus": {
+    "size": 52
+  },
+  "not_measured": [
+    "si el modelo acierta sobre lo que se le pregunta: sin clave no hay modelo, solo se mide qué código se enviaría",
+    "código real de un proyecto: son fragmentos cortos y sintéticos con una sola construcción",
+    "lenguajes que no sean TypeScript, JavaScript, Python, Go, Rust y shell",
+    "las reglas de git (commits, diffs) y las de markdown"
+  ],
+  "projects": {
+    "mizchi/jev-lint": {
+      "version": "0.7.0",
+      "summary": {
+        "byTechnique": {
+          "function-forms": {
+            "defects": 10,
+            "caught": 9,
+            "missed": 1,
+            "clean": 0,
+            "falseAlarms": 0
+          },
+          "method-forms": {
+            "defects": 5,
+            "caught": 5,
+            "missed": 0,
+            "clean": 0,
+            "falseAlarms": 0
+          },
+          "other-languages": {
+            "defects": 4,
+            "caught": 4,
+            "missed": 0,
+            "clean": 0,
+            "falseAlarms": 0
+          },
+          "catch-blocks": {
+            "defects": 6,
+            "caught": 6,
+            "missed": 0,
+            "clean": 0,
+            "falseAlarms": 0
+          },
+          "errors-logs-types": {
+            "defects": 6,
+            "caught": 6,
+            "missed": 0,
+            "clean": 0,
+            "falseAlarms": 0
+          },
+          "doc-comments": {
+            "defects": 4,
+            "caught": 3,
+            "missed": 1,
+            "clean": 0,
+            "falseAlarms": 0
+          },
+          "shell-scripts": {
+            "defects": 9,
+            "caught": 8,
+            "missed": 1,
+            "clean": 0,
+            "falseAlarms": 0
+          },
+          "lookalike-none": {
+            "defects": 0,
+            "caught": 0,
+            "missed": 0,
+            "clean": 8,
+            "falseAlarms": 0
+          }
+        },
+        "defectTotal": 44,
+        "caught": 41,
+        "missed": 3,
+        "cleanTotal": 8,
+        "cleanPass": 8,
+        "falseAlarms": 0,
+        "unreadable": 0
+      },
+      "results": [
+        {
+          "id": "fn-declaration",
+          "technique": "function-forms",
+          "truth": "defect",
+          "expect": [
+            "fn-name-promises"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "fn-name-promises",
+            "module-naming-consistent",
+            "module-name-describes-contents"
+          ]
+        },
+        {
+          "id": "fn-arrow-const",
+          "technique": "function-forms",
+          "truth": "defect",
+          "expect": [
+            "fn-name-promises"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "fn-name-promises",
+            "module-naming-consistent",
+            "module-name-describes-contents"
+          ]
+        },
+        {
+          "id": "fn-function-expression",
+          "technique": "function-forms",
+          "truth": "defect",
+          "expect": [
+            "fn-name-promises"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "fn-name-promises",
+            "module-naming-consistent",
+            "module-name-describes-contents"
+          ]
+        },
+        {
+          "id": "fn-async",
+          "technique": "function-forms",
+          "truth": "defect",
+          "expect": [
+            "fn-name-promises"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "fn-name-promises",
+            "module-naming-consistent",
+            "module-name-describes-contents"
+          ]
+        },
+        {
+          "id": "fn-generator",
+          "technique": "function-forms",
+          "truth": "defect",
+          "expect": [
+            "fn-name-promises"
+          ],
+          "outcome": "missed",
+          "rules": [
+            "module-naming-consistent",
+            "module-name-describes-contents"
+          ]
+        },
+        {
+          "id": "fn-export-default",
+          "technique": "function-forms",
+          "truth": "defect",
+          "expect": [
+            "fn-name-promises"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "fn-name-promises",
+            "module-naming-consistent",
+            "module-name-describes-contents"
+          ]
+        },
+        {
+          "id": "fn-object-method",
+          "technique": "function-forms",
+          "truth": "defect",
+          "expect": [
+            "fn-name-promises"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "var-name-describes-value",
+            "module-naming-consistent",
+            "fn-name-promises",
+            "module-name-describes-contents"
+          ]
+        },
+        {
+          "id": "fn-in-javascript",
+          "technique": "function-forms",
+          "truth": "defect",
+          "expect": [
+            "fn-name-promises"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "module-naming-consistent",
+            "fn-name-promises",
+            "module-name-describes-contents"
+          ]
+        },
+        {
+          "id": "fn-in-tsx",
+          "technique": "function-forms",
+          "truth": "defect",
+          "expect": [
+            "fn-name-promises"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "fn-name-promises",
+            "module-naming-consistent",
+            "module-name-describes-contents"
+          ]
+        },
+        {
+          "id": "fn-nested",
+          "technique": "function-forms",
+          "truth": "defect",
+          "expect": [
+            "fn-name-promises"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "fn-name-promises",
+            "module-naming-consistent",
+            "module-name-describes-contents"
+          ]
+        },
+        {
+          "id": "method-instance",
+          "technique": "method-forms",
+          "truth": "defect",
+          "expect": [
+            "method-name-promises"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "class-shape-shows-its-role",
+            "method-name-promises",
+            "module-naming-consistent",
+            "fn-name-promises",
+            "module-name-describes-contents"
+          ]
+        },
+        {
+          "id": "method-static",
+          "technique": "method-forms",
+          "truth": "defect",
+          "expect": [
+            "method-name-promises"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "class-shape-shows-its-role",
+            "method-name-promises",
+            "module-naming-consistent",
+            "fn-name-promises",
+            "module-name-describes-contents"
+          ]
+        },
+        {
+          "id": "method-async",
+          "technique": "method-forms",
+          "truth": "defect",
+          "expect": [
+            "method-name-promises"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "class-shape-shows-its-role",
+            "method-name-promises",
+            "module-naming-consistent",
+            "fn-name-promises",
+            "module-name-describes-contents"
+          ]
+        },
+        {
+          "id": "method-private-hash",
+          "technique": "method-forms",
+          "truth": "defect",
+          "expect": [
+            "method-name-promises"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "class-shape-shows-its-role",
+            "method-name-promises",
+            "module-naming-consistent",
+            "fn-name-promises",
+            "module-name-describes-contents"
+          ]
+        },
+        {
+          "id": "method-getter",
+          "technique": "method-forms",
+          "truth": "defect",
+          "expect": [
+            "method-name-promises"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "class-shape-shows-its-role",
+            "method-name-promises",
+            "module-naming-consistent",
+            "fn-name-promises",
+            "module-name-describes-contents"
+          ]
+        },
+        {
+          "id": "lang-python",
+          "technique": "other-languages",
+          "truth": "defect",
+          "expect": [
+            "fn-name-promises"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "fn-name-promises",
+            "module-name-describes-contents"
+          ]
+        },
+        {
+          "id": "lang-python-async",
+          "technique": "other-languages",
+          "truth": "defect",
+          "expect": [
+            "fn-name-promises"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "fn-name-promises",
+            "module-name-describes-contents"
+          ]
+        },
+        {
+          "id": "lang-go",
+          "technique": "other-languages",
+          "truth": "defect",
+          "expect": [
+            "fn-name-promises"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "fn-name-promises",
+            "module-name-describes-contents"
+          ]
+        },
+        {
+          "id": "lang-rust",
+          "technique": "other-languages",
+          "truth": "defect",
+          "expect": [
+            "fn-name-promises"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "fn-name-promises",
+            "module-name-describes-contents"
+          ]
+        },
+        {
+          "id": "catch-empty",
+          "technique": "catch-blocks",
+          "truth": "defect",
+          "expect": [
+            "catch-hides-failure"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "catch-hides-failure",
+            "fn-name-promises",
+            "module-naming-consistent",
+            "module-name-describes-contents"
+          ]
+        },
+        {
+          "id": "catch-log-only",
+          "technique": "catch-blocks",
+          "truth": "defect",
+          "expect": [
+            "catch-hides-failure"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "catch-hides-failure",
+            "fn-name-promises",
+            "module-naming-consistent",
+            "module-name-describes-contents"
+          ]
+        },
+        {
+          "id": "catch-async",
+          "technique": "catch-blocks",
+          "truth": "defect",
+          "expect": [
+            "catch-hides-failure"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "catch-hides-failure",
+            "fn-name-promises",
+            "module-naming-consistent",
+            "module-name-describes-contents"
+          ]
+        },
+        {
+          "id": "catch-in-javascript",
+          "technique": "catch-blocks",
+          "truth": "defect",
+          "expect": [
+            "catch-hides-failure"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "catch-hides-failure",
+            "fn-name-promises",
+            "module-naming-consistent",
+            "module-name-describes-contents"
+          ]
+        },
+        {
+          "id": "catch-in-arrow",
+          "technique": "catch-blocks",
+          "truth": "defect",
+          "expect": [
+            "catch-hides-failure"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "catch-hides-failure",
+            "fn-name-promises",
+            "module-naming-consistent",
+            "module-name-describes-contents"
+          ]
+        },
+        {
+          "id": "catch-in-method",
+          "technique": "catch-blocks",
+          "truth": "defect",
+          "expect": [
+            "catch-hides-failure"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "catch-hides-failure",
+            "class-shape-shows-its-role",
+            "method-name-promises",
+            "module-naming-consistent",
+            "fn-name-promises",
+            "module-name-describes-contents"
+          ]
+        },
+        {
+          "id": "error-throw-new",
+          "technique": "errors-logs-types",
+          "truth": "defect",
+          "expect": [
+            "error-message-matches-condition"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "error-message-matches-condition",
+            "fn-name-promises",
+            "module-naming-consistent",
+            "module-name-describes-contents"
+          ]
+        },
+        {
+          "id": "error-throw-typeerror",
+          "technique": "errors-logs-types",
+          "truth": "defect",
+          "expect": [
+            "error-message-matches-condition"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "error-message-matches-condition",
+            "fn-name-promises",
+            "module-naming-consistent",
+            "module-name-describes-contents"
+          ]
+        },
+        {
+          "id": "log-logger-error",
+          "technique": "errors-logs-types",
+          "truth": "defect",
+          "expect": [
+            "log-level-matches-event"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "log-message-matches-event",
+            "log-level-matches-event",
+            "fn-name-promises",
+            "module-naming-consistent",
+            "module-name-describes-contents"
+          ]
+        },
+        {
+          "id": "log-console-warn",
+          "technique": "errors-logs-types",
+          "truth": "defect",
+          "expect": [
+            "log-level-matches-event"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "log-message-matches-event",
+            "log-level-matches-event",
+            "fn-name-promises",
+            "module-naming-consistent",
+            "module-name-describes-contents"
+          ]
+        },
+        {
+          "id": "type-interface",
+          "technique": "errors-logs-types",
+          "truth": "defect",
+          "expect": [
+            "type-name-describes-shape"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "type-name-describes-shape",
+            "module-naming-consistent",
+            "module-name-describes-contents"
+          ]
+        },
+        {
+          "id": "type-alias",
+          "technique": "errors-logs-types",
+          "truth": "defect",
+          "expect": [
+            "type-name-describes-shape"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "type-name-describes-shape",
+            "module-naming-consistent",
+            "module-name-describes-contents"
+          ]
+        },
+        {
+          "id": "doc-function",
+          "technique": "doc-comments",
+          "truth": "defect",
+          "expect": [
+            "comment-describes-declaration"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "doc-errors-match-body",
+            "comment-describes-declaration",
+            "module-naming-consistent",
+            "fn-name-promises",
+            "module-name-describes-contents"
+          ]
+        },
+        {
+          "id": "doc-arrow",
+          "technique": "doc-comments",
+          "truth": "defect",
+          "expect": [
+            "comment-describes-declaration"
+          ],
+          "outcome": "missed",
+          "rules": [
+            "doc-errors-match-body",
+            "module-naming-consistent",
+            "fn-name-promises",
+            "module-name-describes-contents"
+          ]
+        },
+        {
+          "id": "doc-class",
+          "technique": "doc-comments",
+          "truth": "defect",
+          "expect": [
+            "comment-describes-declaration"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "class-shape-shows-its-role",
+            "method-name-promises",
+            "module-naming-consistent",
+            "comment-describes-declaration",
+            "fn-name-promises",
+            "module-name-describes-contents"
+          ]
+        },
+        {
+          "id": "doc-interface",
+          "technique": "doc-comments",
+          "truth": "defect",
+          "expect": [
+            "comment-describes-declaration"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "type-name-describes-shape",
+            "comment-describes-declaration",
+            "module-naming-consistent",
+            "module-name-describes-contents"
+          ]
+        },
+        {
+          "id": "sh-curl-pipe",
+          "technique": "shell-scripts",
+          "truth": "defect",
+          "expect": [
+            "runs-downloaded-code"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "runs-downloaded-code"
+          ]
+        },
+        {
+          "id": "sh-wget-pipe-bash",
+          "technique": "shell-scripts",
+          "truth": "defect",
+          "expect": [
+            "runs-downloaded-code"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "runs-downloaded-code"
+          ]
+        },
+        {
+          "id": "sh-eval-curl",
+          "technique": "shell-scripts",
+          "truth": "defect",
+          "expect": [
+            "runs-downloaded-code"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "runs-downloaded-code"
+          ]
+        },
+        {
+          "id": "sh-process-substitution",
+          "technique": "shell-scripts",
+          "truth": "defect",
+          "expect": [
+            "runs-downloaded-code"
+          ],
+          "outcome": "missed",
+          "rules": []
+        },
+        {
+          "id": "sh-in-bash-extension",
+          "technique": "shell-scripts",
+          "truth": "defect",
+          "expect": [
+            "runs-downloaded-code"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "runs-downloaded-code"
+          ]
+        },
+        {
+          "id": "sh-in-zsh-extension",
+          "technique": "shell-scripts",
+          "truth": "defect",
+          "expect": [
+            "runs-downloaded-code"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "runs-downloaded-code"
+          ]
+        },
+        {
+          "id": "sh-crontab",
+          "technique": "shell-scripts",
+          "truth": "defect",
+          "expect": [
+            "installs-persistence"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "installs-persistence"
+          ]
+        },
+        {
+          "id": "sh-authorized-keys",
+          "technique": "shell-scripts",
+          "truth": "defect",
+          "expect": [
+            "opens-a-backdoor"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "reads-secrets-it-does-not-own",
+            "opens-a-backdoor",
+            "installs-persistence"
+          ]
+        },
+        {
+          "id": "sh-rm-root",
+          "technique": "shell-scripts",
+          "truth": "defect",
+          "expect": [
+            "destroys-beyond-its-scope"
+          ],
+          "outcome": "caught",
+          "rules": [
+            "destroys-beyond-its-scope"
+          ]
+        },
+        {
+          "id": "none-assignment",
+          "technique": "lookalike-none",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "clean",
+          "rules": [
+            "var-name-describes-value",
+            "module-naming-consistent",
+            "module-name-describes-contents"
+          ]
+        },
+        {
+          "id": "none-call-only",
+          "technique": "lookalike-none",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "clean",
+          "rules": [
+            "module-naming-consistent",
+            "module-name-describes-contents"
+          ]
+        },
+        {
+          "id": "none-function-in-string",
+          "technique": "lookalike-none",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "clean",
+          "rules": [
+            "var-name-describes-value",
+            "module-naming-consistent",
+            "module-name-describes-contents"
+          ]
+        },
+        {
+          "id": "none-function-in-comment",
+          "technique": "lookalike-none",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "clean",
+          "rules": [
+            "var-name-describes-value",
+            "module-naming-consistent",
+            "module-name-describes-contents"
+          ]
+        },
+        {
+          "id": "none-try-finally",
+          "technique": "lookalike-none",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "clean",
+          "rules": [
+            "fn-name-promises",
+            "module-naming-consistent",
+            "module-name-describes-contents"
+          ]
+        },
+        {
+          "id": "none-no-comment",
+          "technique": "lookalike-none",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "clean",
+          "rules": [
+            "var-name-describes-value",
+            "module-naming-consistent",
+            "module-name-describes-contents"
+          ]
+        },
+        {
+          "id": "none-plain-call-log",
+          "technique": "lookalike-none",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "clean",
+          "rules": [
+            "module-naming-consistent",
+            "module-name-describes-contents"
+          ]
+        },
+        {
+          "id": "none-shell-echo",
+          "technique": "lookalike-none",
+          "truth": "clean",
+          "expect": [],
+          "outcome": "clean",
+          "rules": []
+        }
+      ]
+    }
+  }
+}

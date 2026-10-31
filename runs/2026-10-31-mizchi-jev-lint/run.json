@@ -1,0 +1,183 @@
+{
+  "repo": "mizchi/jev-lint",
+  "date": "2026-10-31",
+  "scope": "directo: se ejecuta el CLI del especialista, sin pasar por el hub de jevalan",
+  "environment": {
+    "node": "v24.8.0",
+    "specialist": "0.7.0",
+    "keys": "ninguna: entorno vacío, HOME y cwd propios; el especialista no puede llamar a ningún modelo"
+  },
+  "measured": [
+    "`rules`: las reglas empaquetadas y su recuento frente al del README",
+    "`check --dry-run`: planifica y tasa sin enviar nada; sujetos y peticiones por regla",
+    "el emparejador (ast-grep) elige las funciones, el comentario de documentación y el script de shell que las reglas documentan",
+    "supresiones (`jev-lint-ignore-file`, `ignore-next-line`): lo suprimido no se envía",
+    "sin clave, `check` se niega con exit 2 antes de hacer ninguna petición",
+    "errores de uso y de configuración (config ilegible o ausente, ruta ausente, comando desconocido, replay sin registro)",
+    "`init` escribe su configuración en el directorio actual; huella en disco del sandbox"
+  ],
+  "not_measured": [
+    "cualquier veredicto de un modelo: no hay clave, así que nunca se ve si una coincidencia se marca o no",
+    "`review`, `commits`, `gaps`, `calibrate`, `eval` e `init --pre-commit/--pre-push` (necesitan git o piden al modelo)",
+    "coste real de una ejecución: solo se leyó la tasación de `--dry-run`",
+    "lenguajes distintos de TypeScript y shell"
+  ],
+  "footprint": [
+    ".jev-lint.yaml",
+    ".jev-lint/baseline.json",
+    "bad.yaml",
+    "cart.ts",
+    "ignored-file.ts",
+    "ignored-next.ts",
+    "notes.txt",
+    "plain-next.ts",
+    "script.sh"
+  ],
+  "cases": [
+    {
+      "id": "version-flag",
+      "why": "`--version` imprime la versión del paquete.",
+      "pass": false,
+      "problems": [
+        "exit 2, se esperaba 0",
+        "`--version` no imprime una versión"
+      ],
+      "exit": 2
+    },
+    {
+      "id": "help",
+      "why": "`--help` muestra el uso y sale con 0.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "unknown-command",
+      "why": "Un comando desconocido es un error de uso (exit 2).",
+      "pass": true,
+      "problems": [],
+      "exit": 2
+    },
+    {
+      "id": "rules-lists-packaged-rules",
+      "why": "`rules` lista las reglas empaquetadas: el README cuenta 101 y el propio programa dice 103.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "listed": 103
+      }
+    },
+    {
+      "id": "dry-run-plans-without-asking",
+      "why": "`check --dry-run` planifica y tasa: declara `dryRun`, cuántos sujetos y peticiones, y no envía nada.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "subjects": 8,
+        "requests": 3
+      }
+    },
+    {
+      "id": "matcher-selects-function-subjects",
+      "why": "El emparejador elige las funciones del fichero para `fn-name-promises` (dos funciones declaradas).",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "matcher-selects-doc-comment",
+      "why": "La función con comentario de documentación se elige para `comment-describes-declaration` (un sujeto).",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "shell-script-selected",
+      "why": "Un script con `curl … | sh` se elige para `shell/runs-downloaded-code`.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "unmatched-file-asks-nothing",
+      "why": "Un fichero que ninguna regla elige no planifica ninguna petición.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "ignore-file-suppresses-everything",
+      "why": "`// jev-lint-ignore-file` deja el fichero sin sujetos: lo suprimido nunca se envía.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "ignore-next-line-suppresses-one-rule",
+      "why": "`// jev-lint-ignore-next-line fn-name-promises` quita ese sujeto, y la misma función sin la marca sí cuenta.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "unsuppressed-twin-counts",
+      "why": "La función gemela sin la marca de supresión sí se elige (contraste del caso anterior).",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "no-key-check-refuses",
+      "why": "Sin clave y sin `--dry-run`, `check` se niega antes de enviar nada: exit 3 (peticiones fallidas y nada reportado, según su documentación) y dice qué falta.",
+      "pass": true,
+      "problems": [],
+      "exit": 3
+    },
+    {
+      "id": "invalid-config",
+      "why": "Un fichero de configuración ilegible es un error (exit 2), no se ignora en silencio.",
+      "pass": true,
+      "problems": [],
+      "exit": 2
+    },
+    {
+      "id": "missing-config",
+      "why": "Un `--config` que no existe es un error (exit 2).",
+      "pass": true,
+      "problems": [],
+      "exit": 2
+    },
+    {
+      "id": "missing-path",
+      "why": "Una ruta que no existe debería ser un error (exit 2), como un id de regla mal escrito, y no una ejecución vacía con éxito.",
+      "pass": false,
+      "problems": [
+        "exit 0, se esperaba 2"
+      ],
+      "exit": 0
+    },
+    {
+      "id": "replay-missing-record",
+      "why": "`replay` de un registro que no existe es un error (exit 2).",
+      "pass": true,
+      "problems": [],
+      "exit": 2
+    },
+    {
+      "id": "init-writes-config",
+      "why": "`init` escribe un `.jev-lint.yaml` en el directorio actual, como documenta.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "footprint-stays-in-sandbox",
+      "why": "Lo que el CLI deja en disco queda dentro del sandbox y dentro de lo que su documentación declara.",
+      "pass": true,
+      "problems": []
+    }
+  ],
+  "pass": false
+}

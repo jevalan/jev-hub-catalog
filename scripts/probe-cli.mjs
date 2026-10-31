@@ -17,6 +17,7 @@ import { FIXTURES as WP_FIXTURES, judgeCase, wellposedCases } from "./lib/cli-ca
 import { jevHarnessCases } from "./lib/cli-cases-jevharness.mjs";
 import { FIXTURES as PG_FIXTURES, pkgGateCases } from "./lib/cli-cases-pkggate.mjs";
 import { FIXTURES as SN_FIXTURES, snifftestCases } from "./lib/cli-cases-snifftest.mjs";
+import { FIXTURES as JL_FIXTURES, jevLintCases } from "./lib/cli-cases-jevlint.mjs";
 
 const arg = (name) => {
   const i = process.argv.indexOf(`--${name}`);
@@ -95,6 +96,30 @@ const CLIS = {
       "el consentimiento para enviar texto: sin clave no se llega a preguntar",
       "`eval`, `bench` y `serve`, que llaman a modelos o abren un servidor",
       "`--judge-url` contra un servidor propio",
+    ],
+  },
+  "mizchi/jev-lint": {
+    cases: jevLintCases,
+    fixtures: JL_FIXTURES,
+    // `init` escribe .jev-lint.yaml y la caché vive en .jev-lint/: ambos documentados.
+    allowed: /^\.jev-lint(?:\.yaml|\/.*)$/,
+    // `--cli` es dist/cli.js dentro de una instalación con ast-grep ya enlazado.
+    launch: (cli) => ({ command: process.execPath, prefix: [resolve(cli)] }),
+    env: { NO_COLOR: "1" },
+    measured: [
+      "`rules`: las reglas empaquetadas y su recuento frente al del README",
+      "`check --dry-run`: planifica y tasa sin enviar nada; sujetos y peticiones por regla",
+      "el emparejador (ast-grep) elige las funciones, el comentario de documentación y el script de shell que las reglas documentan",
+      "supresiones (`jev-lint-ignore-file`, `ignore-next-line`): lo suprimido no se envía",
+      "sin clave, `check` se niega con exit 2 antes de hacer ninguna petición",
+      "errores de uso y de configuración (config ilegible o ausente, ruta ausente, comando desconocido, replay sin registro)",
+      "`init` escribe su configuración en el directorio actual; huella en disco del sandbox",
+    ],
+    not_measured: [
+      "cualquier veredicto de un modelo: no hay clave, así que nunca se ve si una coincidencia se marca o no",
+      "`review`, `commits`, `gaps`, `calibrate`, `eval` e `init --pre-commit/--pre-push` (necesitan git o piden al modelo)",
+      "coste real de una ejecución: solo se leyó la tasación de `--dry-run`",
+      "lenguajes distintos de TypeScript y shell",
     ],
   },
   "ismaelsoilet/jev-harness": {

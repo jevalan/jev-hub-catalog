@@ -188,3 +188,23 @@ test("la página pinta un grupo prose-lint con su unidad y su aviso propios", ()
   assert.match(buildFrontierPage([run], "es"), /Grupo prose-lint · 67 textos/);
   assert.match(buildFrontierPage([run], "en"), /countable rules/);
 });
+
+// — grupo code-reach —
+import * as codeReach from "../scripts/lib/frontier-code-reach.mjs";
+
+test("el corpus de code-reach tiene ids únicos, verdad de terreno y técnicas con rótulo en ambos idiomas", () => {
+  assert.equal(new Set(codeReach.CORPUS.map((c) => c.id)).size, codeReach.CORPUS.length);
+  for (const c of codeReach.CORPUS) {
+    assert.ok(["defect", "clean"].includes(c.truth) && c.file && c.code, c.id);
+    // Un fragmento con defecto espera una regla; uno sano declara qué reglas no deben elegirlo.
+    assert.equal(c.truth === "defect" ? c.expect.length > 0 : c.forbid.length > 0, true, c.id);
+  }
+  for (const lang of ["es", "en"]) for (const k of codeReach.TECHNIQUES) assert.ok(STR[lang].techniques[k], `${lang}:${k}`);
+});
+
+test("la página pinta un grupo code-reach con su unidad y su aviso propios", () => {
+  const run = { ...reviewSample, group: "code-reach", corpus: { size: 52 } };
+  assert.match(buildFrontierPage([run], "en"), /Group code-reach · 52 code fragments/);
+  assert.match(buildFrontierPage([run], "es"), /Grupo code-reach · 52 fragmentos de código/);
+  assert.match(buildFrontierPage([run], "en"), /matcher selects the code/);
+});

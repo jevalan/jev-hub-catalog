@@ -496,9 +496,15 @@
         ],
         "host": "any"
       },
-      "evidence": "static",
-      "verdict": "Un matcher de ast-grep elige el código y se le pregunta una frase a cada coincidencia; devuelve la probabilidad contra un corte (`0.89 cutoff 0.56`), es decir, una decisión tipada por coincidencia. Tiene `--dry-run` que da el precio sin hacer ninguna petición, `--format github` y un código de salida pensado para hooks. Manda el código evaluado a la API. Evidencia solo de README y árbol: no se ha leído el código que imprime la salida ni verificado el esquema.",
-      "blockers": []
+      "evidence": "measured",
+      "verdict": "Linter de lenguaje natural: un emparejador de ast-grep elige el código y se le pregunta una frase a un modelo por coincidencia; devuelve la probabilidad contra un corte por regla. Trae 103 reglas (TypeScript, Rust, Python, Go, shell, markdown, git…). Medido sin clave (v0.7.0, instalado con `--ignore-scripts` en un directorio vacío y con el `postinstall` de ast-grep —que solo enlaza su binario— ejecutado a mano tras leerlo; siempre con `--dry-run` o sin clave, así que ninguna petición sale; 19 casos, 17 pasan): `rules` lista las reglas, `check --dry-run` planifica y tasa sin enviar (sujetos, peticiones y precio por regla), el emparejador elige las funciones, el comentario de documentación y el script de shell que sus reglas documentan, las supresiones (`jev-lint-ignore-file`, `ignore-next-line`) quitan el sujeto, sin clave `check` se niega con exit 3, y una configuración ilegible o ausente da exit 2. Hallazgos: no tiene `--version` (exit 2) y una ruta que no existe sale con exit 0 como una ejecución vacía, mientras que un id de regla mal escrito sí es error. Frontera del alcance del emparejador con 52 fragmentos sintéticos: selecciona 41 de 44 construcciones que sus reglas deben juzgar y ninguno de 8 parecidos; se le escapan las funciones generadoras, `bash <(curl …)` y el comentario de documentación sobre una función flecha. Lo que no se selecciona no se envía nunca a ningún modelo. NO medido: cualquier veredicto de un modelo (si una coincidencia se marca), `review`, `commits`, `gaps`, `calibrate`, `eval`, los hooks de git, el coste real y los lenguajes fuera de TypeScript y shell.",
+      "blockers": [
+        "todo veredicto exige una clave de TypeSafe y envía el código juzgado a su API",
+        "el emparejador no elige algunas construcciones (generadoras, `bash <(curl …)`, comentario sobre función flecha): lo que no elige, ningún modelo lo juzga",
+        "una ruta inexistente sale con exit 0 y no hay `--version`",
+        "arrastra `@ast-grep/cli`, un binario nativo cuyo `postinstall` hay que ejecutar para que el CLI lo encuentre"
+      ],
+      "run": "runs/2026-10-31-mizchi-jev-lint"
     },
     {
       "repo": "supercorp-ai/supercov",
