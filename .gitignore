@@ -2,3 +2,4 @@ site/index.html
 data/triage-cache/
 node_modules/
 .DS_Store
+site/directorio.html
