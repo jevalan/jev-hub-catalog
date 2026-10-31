@@ -66,9 +66,12 @@ if (!key) {
   process.exit(2);
 }
 
+const only = arg("only") ? new Set(arg("only").split(",")) : null;
+const tag = arg("tag");
 const fixtures = readdirSync(dir)
   .filter((f) => f.endsWith(".json"))
-  .flatMap((f) => JSON.parse(readFileSync(join(dir, f), "utf8")).fixtures.map((x) => ({ ...x, file: f })));
+  .flatMap((f) => JSON.parse(readFileSync(join(dir, f), "utf8")).fixtures.map((x) => ({ ...x, file: f })))
+  .filter((x) => !only || only.has(x.id));
 const recorded = (fx) => {
   try {
     return JSON.parse(fx.measured.answers);
@@ -214,8 +217,8 @@ const run = {
   summary,
   fixtures: perFixture,
 };
-const out = join(ROOT, "runs", `${today()}-jev-openrouter-drift${variant === "base" ? "" : "-" + variant}`);
+const out = join(ROOT, "runs", `${today()}-jev-openrouter-drift${variant === "base" ? "" : "-" + variant}${tag ? "-" + tag : ""}`);
 mkdirSync(out, { recursive: true });
 writeFileSync(join(out, "run.json"), JSON.stringify(run, null, 2) + "\n");
 console.log(JSON.stringify({ spend: run.spend, throughput: run.throughput, errors, models: [...models], summary }, null, 2));
-console.log(`evidencia: runs/${today()}-jev-openrouter-drift${variant === "base" ? "" : "-" + variant}/run.json`);
+console.log(`evidencia: runs/${today()}-jev-openrouter-drift${variant === "base" ? "" : "-" + variant}${tag ? "-" + tag : ""}/run.json`);
