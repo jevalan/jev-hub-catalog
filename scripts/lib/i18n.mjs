@@ -53,6 +53,41 @@ export const STR = {
       "No es una nota de calidad. Los casos los escribimos nosotros para cada contrato de salida, así que sirve para comparar cuánto se ha comprobado de cada proyecto, no para decir cuál es mejor.",
       "Una prueba con todos los casos en verde también puede dejar fuera lo importante: la columna de cobertura lo dice, y el detalle de lo no medido está en la prueba enlazada.",
     ],
+    navFrontier: "Frontera",
+    frontierTitle: "Frontera: hasta dónde llega cada uno",
+    frontierIntro:
+      "La misma batería de pruebas, lanzada contra todos los proyectos de un grupo, ordenada por técnica. No pregunta si funcionan: pregunta dónde dejan de hacerlo y para qué sirven.",
+    frontierGroup: (g, n, m) => `Grupo ${g} · ${n} órdenes de shell con verdad de terreno clara · ${m} proyectos medidos`,
+    frontierWarn: "Solo se mide la parte determinista: ningún gate tuvo clave, así que lo que dependería de un modelo queda fuera.",
+    frontierCols: ["Proyecto", "Peligrosas bloqueadas por regla", "Solo preguntadas", "Brechas", "Inofensivas útiles", "Con fricción", "Falsos bloqueos"],
+    frontierMatrix: "Peligrosas por técnica (bloqueadas / preguntadas / permitidas)",
+    frontierReads: "Cómo leerlo",
+    frontierRead: [
+      "Una brecha es una orden peligrosa que el gate deja pasar. Es lo único que la frontera no perdona.",
+      "Preguntar también sostiene la frontera, pero traslada la decisión a una persona. Un gate que solo pregunta no filtra: interrumpe.",
+      "La fricción son órdenes inofensivas que se interrumpen. Un gate que molesta en exceso acaba apagado.",
+    ],
+    frontierServes: "Para qué sirve y para qué no",
+    frontierVerdict: (p) => {
+      const out = [];
+      out.push(`Bloquea por regla ${p.blocked} de ${p.dangerTotal} órdenes peligrosas y pregunta por ${p.asked}; deja pasar ${p.bypasses}.`);
+      out.push(`De ${p.safeTotal} órdenes inofensivas, ${p.useful} pasan limpias, ${p.friction} le piden confirmación y ${p.falseBlocks} las bloquea.`);
+      return out;
+    },
+    frontierOnlyAsks: (t) => `Sin ninguna regla propia (solo pregunta): ${t}.`,
+    frontierNoOnlyAsks: "Tiene al menos una regla en cada técnica.",
+    frontierNone: "Aún no hay batería de frontera medida.",
+    outcomeLabels: { block: "bloquea", ask: "pregunta", allow: "permite" },
+    techniques: {
+      "direct-destructive": "Destructivo directo",
+      exfiltration: "Exfiltración de secretos",
+      "download-exec": "Descargar y ejecutar",
+      obfuscation: "Ofuscación",
+      wrapper: "Envoltorios",
+      compound: "Órdenes compuestas",
+      "size-encoding": "Tamaño y codificación",
+      "lookalike-safe": "Parecidos inofensivos",
+    },
     problems: (n) => (n ? String(n) : "ninguno"),
   },
   en: {
@@ -104,6 +139,41 @@ export const STR = {
       "It is not a quality grade. We write the cases ourselves for each output contract, so it compares how much of each project has been checked, not which one is better.",
       "A test with every case green can still leave the important part out: the coverage column says so, and the detail of what was not measured is in the linked test.",
     ],
+    navFrontier: "Frontier",
+    frontierTitle: "Frontier: how far each one goes",
+    frontierIntro:
+      "The same test battery run against every project in a group, ordered by technique. It does not ask whether they work: it asks where they stop working and what they are good for.",
+    frontierGroup: (g, n, m) => `Group ${g} · ${n} shell commands with clear ground truth · ${m} projects measured`,
+    frontierWarn: "Only the deterministic part is measured: no gate had a key, so anything that would depend on a model is out.",
+    frontierCols: ["Project", "Dangerous blocked by rule", "Only asked", "Bypasses", "Harmless and useful", "With friction", "False blocks"],
+    frontierMatrix: "Dangerous commands by technique (blocked / asked / allowed)",
+    frontierReads: "How to read it",
+    frontierRead: [
+      "A bypass is a dangerous command the gate lets through. It is the one thing the frontier does not forgive.",
+      "Asking also holds the line, but hands the decision to a person. A gate that only asks does not filter: it interrupts.",
+      "Friction is harmless commands that get interrupted. A gate that annoys too much ends up switched off.",
+    ],
+    frontierServes: "What it is for and what it is not",
+    frontierVerdict: (p) => {
+      const out = [];
+      out.push(`Blocks ${p.blocked} of ${p.dangerTotal} dangerous commands by rule and asks about ${p.asked}; lets ${p.bypasses} through.`);
+      out.push(`Of ${p.safeTotal} harmless commands, ${p.useful} pass cleanly, ${p.friction} ask for confirmation and ${p.falseBlocks} are blocked.`);
+      return out;
+    },
+    frontierOnlyAsks: (t) => `No rule of its own (it only asks): ${t}.`,
+    frontierNoOnlyAsks: "It has at least one rule in every technique.",
+    frontierNone: "No frontier battery has been measured yet.",
+    outcomeLabels: { block: "blocks", ask: "asks", allow: "allows" },
+    techniques: {
+      "direct-destructive": "Direct destructive",
+      exfiltration: "Secret exfiltration",
+      "download-exec": "Download and execute",
+      obfuscation: "Obfuscation",
+      wrapper: "Wrappers",
+      compound: "Compound commands",
+      "size-encoding": "Size and encoding",
+      "lookalike-safe": "Harmless lookalikes",
+    },
     problems: (n) => (n ? String(n) : "none"),
   },
 };

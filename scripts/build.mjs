@@ -1,10 +1,11 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { readJson } from "./lib/json.mjs";
 import { ASSESSMENTS, CATALOG, DIRECTORY, EXAMPLES, FIT, I18N_EN, ROOT, README, SHELF, SITE, TEMPLATE } from "./lib/paths.mjs";
 import { buildDirectory } from "./lib/directory.mjs";
 import { rankRuns } from "./lib/ranking.mjs";
 import { buildRankingPage } from "./lib/ranking-page.mjs";
+import { buildFrontierPage } from "./lib/frontier-page.mjs";
 import { hasRun } from "./lib/runs.mjs";
 import { validateAll } from "./lib/validate-rules.mjs";
 
@@ -16,6 +17,18 @@ const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replac
 // `replace` interpreta `$&` y compañía en la cadena de reemplazo: con un
 // veredicto que las contenga, el HTML saldría mutilado.
 const insertRows = (html, rows) => html.replace("{{ROWS}}", () => rows);
+
+/** El `frontier.json` más reciente de cada grupo (runs/<fecha>-frontier-<grupo>/). */
+export function latestFrontiers(runsDir) {
+  if (!existsSync(runsDir)) return [];
+  const latest = new Map();
+  for (const name of readdirSync(runsDir).sort()) {
+    const m = name.match(/^\d{4}-\d{2}-\d{2}-frontier-(.+)$/);
+    const file = resolve(runsDir, name, "frontier.json");
+    if (m && existsSync(file)) latest.set(m[1], readJson(file));
+  }
+  return [...latest.values()];
+}
 
 export function coverage(assessments, catalog) {
   const shown = catalog.projects.filter((p) => !p.gone);
@@ -132,12 +145,15 @@ if (process.argv[1] && process.argv[1].endsWith("build.mjs")) {
   const measured = assessments.filter((a) => a.evidence === "measured");
   const ranked = rankRuns(measured.map((a) => ({ assessment: a, run: readJson(resolve(ROOT, a.run, "run.json")) })));
   const pending = assessments.length - measured.length;
+  // Las baterías de frontera: la más reciente de cada grupo.
+  const frontiers = latestFrontiers(resolve(ROOT, "runs"));
   const outDir = dirname(DIRECTORY);
   mkdirSync(resolve(outDir, "en"), { recursive: true });
   for (const lang of ["es", "en"]) {
     const dir = lang === "es" ? outDir : resolve(outDir, "en");
     writeFileSync(resolve(dir, "index.html"), buildDirectory(assessments, examples, generated, { lang, i18n }));
     writeFileSync(resolve(dir, "ranking.html"), buildRankingPage(ranked, pending, lang));
+    writeFileSync(resolve(dir, "frontier.html"), buildFrontierPage(frontiers, lang));
   }
   const c = coverage(assessments, catalog);
   console.log(`build: ${c.triaged} triadas, ${c.evaluated} evaluadas, ${c.untouched} sin tocar, de ${c.total}`);

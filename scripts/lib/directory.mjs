@@ -174,7 +174,7 @@ export function facets(assessments, lang) {
     .join("");
 }
 
-const PAGES = { directory: "index.html", ranking: "ranking.html" };
+const PAGES = { directory: "index.html", ranking: "ranking.html", frontier: "frontier.html" };
 /** Enlace relativo a una página de otro idioma: el español vive en la raíz y el inglés en /en/. */
 const href = (from, to, file) => (from === to ? file : from === "es" ? `en/${file}` : `../${file}`);
 
@@ -184,6 +184,7 @@ export function shell({ lang, page, title, body, aside = "", script = "" }) {
   const nav = [
     ["directory", s.navDirectory],
     ["ranking", s.navRanking],
+    ["frontier", s.navFrontier],
   ]
     .map(([id, text]) => `<a href="${PAGES[id]}"${id === page ? ' aria-current="page"' : ""}>${esc(text)}</a>`)
     .join("");
