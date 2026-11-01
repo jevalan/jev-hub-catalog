@@ -6,11 +6,11 @@ Un veredicto leído no es un veredicto probado. Cada ficha de esta lista pasa a 
 
 **Reglas de cada prueba** (la política de código de terceros es obligatoria): directorio nuevo y vacío, `--ignore-scripts`, HOME y cwd propios, sin claves reales, jamás `setup`/`install`/`doctor` de un gate, y autorización explícita antes de instalar nada ajeno. Cada contrato de salida necesita su juego de casos en `scripts/probe-gate.mjs`.
 
-## Primera tanda: sin clave y con instalación documentada (1)
+## Primera tanda: sin clave y con instalación documentada (0)
 
 Las más baratas de medir: se instalan según su README y corren sin credenciales.
 
-- [ ] `DataZooDE/anofox-decide` · yes · exec · lib
+_Vacío._
 
 ## Segunda tanda: piden clave o no traen instalación clara (58)
 

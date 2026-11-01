@@ -19,6 +19,7 @@
  *   [badjson]       responde 200 con un cuerpo que no es JSON
  *   [badshape]      responde 200 con un JSON sin `answers`
  *   [toosure]       responde 200 con una probabilidad fuera de [0, 1]
+ *   [scoremap]      score: devuelve las probabilidades como mapa {"0": p…} en vez de lista
  */
 import { appendFileSync } from "node:fs";
 import { createServer } from "node:http";
@@ -45,7 +46,9 @@ function answer(text, question, id, state) {
   const count = question.criteria.length;
   const pick = Math.min(count - 1, Number(mark(text, "pick") ?? 0));
   const rest = count > 1 ? 0.2 / (count - 1) : 0;
-  const probabilities = Array.from({ length: count }, (_, i) => (i === pick ? (count > 1 ? 0.8 : 1) : rest));
+  const list = Array.from({ length: count }, (_, i) => (i === pick ? (count > 1 ? 0.8 : 1) : rest));
+  // [scoremap]: algunos clientes (anofox-decide) exigen las probabilidades como mapa {"0": p, "1": p…} y no como lista.
+  const probabilities = /\[scoremap\]/.test(text) ? Object.fromEntries(list.map((p, i) => [String(i), p])) : list;
   return { type: "score", score: pick, probabilities, confidence: conf };
 }
 

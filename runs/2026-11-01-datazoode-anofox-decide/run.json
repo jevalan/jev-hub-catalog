@@ -1,0 +1,297 @@
+{
+  "repo": "DataZooDE/anofox-decide",
+  "date": "2026-11-01",
+  "scope": "directo: se carga la extensión en DuckDB y se llama a sus funciones SQL, sin pasar por el hub de jevalan",
+  "environment": {
+    "python": "venv propio con el wheel oficial de duckdb",
+    "duckdb": "2.0.0",
+    "specialist": "v2026.10.26",
+    "keys": "inventada («clave-inventada») válida solo contra un proveedor local en 127.0.0.1; ninguna petición sale de la máquina salvo la instalación desde community y ninguna clave real entra en el entorno. Telemetría apagada con DATAZOO_DISABLE_TELEMETRY=1."
+  },
+  "measured": [
+    "instalación desde el repositorio firmado `community` (sin `-unsigned`) y carga",
+    "`decide_doctor()` con la telemetría apagada y el modelo de pega `stub` (constante, no es un modelo)",
+    "las llamadas remotas están apagadas por defecto y el error dice qué ejecutar; con el opt-in, una petición por texto",
+    "`decide_probability`, `decide_choice`, `decide_choice_distribution` (incluidas 30 opciones), `decide_score`, `decide_decision` y su umbral",
+    "`decide_table` (una petición para varias preguntas), el tope `anofox_decide_max_questions` y `decide_answers` (una petición por fila)",
+    "NULL, opciones vacías y duplicadas; 500 con reintentos, cuerpo que no es JSON, forma equivocada y probabilidad fuera de rango",
+    "la clave (secreto con alcance por host) no viaja a otro host ni se ve en `duckdb_secrets()` ni en `decide_models()`",
+    "métricas (exactitud, Brier, AUC, log-loss) contra el cálculo a mano y `decide_fit_calibration`",
+    "un modelo local sin bajar no se descarga solo",
+    "huella en disco del sandbox"
+  ],
+  "not_measured": [
+    "lo que ningún modelo contesta de verdad: el proveedor es un simulador y la respuesta la dicta una marca en el texto",
+    "los modelos locales (Julia-1, Laya sobre ONNX Runtime): pesan de 600 a 850 MB y no se descargaron",
+    "los proveedores alojados (TypeSafe Jev, Liquid D1, Cloudflare Clef, OpenAI), la GPU y sus plugins",
+    "la telemetría con el valor por defecto (encendida): no se ejecutó para no enviar nada; se midió solo apagada",
+    "volumen, latencia con un modelo real y concurrencia más allá de 20 filas"
+  ],
+  "footprint": [
+    "ext/anofox_decide.duckdb_extension",
+    "ext/anofox_decide.duckdb_extension.info"
+  ],
+  "cases": [
+    {
+      "id": "loads-from-community",
+      "why": "La extensión viene del repositorio `community` de DuckDB (firmado), sin `-unsigned`.",
+      "pass": true,
+      "problems": [],
+      "observed": {
+        "version": "v2026.10.26",
+        "from": "community"
+      }
+    },
+    {
+      "id": "doctor-reports-telemetry-off",
+      "why": "Con `DATAZOO_DISABLE_TELEMETRY=1`, `decide_doctor()` declara la telemetría apagada y no hay llamadas remotas.",
+      "pass": true,
+      "problems": [],
+      "observed": {
+        "items": {
+          "default model": "warn",
+          "registered models": "warn",
+          "remote calls": "ok",
+          "local model 'julia-1'": "warn",
+          "local model 'laya-multilingual'": "warn",
+          "local model 'laya-typed-decisions'": "warn",
+          "gpu device": "ok",
+          "gpu plugin 'cuda'": "warn",
+          "telemetry": "ok"
+        }
+      }
+    },
+    {
+      "id": "stub-model-is-a-constant",
+      "why": "El modelo de pega `stub` devuelve 0,5 sin enviar nada: no es un modelo.",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "remote-is-off-by-default",
+      "why": "Un modelo remoto registrado no se llama sin `anofox_decide_allow_remote`: error que dice qué ejecutar y cero peticiones.",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "probability-reads-the-answer",
+      "why": "`decide_probability` devuelve la probabilidad que da el proveedor y envía una sola pregunta binaria.",
+      "pass": true,
+      "problems": [],
+      "observed": {
+        "model_sent": "sys",
+        "auth_header": "Bearer clave-inventada"
+      }
+    },
+    {
+      "id": "probability-extremes",
+      "why": "Las probabilidades 0 y 1 llegan tal cual.",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "choice-picks-the-option",
+      "why": "`decide_choice` devuelve la opción elegida y manda las opciones como criterios.",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "choice-distribution-sums-to-one",
+      "why": "`decide_choice_distribution` da un mapa con una clave por opción y suma 1.",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "choice-with-thirty-options-over-http",
+      "why": "Con un proveedor remoto no rige el tope de 24 opciones del modelo local: 30 opciones salen y se contestan.",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "score-expected-level",
+      "why": "`decide_score` acepta las probabilidades como mapa y devuelve el nivel que da el proveedor; observación: no lo recalcula (el esperado sería 1,7).",
+      "pass": true,
+      "problems": [],
+      "observed": {
+        "returned": 2,
+        "expected_from_distribution": 1.7
+      }
+    },
+    {
+      "id": "score-rejects-a-probability-list",
+      "why": "Una respuesta de `score` con las probabilidades como lista (no como mapa «0».. «n-1») se rechaza con error, no se adivina.",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "decision-applies-the-threshold",
+      "why": "`decide_decision` compara la probabilidad con el umbral dado.",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "null-input-sends-nothing",
+      "why": "Un texto, pregunta u opciones NULL dan NULL sin resolver el modelo ni enviar nada.",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "empty-options-refused-locally",
+      "why": "Una lista de opciones vacía se rechaza antes de enviar nada, con un ejemplo de cómo se escribe.",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "duplicate-options-collapse-silently",
+      "why": "Observación: dos opciones iguales se envían como un solo criterio, sin avisar.",
+      "pass": true,
+      "problems": [],
+      "observed": {
+        "criteria_sent": [
+          "a"
+        ],
+        "answered": "a"
+      }
+    },
+    {
+      "id": "table-asks-once-for-several-questions",
+      "why": "`decide_table` con dos preguntas envía una sola petición y devuelve una fila por pregunta.",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "max-questions-is-enforced",
+      "why": "`anofox_decide_max_questions` rechaza una llamada con más preguntas, sin enviar nada.",
+      "pass": true,
+      "problems": [],
+      "observed": {
+        "error": "Invalid Input Error: decide_table: 2 questions exceed the per-call limit of 1 (SET anofox_decide_max_questions to raise it)\n\nLINE 1: SELECT * FROM decide_table("
+      }
+    },
+    {
+      "id": "answers-one-request-per-row",
+      "why": "Puntuar 20 filas con `decide_answers` hace una petición por fila, como declara la doc.",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "server-error-is-retried-then-reported",
+      "why": "Un 500 se reintenta y acaba en un error de E/S que dice que no es culpa de la consulta.",
+      "pass": true,
+      "problems": [],
+      "observed": {
+        "requests_sent": 12,
+        "elapsed_ms": 4327
+      }
+    },
+    {
+      "id": "non-json-body-is-an-error",
+      "why": "Un cuerpo 200 que no es JSON da un error que señala el endpoint, no un valor.",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "wrong-shape-is-an-error",
+      "why": "Un JSON sin `answers` da un error que dice qué comprobar.",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "probability-out-of-range-is-an-error",
+      "why": "Una probabilidad fuera de [0, 1] se rechaza, no se recorta.",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "key-is-not-used-for-another-host",
+      "why": "Un secreto con otro `SCOPE` no se envía al endpoint local: sin clave aplicable, ninguna cabecera lleva la inventada.",
+      "pass": true,
+      "problems": [],
+      "observed": {
+        "requests_sent": 0,
+        "error": "Invalid Input Error: decide_probability: no API key for System One endpoint at 127.0.0.1. Fix: provide a key: (1) CREATE SECRET (TYPE anofox_decide, API_KEY '<k"
+      }
+    },
+    {
+      "id": "secret-is-write-only",
+      "why": "El secreto no se ve con `duckdb_secrets()` ni en `decide_models()`.",
+      "pass": true,
+      "problems": []
+    },
+    {
+      "id": "text-reaches-the-provider-after-opt-in",
+      "why": "Observación: tras el opt-in, el texto evaluado sale entero hacia el proveedor, secretos incluidos (no se redacta).",
+      "pass": true,
+      "problems": [],
+      "observed": {
+        "secret_shaped_value_sent": true
+      }
+    },
+    {
+      "id": "metrics-on-known-data",
+      "why": "Exactitud, Brier, AUC y log-loss coinciden con el cálculo a mano sobre cuatro filas.",
+      "pass": true,
+      "problems": [],
+      "observed": {
+        "values": [
+          0.75,
+          0.12499999999999999,
+          1,
+          0.4003674356962309
+        ]
+      }
+    },
+    {
+      "id": "metrics-skip-nulls-and-empty-input",
+      "why": "Observación: las métricas ignoran las filas NULL y sobre una entrada vacía no fallan.",
+      "pass": true,
+      "problems": [],
+      "observed": {
+        "values": [
+          1,
+          null
+        ]
+      }
+    },
+    {
+      "id": "calibration-fit-returns-platt",
+      "why": "`decide_fit_calibration` con resultados mezclados devuelve una calibración `platt:a,b`.",
+      "pass": true,
+      "problems": [],
+      "observed": {
+        "fit": "platt:0.840468163,6.16817084e-17"
+      }
+    },
+    {
+      "id": "calibration-fit-refuses-one-class",
+      "why": "Sin ambos resultados la calibración se niega en vez de inventar una.",
+      "pass": true,
+      "problems": [],
+      "observed": {
+        "error": "Invalid Input Error: decide_fit_calibration: all 3 rows have the same outcome (true); calibration needs both. Fix: pass a model's probabilities and the true out"
+      }
+    },
+    {
+      "id": "local-model-never-downloads-by-itself",
+      "why": "Un modelo local sin bajar falla con la orden que lo baja; no descarga pesos por su cuenta.",
+      "pass": true,
+      "problems": [],
+      "observed": {
+        "error": "Invalid Input Error: decide_probability: model 'laya-multilingual' is not downloaded. Fix: CALL decide_download('laya-multilingual');"
+      }
+    },
+    {
+      "id": "footprint-stays-in-sandbox",
+      "why": "Instalar y usar la extensión solo escribe su binario en el directorio de extensiones: ni pesos, ni caché, ni configuración.",
+      "pass": true,
+      "problems": [],
+      "observed": {
+        "extension_files": [
+          "ext/anofox_decide.duckdb_extension",
+          "ext/anofox_decide.duckdb_extension.info"
+        ]
+      }
+    }
+  ],
+  "pass": true
+}

@@ -21,7 +21,7 @@ veredictos y las medidas crecen aquí. `scripts/probe.mjs` mide un especialista
 arrancando un `jevalan serve` en un sandbox sin claves, y `scripts/probe-gate.mjs`
 mide un gate de hook ejecutando su CLI directamente (sin pasar por el hub). **No es
 un registro**: la spec del hub deja fuera empuje, descarga y firma. Solo toolgate, wellposed, jev-harness,
-jev-firewall, reflex, jev-sentinel, pkg-gate, snifftest, jev-lint, riff, JevLint, jevc, semdecide, every, jev-layer y JevRouter están medidos (`runs/`); lo demás es lectura de código
+jev-firewall, reflex, jev-sentinel, pkg-gate, snifftest, jev-lint, riff, JevLint, jevc, semdecide, every, jev-layer, JevRouter y anofox-decide están medidos (`runs/`); lo demás es lectura de código
 (`static`).
 
 Fuentes de contexto (leer antes de tocar el diseño):
@@ -71,6 +71,10 @@ node scripts/probe-cli.mjs --repo sharziki/semdecide --cli <src> --python <py> -
                                # lo mismo contra Jev DE VERDAD por OpenRouter (typesafe/jev-1.13): la clave vive solo en el entorno de
                                # scripts/lib/openrouter-adapter.mjs, el especialista recibe una inventada y el gasto se cuenta y se topa (USD).
                                # Escribe runs/<fecha>-<repo>-openrouter/. Nunca pegues la clave en un fichero del repo
+node scripts/probe-decide.mjs --python <python de un venv con el wheel oficial de duckdb>
+                               # mide anofox-decide (extensión de DuckDB, no es un CLI): la instala desde el repositorio FIRMADO `community`
+                               # en un directorio de extensiones propio, con telemetría apagada y proxy muerto salvo 127.0.0.1, y la ejecuta
+                               # contra el simulador de scripts/lib/stub-provider.mjs (marca extra [scoremap]). Casos en scripts/lib/cli-cases-decide.mjs
 node scripts/probe-gate.mjs --repo <o/r> --cli <ruta al CLI>
                                # mide un gate de hook (jev-firewall, reflex) en un sandbox, sin hub ni claves;
                                # cada gate tiene su juego de casos registrado en el propio script
@@ -157,7 +161,7 @@ Cambiar estos implica actualizar tests, docs y el plan a la vez:
 - Cohorte A: **13** entradas; solo toolgate es `measured`, con su run en disco.
 - La cobertura publicada **no es un invariante fijo**: crece con cada veredicto de
   la cohorte B y los tests la derivan de `assessments.json`. Solo se fijan las
-  **1340** entradas visibles. Hoy: **109** triadas, **16** evaluadas (**123** de las 125
+  **1340** entradas visibles. Hoy: **108** triadas, **17** evaluadas (**123** de las 125
   en el catálogo), **1217** sin tocar.
 
 ## Reglas inviolables (validadas por `validate-rules.mjs`)

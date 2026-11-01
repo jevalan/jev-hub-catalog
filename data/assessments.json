@@ -3083,14 +3083,17 @@
         "requires_key": [],
         "host": "any"
       },
-      "evidence": "static",
-      "verdict": "Extensión de DuckDB que lleva decisiones en lenguaje natural a SQL: `decide_probability(texto, 'Se pide un reembolso.')`, `decide_choice(texto, '¿Qué equipo es dueño?', ['facturación', 'defecto', 'otro'])` y una escala ordenada, sobre cualquier texto o estado estructurado, con probabilidades calibradas para elegir el umbral y medir. Corre sin conexión en el propio proceso con Julia-1 o Laya sobre ONNX Runtime, o con hosted Jev u otros proveedores; el tutorial arranca con un modelo de pega (`stub`) para ejecutarse sin descargar nada, y una pregunta de elección admite como máximo 24 opciones con el modelo local. Evidencia solo de README.",
+      "evidence": "measured",
+      "verdict": "Extensión de DuckDB que lleva decisiones en lenguaje natural a SQL: `decide_probability(texto, 'Se pide un reembolso.')`, `decide_choice(texto, '¿Qué equipo es dueño?', ['facturación', 'defecto', 'otro'])` y una escala ordenada, sobre cualquier texto o estado estructurado, con probabilidades calibradas para elegir el umbral y medir. Corre sin conexión en el propio proceso con Julia-1 o Laya sobre ONNX Runtime, o con hosted Jev u otros proveedores; el tutorial arranca con un modelo de pega (`stub`) para ejecutarse sin descargar nada, y una pregunta de elección admite como máximo 24 opciones con el modelo local. MEDIDO por nosotros (extensión v2026.10.26 instalada desde el repositorio firmado `community` de DuckDB 2.0.0, en un directorio de extensiones propio, con telemetría apagada y sin descargar ningún modelo). Con un proveedor simulado nuestro en 127.0.0.1 (31 casos, 31 pasan; el simulador no es Jev): las llamadas remotas vienen apagadas y el error dice qué ejecutar, con el opt-in sale una petición por texto, `decide_probability`, `decide_choice` (también con 30 opciones por HTTP), `decide_choice_distribution`, `decide_score`, `decide_decision` con su umbral, `decide_table` (una petición para varias preguntas) y `decide_answers` (una por fila) devuelven lo que dice el proveedor, un NULL no envía nada, y un 500, un cuerpo que no es JSON, una forma equivocada o una probabilidad fuera de [0, 1] acaban en error y nunca en un valor. La clave es un secreto con alcance por host: no viaja a otro host ni se ve en `duckdb_secrets()` ni en `decide_models()`. Las métricas (exactitud, Brier, AUC, log-loss) coinciden con el cálculo a mano, un modelo local sin bajar falla con la orden que lo baja y no se descarga solo, y la instalación solo deja su binario en el directorio de extensiones. Hallazgos: un solo 500 cuesta 12 peticiones y 4,3 s antes de fallar (los reintentos se multiplican); `decide_score` devuelve el nivel que trae el proveedor y no lo recalcula desde la distribución; dos opciones iguales se envían como una sola sin avisar; el texto evaluado sale entero hacia el proveedor tras el opt-in, secretos incluidos. NO medido: los modelos locales (Julia-1 y Laya, de 600 a 850 MB), los proveedores alojados, la GPU, la telemetría encendida (viene encendida por defecto) y cualquier calidad de modelo.",
       "blockers": [
         "se invoca como función SQL dentro de DuckDB: hace falta un shim con DuckDB",
         "con un modelo local la decisión no es de Jev",
-        "el modelo de pega del tutorial no es un modelo real",
-        "no se leyó el contrato de errores"
-      ]
+        "la telemetría viene encendida por defecto (apagable con DATAZOO_DISABLE_TELEMETRY=1); solo se midió apagada",
+        "es un binario nativo de tercero que se carga dentro del proceso de DuckDB",
+        "el texto evaluado sale entero hacia el proveedor tras el opt-in, secretos incluidos",
+        "un solo 500 del proveedor cuesta 12 peticiones antes de fallar"
+      ],
+      "run": "runs/2026-11-01-datazoode-anofox-decide"
     },
     {
       "repo": "YehuiTang0316/jev-nlgrep",
