@@ -172,7 +172,62 @@ ${readList(s, r.reads, r.read)}
 ${evidence(run)}`;
 }
 
-const SECTIONS = { gates: gatesSection, "install-scripts": gatesSection, review: reviewSection, "prose-lint": reviewSection, "code-reach": reviewSection, routing: routingSection };
+// — context: qué conserva, qué pierde y qué deja salir cada herramienta de poda o compactación —
+
+/** Menos filtradas, luego menos pérdidas, luego menos sin podar. */
+const orderContext = (a, b) =>
+  a[1].summary.leaked - b[1].summary.leaked ||
+  a[1].summary.lost - b[1].summary.lost ||
+  a[1].summary.bloated - b[1].summary.bloated ||
+  a[0].localeCompare(b[0]);
+
+const techniquesWith = (p, key) => Object.entries(p.summary.byTechnique).filter(([, c]) => c[key] > 0).map(([k]) => k);
+
+function contextSection(run, s) {
+  const r = s.frontierContext;
+  const projects = Object.entries(run.projects).sort(orderContext);
+  // Cada herramienta recibe una forma distinta de caso: las filas son la unión de las técnicas, en el orden en que aparecen.
+  const techniques = [...new Set(projects.flatMap(([, p]) => Object.keys(p.summary.byTechnique)))];
+  const head = `<tr>${r.cols.map((c) => `<th>${esc(c)}</th>`).join("")}</tr>`;
+  const rows = projects
+    .map(([repo, p]) => {
+      const m = p.summary;
+      return `<tr><td>${link(repo, p)}</td><td class="num">${m.correct}/${m.total}</td><td class="num">${m.bloated}</td><td class="num m-${m.lost ? "bad" : "ok"}">${m.lost}</td><td class="num m-${m.leaked ? "bad" : "ok"}">${m.leaked}</td><td class="num">${m.rankable ? `${m.ranked}/${m.rankable}` : "—"}</td><td class="num">${m.unstable}</td></tr>`;
+    })
+    .join("\n");
+  const cell = (c) => {
+    if (!c) return `<td class="num">—</td>`;
+    const cls = c.lost || c.leaked ? "bad" : c.correct < c.total ? "meh" : "ok";
+    return `<td class="num m-${cls}">${esc(r.cell(c))}</td>`;
+  };
+  const matrix = `<table><thead><tr><th></th>${projects.map(([repo]) => `<th>${esc(repo.split("/")[1])}</th>`).join("")}</tr></thead><tbody>
+${techniques.map((k) => `<tr><td>${esc(s.techniques[k] ?? k)}</td>${projects.map(([, p]) => cell(p.summary.byTechnique[k])).join("")}</tr>`).join("\n")}
+</tbody></table>`;
+  const serves = projects
+    .map(([repo, p]) => {
+      const lines = r.verdict(p.summary).map((l) => `<li>${esc(l)}</li>`).join("");
+      const name = (k) => s.techniques[k] ?? k;
+      const lost = techniquesWith(p, "lost");
+      const leaked = techniquesWith(p, "leaked");
+      const t1 = lost.length ? r.lost(lost.map(name).join(", ")) : r.noLost;
+      const t2 = leaked.length ? r.leaked(leaked.map(name).join(", ")) : r.noLeaked;
+      return `<h4>${esc(repo)}</h4><ul>${lines}<li>${esc(t1)}</li><li>${esc(t2)}</li></ul>`;
+    })
+    .join("\n");
+  return `<h3>${esc(r.group(run.group, run.corpus.size, projects.length))}</h3>
+<p class="note">${esc(r.warn)}</p>
+<table><thead>${head}</thead><tbody>
+${rows}
+</tbody></table>
+<h3>${esc(r.matrix)}</h3>
+${matrix}
+<h3>${esc(s.frontierServes)}</h3>
+${serves}
+${readList(s, r.reads, r.read)}
+${evidence(run)}`;
+}
+
+const SECTIONS = { context: contextSection, gates: gatesSection, "install-scripts": gatesSection, review: reviewSection, "prose-lint": reviewSection, "code-reach": reviewSection, routing: routingSection };
 
 /** `runs` son los frontier.json ya leídos; cada grupo se pinta con su propia sección. */
 export function buildFrontierPage(runs, lang = "es") {

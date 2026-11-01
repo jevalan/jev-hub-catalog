@@ -26,6 +26,8 @@ import { FIXTURES as SD_FIXTURES, semdecideCases } from "./lib/cli-cases-semdeci
 import { FIXTURES as SDL_FIXTURES, semdecideLiveCases } from "./lib/cli-cases-semdecide-live.mjs";
 import { FIXTURES as JY_FIXTURES, jevLayerCases, jevLayerLiveCases } from "./lib/cli-cases-jevlayer.mjs";
 import { FIXTURES as JR_FIXTURES, jevRouterCases, jevRouterLiveCases } from "./lib/cli-cases-jevrouter.mjs";
+import { FIXTURES as JP_FIXTURES, jevPruneCases, jevPruneLiveCases } from "./lib/cli-cases-jevprune.mjs";
+import { FIXTURES as FC_FIXTURES, fastJevCases, fastJevLiveCases } from "./lib/cli-cases-fastjev.mjs";
 import { FIXTURES as EV_FIXTURES, everyCases, EXTRACT_HARNESS } from "./lib/cli-cases-every.mjs";
 
 const arg = (name) => {
@@ -329,6 +331,80 @@ const CLIS = {
       "el servidor MCP (`jev mcp`), los adaptadores de Hermes, OMP y Codex, y los comandos que escriben configuración (`install`, `init`, `add`, `doctor`)",
       "imágenes, Box, supervisión, filtrado de contexto, ruta de modelos y navegador",
       "el endpoint HTTPS real: el simulador usa HTTP en loopback",
+    ],
+  },
+  "tamaratran/fast-jev-compaction": {
+    cases: fastJevCases,
+    fixtures: FC_FIXTURES,
+    allowed: /^$/,
+    stub: true,
+    // La librería toma la URL por opción: el conductor la lee de FJC_BASE_URL (el simulador o el adaptador en 127.0.0.1).
+    stubEnv: (port) => ({ FJC_BASE_URL: `http://127.0.0.1:${port}/v1/systemone` }),
+    keys: "inventada («clave-inventada-de-pruebas»), válida solo contra un proveedor simulado nuestro en 127.0.0.1; ninguna petición sale de la máquina y ninguna clave real entra en el entorno",
+    // `--cli` es el `dist/index.js` del paquete npm instalado con --ignore-scripts; se ejerce con nuestro conductor, que solo llama a `compactMessages`.
+    launch: () => ({ command: process.execPath, prefix: [join(ROOT, "scripts", "lib", "compaction-driver.mjs")] }),
+    get env() {
+      return { FJC_DIST: resolve(arg("cli")), NO_COLOR: "1" };
+    },
+    live: {
+      cases: fastJevLiveCases,
+      keys: "inventada para el especialista; la real (OpenRouter) vive solo en el entorno de un adaptador local en 127.0.0.1 con tope de gasto",
+      measured: [
+        "Jev de verdad (typesafe/jev-1.13 por la Decisions API de OpenRouter) a través de la librería, sobre una conversación de cinco llamadas con un objetivo: qué conserva y qué descarta, y cómo cambia con el objetivo",
+      ],
+      not_measured: [
+        "estabilidad entre ejecuciones y conversaciones reales: es una sola conversación sintética",
+        "el plugin de Claude Code, los hooks y los `bin` del paquete (`jev-setup` escribe configuración de otros programas)",
+      ],
+    },
+    measured: [
+      "con un proveedor simulado nuestro (NO es Jev): umbral por defecto y `keepThreshold`, descartar la llamada con su resultado o solo el resultado (cabeza acotada), lo fijado (primer mensaje y más recientes) nunca se pregunta ni se descarta",
+      "qué se manda al proveedor: dos preguntas binarias por llamada, la clave por Authorization, el estado sin el texto de los resultados, y que una orden con una clave dentro viaja tal cual",
+      "reparto en varias peticiones con un historial grande, y los errores (sin clave, 500, cuerpo que no es JSON) se propagan sin caer a nada",
+      "huella en disco del sandbox",
+    ],
+    not_measured: [
+      "lo que Jev contesta de verdad con el proveedor simulado: lo dicta una marca en el objetivo",
+      "el plugin de Claude Code, los hooks y los `bin` del paquete (`jev-setup`, `jev-find`, `jev-qa`): el primero escribe configuración de otros programas y no se ejecutó",
+      "la parte de Hermes y Python (`plugins/jev-layer`) y `hermes-compact.mjs`",
+    ],
+  },
+  "ibrahemid/jevprune": {
+    cases: jevPruneCases,
+    fixtures: JP_FIXTURES,
+    // Guarda cada ejecución en ~/.jevprune (el HOME del sandbox): es parte de lo que declara.
+    allowed: /^\.jevprune\//,
+    stub: true,
+    // Solo la URL: la clave la ponen los casos que la quieren, para poder medir también el camino sin clave.
+    stubEnv: (port) => ({ TYPESAFE_BASE_URL: `http://127.0.0.1:${port}` }),
+    keys: "inventada («clave-inventada-de-pruebas»), válida solo contra un proveedor simulado nuestro en 127.0.0.1; ninguna petición sale de la máquina y ninguna clave real entra en el entorno",
+    // `--cli` es dist/cli.js del paquete npm instalado con --ignore-scripts.
+    launch: (cli) => ({ command: process.execPath, prefix: [resolve(cli)] }),
+    env: { NO_COLOR: "1" },
+    live: {
+      cases: jevPruneLiveCases,
+      keys: "inventada para el especialista; la real (OpenRouter) vive solo en el entorno de un adaptador local en 127.0.0.1 con tope de gasto",
+      measured: [
+        "Jev de verdad (typesafe/jev-1.13 por la Decisions API de OpenRouter) a través del filtro, sobre un registro de 200 líneas con un fallo: conserva el fallo, descarta el ruido rutinario y no reescribe ni reordena",
+        "la dependencia de la tarea: con otra tarea el mismo registro se filtra distinto",
+      ],
+      not_measured: [
+        "estabilidad entre ejecuciones y la cola de casos difíciles: es un solo registro sintético",
+        "el plugin de Claude Code (hooks de función), que es la forma principal de uso",
+      ],
+    },
+    measured: [
+      "el camino sin clave: cae a reglas (cabeza, cola y errores con contexto), conserva el error y lo declara en el pie",
+      "con un proveedor simulado nuestro (NO es Jev): una pregunta binaria por línea, qué se manda (tarea, comando, clave por Authorization), qué líneas no se mandan, el umbral por defecto y `--threshold`",
+      "lo conservado son líneas originales y en su orden; la marca de líneas descartadas; stdin; `run` y su código de salida",
+      "documentos que pasan enteros y sin petición; 500 y cuerpo que no es JSON caen a reglas y lo dicen",
+      "observación: un token de GitHub en una línea del registro no activa la protección y viaja al proveedor",
+      "huella en disco del sandbox (~/.jevprune)",
+    ],
+    not_measured: [
+      "lo que Jev contesta de verdad con el proveedor simulado: lo dicta una marca en la tarea",
+      "el plugin de Claude Code (hooks de función), la librería (`pruneOutput`, `pruneStream`) y `gain`",
+      "entradas de más de 16 MiB, UTF-8 inválido y la recuperación de líneas con `show <id>`",
     ],
   },
   "billionsbobby/jevrouter": {

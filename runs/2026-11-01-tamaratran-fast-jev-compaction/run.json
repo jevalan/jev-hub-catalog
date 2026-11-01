@@ -1,0 +1,180 @@
+{
+  "repo": "tamaratran/fast-jev-compaction",
+  "date": "2026-11-01",
+  "scope": "directo: se ejecuta el CLI del especialista, sin pasar por el hub de jevalan",
+  "environment": {
+    "node": "v24.8.0",
+    "specialist": "0.4.1",
+    "keys": "inventada («clave-inventada-de-pruebas»), válida solo contra un proveedor simulado nuestro en 127.0.0.1; ninguna petición sale de la máquina y ninguna clave real entra en el entorno"
+  },
+  "measured": [
+    "con un proveedor simulado nuestro (NO es Jev): umbral por defecto y `keepThreshold`, descartar la llamada con su resultado o solo el resultado (cabeza acotada), lo fijado (primer mensaje y más recientes) nunca se pregunta ni se descarta",
+    "qué se manda al proveedor: dos preguntas binarias por llamada, la clave por Authorization, el estado sin el texto de los resultados, y que una orden con una clave dentro viaja tal cual",
+    "reparto en varias peticiones con un historial grande, y los errores (sin clave, 500, cuerpo que no es JSON) se propagan sin caer a nada",
+    "huella en disco del sandbox"
+  ],
+  "not_measured": [
+    "lo que Jev contesta de verdad con el proveedor simulado: lo dicta una marca en el objetivo",
+    "el plugin de Claude Code, los hooks y los `bin` del paquete (`jev-setup`, `jev-find`, `jev-qa`): el primero escribe configuración de otros programas y no se ejecutó",
+    "la parte de Hermes y Python (`plugins/jev-layer`) y `hermes-compact.mjs`"
+  ],
+  "footprint": [],
+  "cases": [
+    {
+      "id": "high-scores-leave-the-conversation-untouched",
+      "why": "Con la probabilidad por encima del umbral no se quita nada y los mensajes salen idénticos a los de entrada.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "low-scores-drop-calls-with-their-results",
+      "why": "Con la probabilidad por debajo del umbral descarta la llamada junto con su resultado y los mensajes quedan más cortos.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "stats": {
+          "calls": 5,
+          "callsDropped": 4,
+          "pinned": 1,
+          "messagesBefore": 15,
+          "messagesAfter": 11
+        }
+      }
+    },
+    {
+      "id": "first-and-newest-messages-are-pinned",
+      "why": "Lo fijado (el primer mensaje y los más recientes) no se pregunta ni se descarta nunca.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "pinned": [
+          "t3",
+          "t4",
+          "t5"
+        ],
+        "questions": 4
+      }
+    },
+    {
+      "id": "call-and-result-are-decided-separately",
+      "why": "La llamada y el resultado tienen su propia pregunta: conservar la llamada y descartar el resultado deja una cabeza acotada con una nota.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "kept_result_head": "server:\n  port: 8443\n  host: 0.0.0.0\n# comentario de relleno del fichero\n# comentario de relleno del fichero\n# comentario de relleno del fichero\n# comentario de"
+      }
+    },
+    {
+      "id": "keep-threshold-option-raises-the-bar",
+      "why": "`keepThreshold` sube el listón: con 0,9 de probabilidad y umbral 0,95 se descarta lo que con el umbral por defecto se conservaba.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "request-shape",
+      "why": "Una sola petición para una conversación pequeña, con la clave por Authorization, y dos preguntas binarias por llamada.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "model_sent": "jev-latest",
+        "state_keys": [
+          "context",
+          "goal",
+          "history"
+        ],
+        "questions": 8
+      }
+    },
+    {
+      "id": "tool-result-text-is-not-in-the-state",
+      "why": "Observación: el estado que se manda al proveedor lleva las llamadas pero no el texto de los resultados (se pregunta sin enseñarlos).",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "result_text_sent": false,
+        "tool_inputs_sent": true
+      }
+    },
+    {
+      "id": "secret-in-tool-input-reaches-the-provider",
+      "why": "Observación: una orden con una clave dentro (lo que el asistente escribió) viaja al proveedor tal cual en el historial.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "secret_sent": true
+      }
+    },
+    {
+      "id": "no-key-is-an-error-and-sends-nothing",
+      "why": "Sin clave falla con un error que lo dice y no envía nada (no cae a ningún resumen propio).",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "server-error-throws",
+      "why": "Un 500 se propaga como error (la librería no cae sola a otra cosa: lo decide quien la llama).",
+      "pass": true,
+      "problems": [],
+      "exit": 1,
+      "observed": {
+        "requests_sent": 1,
+        "error": "Jev request failed (500): "
+      }
+    },
+    {
+      "id": "non-json-body-throws",
+      "why": "Un cuerpo que no es JSON es un error, no una conversación sin tocar.",
+      "pass": true,
+      "problems": [],
+      "exit": 1
+    },
+    {
+      "id": "empty-conversation",
+      "why": "Observación: una conversación vacía no revienta.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "exit": 0,
+        "out": "{\"messages\":[],\"decisions\":[],\"stats\":{\"messagesBefore\":0,\"messagesAfter\":0,\"charsBefore\":0,\"charsAfter\":0,\"calls\":0,\"kept\":0,\"resultsDropped\":0,\"callsDropped\":0,\"pinned\":0,\"stateTokens\":0,\"stateStage"
+      }
+    },
+    {
+      "id": "large-history-is-batched",
+      "why": "Con muchas llamadas y un tope de petición ajustado reparte las preguntas en varias peticiones.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "requests": 5,
+        "calls": 60
+      }
+    },
+    {
+      "id": "history-that-does-not-fit-throws",
+      "why": "Si el estado no cabe en el tope de petición falla en voz alta (no recorta en silencio) y no envía nada.",
+      "pass": true,
+      "problems": [],
+      "exit": 1,
+      "observed": {
+        "error": "state leaves no room for questions (~5316 of 4000 tokens)"
+      }
+    },
+    {
+      "id": "footprint-stays-in-sandbox",
+      "why": "Lo que el CLI deja en disco queda dentro del sandbox y dentro de lo que su documentación declara.",
+      "pass": true,
+      "problems": []
+    }
+  ],
+  "pass": true
+}

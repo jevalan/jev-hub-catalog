@@ -27,8 +27,8 @@ test("toolgate is catalogued under research and is the one already adapted", () 
   assert.equal(t.capability, "tool.risk");
 });
 
-test("an entry is measured only if its run is on disk, and toolgate is the one measured in cohort A", () => {
+test("an entry is measured only if its run is on disk, and toolgate and fast-jev-compaction are the ones measured in cohort A", () => {
   for (const a of assessments.filter((x) => x.evidence === "measured")) assert.equal(hasRun(a.run), true, `${a.repo} sin run`);
   const measuredInA = assessments.filter((a) => a.cohort === "A" && a.evidence === "measured");
-  assert.deepEqual(measuredInA.map((a) => a.repo), ["RiskAverseTech/toolgate"]);
+  assert.deepEqual(measuredInA.map((a) => a.repo).sort(), ["RiskAverseTech/toolgate", "tamaratran/fast-jev-compaction"]);
 });

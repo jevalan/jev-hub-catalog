@@ -1,0 +1,89 @@
+{
+  "repo": "ibrahemid/jevprune",
+  "date": "2026-11-01",
+  "scope": "directo: se ejecuta el CLI del especialista, sin pasar por el hub de jevalan",
+  "environment": {
+    "node": "v24.8.0",
+    "specialist": "0.2.0",
+    "keys": "inventada para el especialista; la real (OpenRouter) vive solo en el entorno de un adaptador local en 127.0.0.1 con tope de gasto"
+  },
+  "live": {
+    "backend": "OpenRouter Decisions API",
+    "models_seen": [
+      "typesafe/jev-1.13-20260917"
+    ],
+    "spend_usd": 0.00189,
+    "cap_usd": 1
+  },
+  "measured": [
+    "Jev de verdad (typesafe/jev-1.13 por la Decisions API de OpenRouter) a través del filtro, sobre un registro de 200 líneas con un fallo: conserva el fallo, descarta el ruido rutinario y no reescribe ni reordena",
+    "la dependencia de la tarea: con otra tarea el mismo registro se filtra distinto"
+  ],
+  "not_measured": [
+    "estabilidad entre ejecuciones y la cola de casos difíciles: es un solo registro sintético",
+    "el plugin de Claude Code (hooks de función), que es la forma principal de uso"
+  ],
+  "footprint": [
+    ".jevprune/gain.jsonl",
+    ".jevprune/runs/mvxjox9f-b91b.json",
+    ".jevprune/runs/mvxjox9f-b91b.log",
+    ".jevprune/runs/mvxjoxqo-dc21.json",
+    ".jevprune/runs/mvxjoxqo-dc21.log",
+    ".jevprune/runs/mvxjoy1x-27eb.json",
+    ".jevprune/runs/mvxjoy1x-27eb.log",
+    ".jevprune/runs/mvxjoyd6-86c8.json",
+    ".jevprune/runs/mvxjoyd6-86c8.log",
+    "doc.json",
+    "github-token.log",
+    "npm-test.log"
+  ],
+  "cases": [
+    {
+      "id": "live-keeps-the-failure",
+      "why": "Para «arreglar el test de auth», conserva la línea del fallo.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "lines_out": 47,
+        "footer": "jevprune: 200 → 49 lines, full output ~…"
+      }
+    },
+    {
+      "id": "live-drops-routine-success-noise",
+      "why": "Descarta la mayor parte de las 199 líneas de «PASS» rutinarias.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "lines_out": 47
+      }
+    },
+    {
+      "id": "live-kept-lines-are-verbatim-and-in-order",
+      "why": "Lo que conserva son líneas originales y en su orden.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "live-follows-the-task",
+      "why": "Con otra tarea («cuánto tardó el test 7») el error de auth deja de ser lo importante: observación de la dependencia de la tarea.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "lines_out": 48,
+        "kept_error_line": true,
+        "kept_case7": true
+      }
+    },
+    {
+      "id": "footprint-stays-in-sandbox",
+      "why": "Lo que el CLI deja en disco queda dentro del sandbox y dentro de lo que su documentación declara.",
+      "pass": true,
+      "problems": []
+    }
+  ],
+  "pass": true
+}

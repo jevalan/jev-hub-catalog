@@ -1,0 +1,123 @@
+{
+  "repo": "tamaratran/fast-jev-compaction",
+  "date": "2026-11-01",
+  "scope": "directo: se ejecuta el CLI del especialista, sin pasar por el hub de jevalan",
+  "environment": {
+    "node": "v24.8.0",
+    "specialist": "0.4.1",
+    "keys": "inventada para el especialista; la real (OpenRouter) vive solo en el entorno de un adaptador local en 127.0.0.1 con tope de gasto"
+  },
+  "live": {
+    "backend": "OpenRouter Decisions API",
+    "models_seen": [
+      "typesafe/jev-1.13-20260917"
+    ],
+    "spend_usd": 0.00025,
+    "cap_usd": 1
+  },
+  "measured": [
+    "Jev de verdad (typesafe/jev-1.13 por la Decisions API de OpenRouter) a través de la librería, sobre una conversación de cinco llamadas con un objetivo: qué conserva y qué descarta, y cómo cambia con el objetivo"
+  ],
+  "not_measured": [
+    "estabilidad entre ejecuciones y conversaciones reales: es una sola conversación sintética",
+    "el plugin de Claude Code, los hooks y los `bin` del paquete (`jev-setup` escribe configuración de otros programas)"
+  ],
+  "footprint": [],
+  "cases": [
+    {
+      "id": "live-ranks-the-result-the-goal-depends-on-first",
+      "why": "Si la pregunta se contesta con el fichero de configuración leído antes, esa llamada y ese resultado puntúan más alto que todos los demás.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "scores_call_result": {
+          "t1": [
+            0.1,
+            0.07
+          ],
+          "t2": [
+            0.47,
+            0.17
+          ],
+          "t3": [
+            0.1,
+            0.05
+          ],
+          "t4": [
+            0.13,
+            0.07
+          ]
+        },
+        "actions": {
+          "t1": "Bash:drop_call",
+          "t2": "Read:drop_call",
+          "t3": "Bash:drop_call",
+          "t4": "Read:drop_call",
+          "t5": "Bash:keep"
+        },
+        "reduction": [
+          4147,
+          167
+        ]
+      }
+    },
+    {
+      "id": "live-needed-result-survives-the-default-threshold",
+      "why": "Con el umbral por defecto (0,5) esa lectura se conserva: la pregunta no se puede contestar sin ella.",
+      "pass": false,
+      "problems": [
+        "t2 (config/server.yaml): drop_call, puntuación [0.46,0.18]"
+      ],
+      "exit": 0
+    },
+    {
+      "id": "live-drops-what-the-goal-does-not-use",
+      "why": "Descarta lo que esa pregunta no usa: el listado y el README.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "live-follows-the-goal",
+      "why": "Con otra pregunta («cómo se llama el proyecto según el README») el README pasa a puntuar el primero y la configuración deja de serlo.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "scores_call_result": {
+          "t1": [
+            0.1,
+            0.07
+          ],
+          "t2": [
+            0.14,
+            0.07
+          ],
+          "t3": [
+            0.1,
+            0.05
+          ],
+          "t4": [
+            0.34,
+            0.21
+          ]
+        },
+        "actions": {
+          "t1": "Bash:drop_call",
+          "t2": "Read:drop_call",
+          "t3": "Bash:drop_call",
+          "t4": "Read:drop_call",
+          "t5": "Bash:keep"
+        }
+      }
+    },
+    {
+      "id": "footprint-stays-in-sandbox",
+      "why": "Lo que el CLI deja en disco queda dentro del sandbox y dentro de lo que su documentación declara.",
+      "pass": true,
+      "problems": []
+    }
+  ],
+  "pass": false
+}

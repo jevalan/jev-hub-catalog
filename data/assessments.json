@@ -135,9 +135,14 @@
         ],
         "host": "any"
       },
-      "evidence": "static",
-      "verdict": "Devuelve un array de mensajes reescrito, no un veredicto: el hub no tiene dónde colocar esa salida.",
-      "blockers": []
+      "evidence": "measured",
+      "verdict": "Devuelve un array de mensajes reescrito, no un veredicto: el hub no tiene dónde colocar esa salida. MEDIDO por nosotros (v0.4.1 desde npm con `--ignore-scripts`; solo la librería `dist/` a través de un conductor nuestro que llama a `compactMessages`: el plugin, los hooks y los `bin` `jev-setup`, `jev-find` y `jev-qa` no se ejecutaron). Con un proveedor simulado nuestro (15 casos, 15 pasan): umbral por defecto y `keepThreshold`, descartar la llamada con su resultado o solo el resultado, lo fijado nunca se pregunta ni se descarta, dos preguntas binarias por llamada, el estado no lleva el texto de los resultados, un historial grande se reparte en varias peticiones y uno que no cabe falla en voz alta; sin clave, un 500 y un cuerpo que no es JSON se propagan como error. Con Jev de verdad (typesafe/jev-1.13 por OpenRouter, 4 casos, 3 pasan, 0,0003 USD; run `runs/2026-11-01-tamaratran-fast-jev-compaction-openrouter`): el resultado del que depende la pregunta puntúa el primero, y con otra pregunta puntúa el primero otro, pero queda por debajo del umbral por defecto (0,5): la llamada necesaria sale con 0,46 y su resultado con 0,18, así que se descarta. Frontera del grupo context (15 conversaciones, 3 pasadas cada una): Jev ordena bien en 11 de 11 casos (lo necesario puntúa por encima de todo el ruido) y aun así el umbral por defecto pierde lo necesario en las 11, sin una pasada distinta; es decir, con los valores por defecto compacta de más. Hallazgos: una credencial dentro de lo que el asistente escribió (cabecera, variable de entorno) viaja al proveedor en el historial (4 de 4); el paquete npm publica ficheros del autor (registros de llamadas a herramientas, una transcripción de prueba y `__pycache__`). NO medido: el plugin de Claude Code y sus hooks, los `bin` del paquete, la parte de Hermes y Python y los umbrales distintos del por defecto.",
+      "blockers": [
+        "con los valores por defecto el umbral (0,5) descarta lo que la pregunta necesita: Jev lo puntúa el primero (0,46 / 0,18) pero por debajo del listón",
+        "una credencial dentro de una orden del asistente viaja al proveedor en el historial",
+        "el paquete npm publica ficheros del autor (registros de herramientas, transcripción de prueba, `__pycache__`)"
+      ],
+      "run": "runs/2026-11-01-tamaratran-fast-jev-compaction"
     },
     {
       "repo": "shitianfang/wakegate",
@@ -1981,9 +1986,13 @@
         ],
         "host": "any"
       },
-      "evidence": "static",
-      "verdict": "Filtra la salida larga de comandos para agentes según la descripción de la tarea y conserva las líneas con su texto y orden originales. Devuelve texto transformado, no un veredicto. Sin clave, o si Jev falla por plazo o la salida pasa de 16 MB, cae a reglas (40 primeras y últimas líneas más los errores con 3 de contexto) y lo declara en el pie con el motivo, así que no es un fallo silencioso. La salida completa queda en `~/.jevprune/runs/`.",
-      "blockers": []
+      "evidence": "measured",
+      "verdict": "Filtra la salida larga de comandos para agentes según la descripción de la tarea y conserva las líneas con su texto y orden originales. Devuelve texto transformado, no un veredicto. Sin clave, o si Jev falla por plazo o la salida pasa de 16 MB, cae a reglas (40 primeras y últimas líneas más los errores con 3 de contexto) y lo declara en el pie con el motivo, así que no es un fallo silencioso. La salida completa queda en `~/.jevprune/runs/`. MEDIDO por nosotros (v0.2.0 desde npm con `--ignore-scripts`; solo `--help`, `--version`, `select`, `run` y `show`: el plugin y los hooks no se ejecutaron). Con un proveedor simulado nuestro (19 casos, 19 pasan): sin clave cae a reglas (89 de 200 líneas, conserva el error) y lo declara en el pie; con proveedor hace una pregunta binaria por línea candidata (153 de 200: las que las reglas ya conservan no se mandan), el umbral y `--threshold` mandan, lo conservado son líneas originales y en su orden, un documento pasa entero sin petición y un 500 o un cuerpo que no es JSON caen a reglas y lo dicen. Con Jev de verdad (typesafe/jev-1.13 por OpenRouter, 4 casos, 4 pasan, 0,002 USD; run `runs/2026-11-01-ibrahemid-jevprune-openrouter`): 200 → 49 líneas con el fallo conservado y las líneas intactas y en orden. Frontera del grupo context (28 registros, 3 pasadas cada uno, `runs/2026-11-01-frontier-context`): conserva lo necesario en los 18 casos con aguja (fallo escrito de cinco formas, línea sin «error» ni «fail», otra tarea sobre la misma salida, orden incrustada en el propio registro, 2000 líneas) y poda el ruido, sin una sola pérdida ni una pasada distinta; pero deja salir 7 de 10 formas de credencial hacia el proveedor (token de GitHub, clave de acceso de AWS, JWT en una cabecera, contraseña asignada, clave de Anthropic, token de Slack y clave de Stripe); solo la protegen la clave secreta de AWS por su nombre, la clave PEM y `api_key=` en una URL. NO medido: el plugin de Claude Code (la forma principal de uso), la librería, `gain`, entradas de más de 16 MiB y UTF-8 inválido.",
+      "blockers": [
+        "la protección de credenciales no reconoce la mayoría de las formas habituales: 7 de 10 salen hacia el proveedor dentro de la línea",
+        "se instala como plugin de Claude Code con hooks de función; el CLI es solo la parte medida"
+      ],
+      "run": "runs/2026-11-01-ibrahemid-jevprune"
     },
     {
       "repo": "CheshiAI/Cheshi",

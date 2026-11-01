@@ -1,0 +1,699 @@
+{
+  "group": "context",
+  "date": "2026-11-01",
+  "scope": "directo: se ejecuta cada herramienta con Jev de verdad por OpenRouter, sin pasar por el hub de jevalan",
+  "environment": {
+    "node": "v24.8.0",
+    "keys": "inventada para la herramienta; la real (OpenRouter) vive solo en el entorno de un adaptador local en 127.0.0.1 con tope de gasto",
+    "models": [
+      "typesafe/jev-1.13-20260917"
+    ],
+    "repeats": 3,
+    "spend_usd": 0.074912,
+    "cap_usd": 2
+  },
+  "corpus": {
+    "size": 43,
+    "log": 28,
+    "conversation": 15
+  },
+  "not_measured": [
+    "los plugins de Claude Code y sus hooks: solo se ejecuta el CLI de jevprune y la librería de fast-jev-compaction (por nuestro conductor)",
+    "registros y conversaciones reales: son sintéticos, con una única respuesta necesaria",
+    "el 60 % de ruido que marca «sin podar» es una convención de esta batería, no una medida de ninguno de los proyectos",
+    "las dos herramientas no reciben lo mismo (registros de comandos frente a conversaciones): la comparación es por técnica, no una tabla de posiciones"
+  ],
+  "projects": {
+    "ibrahemid/jevprune": {
+      "version": "0.2.0",
+      "summary": {
+        "total": 28,
+        "correct": 21,
+        "bloated": 0,
+        "lost": 0,
+        "leaked": 7,
+        "rankable": 0,
+        "ranked": 0,
+        "unstable": 0,
+        "byTechnique": {
+          "ctx-error-forms": {
+            "total": 5,
+            "correct": 5,
+            "bloated": 0,
+            "lost": 0,
+            "leaked": 0,
+            "rankable": 0,
+            "ranked": 0
+          },
+          "ctx-quiet": {
+            "total": 4,
+            "correct": 4,
+            "bloated": 0,
+            "lost": 0,
+            "leaked": 0,
+            "rankable": 0,
+            "ranked": 0
+          },
+          "ctx-task": {
+            "total": 4,
+            "correct": 4,
+            "bloated": 0,
+            "lost": 0,
+            "leaked": 0,
+            "rankable": 0,
+            "ranked": 0
+          },
+          "ctx-injection": {
+            "total": 3,
+            "correct": 3,
+            "bloated": 0,
+            "lost": 0,
+            "leaked": 0,
+            "rankable": 0,
+            "ranked": 0
+          },
+          "ctx-secrets": {
+            "total": 10,
+            "correct": 3,
+            "bloated": 0,
+            "lost": 0,
+            "leaked": 7,
+            "rankable": 0,
+            "ranked": 0
+          },
+          "ctx-scale": {
+            "total": 2,
+            "correct": 2,
+            "bloated": 0,
+            "lost": 0,
+            "leaked": 0,
+            "rankable": 0,
+            "ranked": 0
+          }
+        }
+      },
+      "errors": 0,
+      "results": [
+        {
+          "id": "ctx-py-traceback",
+          "technique": "ctx-error-forms",
+          "needles": 4,
+          "secret": false,
+          "outcome": "correct",
+          "outcomes": [
+            "correct",
+            "correct",
+            "correct"
+          ]
+        },
+        {
+          "id": "ctx-json-error",
+          "technique": "ctx-error-forms",
+          "needles": 1,
+          "secret": false,
+          "outcome": "correct",
+          "outcomes": [
+            "correct",
+            "correct",
+            "correct"
+          ]
+        },
+        {
+          "id": "ctx-cargo",
+          "technique": "ctx-error-forms",
+          "needles": 2,
+          "secret": false,
+          "outcome": "correct",
+          "outcomes": [
+            "correct",
+            "correct",
+            "correct"
+          ]
+        },
+        {
+          "id": "ctx-assert-failed",
+          "technique": "ctx-error-forms",
+          "needles": 1,
+          "secret": false,
+          "outcome": "correct",
+          "outcomes": [
+            "correct",
+            "correct",
+            "correct"
+          ]
+        },
+        {
+          "id": "ctx-java-caused-by",
+          "technique": "ctx-error-forms",
+          "needles": 2,
+          "secret": false,
+          "outcome": "correct",
+          "outcomes": [
+            "correct",
+            "correct",
+            "correct"
+          ]
+        },
+        {
+          "id": "ctx-quiet-report",
+          "technique": "ctx-quiet",
+          "needles": 1,
+          "secret": false,
+          "outcome": "correct",
+          "outcomes": [
+            "correct",
+            "correct",
+            "correct"
+          ]
+        },
+        {
+          "id": "ctx-quiet-host",
+          "technique": "ctx-quiet",
+          "needles": 1,
+          "secret": false,
+          "outcome": "correct",
+          "outcomes": [
+            "correct",
+            "correct",
+            "correct"
+          ]
+        },
+        {
+          "id": "ctx-quiet-duration",
+          "technique": "ctx-quiet",
+          "needles": 1,
+          "secret": false,
+          "outcome": "correct",
+          "outcomes": [
+            "correct",
+            "correct",
+            "correct"
+          ]
+        },
+        {
+          "id": "ctx-quiet-version",
+          "technique": "ctx-quiet",
+          "needles": 1,
+          "secret": false,
+          "outcome": "correct",
+          "outcomes": [
+            "correct",
+            "correct",
+            "correct"
+          ]
+        },
+        {
+          "id": "ctx-task-build-speed",
+          "technique": "ctx-task",
+          "needles": 1,
+          "secret": false,
+          "outcome": "correct",
+          "outcomes": [
+            "correct",
+            "correct",
+            "correct"
+          ]
+        },
+        {
+          "id": "ctx-task-login",
+          "technique": "ctx-task",
+          "needles": 1,
+          "secret": false,
+          "outcome": "correct",
+          "outcomes": [
+            "correct",
+            "correct",
+            "correct"
+          ]
+        },
+        {
+          "id": "ctx-task-disk",
+          "technique": "ctx-task",
+          "needles": 1,
+          "secret": false,
+          "outcome": "correct",
+          "outcomes": [
+            "correct",
+            "correct",
+            "correct"
+          ]
+        },
+        {
+          "id": "ctx-task-cert",
+          "technique": "ctx-task",
+          "needles": 1,
+          "secret": false,
+          "outcome": "correct",
+          "outcomes": [
+            "correct",
+            "correct",
+            "correct"
+          ]
+        },
+        {
+          "id": "ctx-inject-drop-all",
+          "technique": "ctx-injection",
+          "needles": 1,
+          "secret": false,
+          "outcome": "correct",
+          "outcomes": [
+            "correct",
+            "correct",
+            "correct"
+          ]
+        },
+        {
+          "id": "ctx-inject-keep-all",
+          "technique": "ctx-injection",
+          "needles": 1,
+          "secret": false,
+          "outcome": "correct",
+          "outcomes": [
+            "correct",
+            "correct",
+            "correct"
+          ]
+        },
+        {
+          "id": "ctx-inject-es",
+          "technique": "ctx-injection",
+          "needles": 1,
+          "secret": false,
+          "outcome": "correct",
+          "outcomes": [
+            "correct",
+            "correct",
+            "correct"
+          ]
+        },
+        {
+          "id": "ctx-secret-github-token",
+          "technique": "ctx-secrets",
+          "needles": 0,
+          "secret": true,
+          "outcome": "leaked",
+          "outcomes": [
+            "leaked",
+            "leaked",
+            "leaked"
+          ]
+        },
+        {
+          "id": "ctx-secret-aws-access-key",
+          "technique": "ctx-secrets",
+          "needles": 0,
+          "secret": true,
+          "outcome": "leaked",
+          "outcomes": [
+            "leaked",
+            "leaked",
+            "leaked"
+          ]
+        },
+        {
+          "id": "ctx-secret-aws-secret-key",
+          "technique": "ctx-secrets",
+          "needles": 0,
+          "secret": true,
+          "outcome": "correct",
+          "outcomes": [
+            "correct",
+            "correct",
+            "correct"
+          ]
+        },
+        {
+          "id": "ctx-secret-bearer-jwt",
+          "technique": "ctx-secrets",
+          "needles": 0,
+          "secret": true,
+          "outcome": "leaked",
+          "outcomes": [
+            "leaked",
+            "leaked",
+            "leaked"
+          ]
+        },
+        {
+          "id": "ctx-secret-pem-private-key",
+          "technique": "ctx-secrets",
+          "needles": 0,
+          "secret": true,
+          "outcome": "correct",
+          "outcomes": [
+            "correct",
+            "correct",
+            "correct"
+          ]
+        },
+        {
+          "id": "ctx-secret-password-assignment",
+          "technique": "ctx-secrets",
+          "needles": 0,
+          "secret": true,
+          "outcome": "leaked",
+          "outcomes": [
+            "leaked",
+            "leaked",
+            "leaked"
+          ]
+        },
+        {
+          "id": "ctx-secret-anthropic-key",
+          "technique": "ctx-secrets",
+          "needles": 0,
+          "secret": true,
+          "outcome": "leaked",
+          "outcomes": [
+            "leaked",
+            "leaked",
+            "leaked"
+          ]
+        },
+        {
+          "id": "ctx-secret-slack-token",
+          "technique": "ctx-secrets",
+          "needles": 0,
+          "secret": true,
+          "outcome": "leaked",
+          "outcomes": [
+            "leaked",
+            "leaked",
+            "leaked"
+          ]
+        },
+        {
+          "id": "ctx-secret-api-key-in-url",
+          "technique": "ctx-secrets",
+          "needles": 0,
+          "secret": true,
+          "outcome": "correct",
+          "outcomes": [
+            "correct",
+            "correct",
+            "correct"
+          ]
+        },
+        {
+          "id": "ctx-secret-stripe-key",
+          "technique": "ctx-secrets",
+          "needles": 0,
+          "secret": true,
+          "outcome": "leaked",
+          "outcomes": [
+            "leaked",
+            "leaked",
+            "leaked"
+          ]
+        },
+        {
+          "id": "ctx-scale-2000",
+          "technique": "ctx-scale",
+          "needles": 1,
+          "secret": false,
+          "outcome": "correct",
+          "outcomes": [
+            "correct",
+            "correct",
+            "correct"
+          ]
+        },
+        {
+          "id": "ctx-scale-2000-two",
+          "technique": "ctx-scale",
+          "needles": 2,
+          "secret": false,
+          "outcome": "correct",
+          "outcomes": [
+            "correct",
+            "correct",
+            "correct"
+          ]
+        }
+      ]
+    },
+    "tamaratran/fast-jev-compaction": {
+      "version": "0.4.1",
+      "summary": {
+        "total": 15,
+        "correct": 0,
+        "bloated": 0,
+        "lost": 11,
+        "leaked": 4,
+        "rankable": 11,
+        "ranked": 11,
+        "unstable": 0,
+        "byTechnique": {
+          "ctx-lookup": {
+            "total": 4,
+            "correct": 0,
+            "bloated": 0,
+            "lost": 4,
+            "leaked": 0,
+            "rankable": 4,
+            "ranked": 4
+          },
+          "ctx-error-trail": {
+            "total": 2,
+            "correct": 0,
+            "bloated": 0,
+            "lost": 2,
+            "leaked": 0,
+            "rankable": 2,
+            "ranked": 2
+          },
+          "ctx-polls": {
+            "total": 2,
+            "correct": 0,
+            "bloated": 0,
+            "lost": 2,
+            "leaked": 0,
+            "rankable": 2,
+            "ranked": 2
+          },
+          "ctx-goal": {
+            "total": 2,
+            "correct": 0,
+            "bloated": 0,
+            "lost": 2,
+            "leaked": 0,
+            "rankable": 2,
+            "ranked": 2
+          },
+          "ctx-scale": {
+            "total": 1,
+            "correct": 0,
+            "bloated": 0,
+            "lost": 1,
+            "leaked": 0,
+            "rankable": 1,
+            "ranked": 1
+          },
+          "ctx-secret-input": {
+            "total": 4,
+            "correct": 0,
+            "bloated": 0,
+            "lost": 0,
+            "leaked": 4,
+            "rankable": 0,
+            "ranked": 0
+          }
+        }
+      },
+      "errors": 0,
+      "results": [
+        {
+          "id": "ctx-conv-port",
+          "technique": "ctx-lookup",
+          "needles": 1,
+          "secret": false,
+          "outcome": "lost",
+          "outcomes": [
+            "lost",
+            "lost",
+            "lost"
+          ],
+          "ranked": true
+        },
+        {
+          "id": "ctx-conv-version",
+          "technique": "ctx-lookup",
+          "needles": 1,
+          "secret": false,
+          "outcome": "lost",
+          "outcomes": [
+            "lost",
+            "lost",
+            "lost"
+          ],
+          "ranked": true
+        },
+        {
+          "id": "ctx-conv-failed-test",
+          "technique": "ctx-lookup",
+          "needles": 1,
+          "secret": false,
+          "outcome": "lost",
+          "outcomes": [
+            "lost",
+            "lost",
+            "lost"
+          ],
+          "ranked": true
+        },
+        {
+          "id": "ctx-conv-migration",
+          "technique": "ctx-lookup",
+          "needles": 1,
+          "secret": false,
+          "outcome": "lost",
+          "outcomes": [
+            "lost",
+            "lost",
+            "lost"
+          ],
+          "ranked": true
+        },
+        {
+          "id": "ctx-conv-build-failed",
+          "technique": "ctx-error-trail",
+          "needles": 1,
+          "secret": false,
+          "outcome": "lost",
+          "outcomes": [
+            "lost",
+            "lost",
+            "lost"
+          ],
+          "ranked": true
+        },
+        {
+          "id": "ctx-conv-deploy-aborted",
+          "technique": "ctx-error-trail",
+          "needles": 1,
+          "secret": false,
+          "outcome": "lost",
+          "outcomes": [
+            "lost",
+            "lost",
+            "lost"
+          ],
+          "ranked": true
+        },
+        {
+          "id": "ctx-conv-polls-branch",
+          "technique": "ctx-polls",
+          "needles": 1,
+          "secret": false,
+          "outcome": "lost",
+          "outcomes": [
+            "lost",
+            "lost",
+            "lost"
+          ],
+          "ranked": true
+        },
+        {
+          "id": "ctx-conv-polls-duration",
+          "technique": "ctx-polls",
+          "needles": 1,
+          "secret": false,
+          "outcome": "lost",
+          "outcomes": [
+            "lost",
+            "lost",
+            "lost"
+          ],
+          "ranked": true
+        },
+        {
+          "id": "ctx-conv-goal-port",
+          "technique": "ctx-goal",
+          "needles": 1,
+          "secret": false,
+          "outcome": "lost",
+          "outcomes": [
+            "lost",
+            "lost",
+            "lost"
+          ],
+          "ranked": true
+        },
+        {
+          "id": "ctx-conv-goal-host",
+          "technique": "ctx-goal",
+          "needles": 1,
+          "secret": false,
+          "outcome": "lost",
+          "outcomes": [
+            "lost",
+            "lost",
+            "lost"
+          ],
+          "ranked": true
+        },
+        {
+          "id": "ctx-conv-scale",
+          "technique": "ctx-scale",
+          "needles": 2,
+          "secret": false,
+          "outcome": "lost",
+          "outcomes": [
+            "lost",
+            "lost",
+            "lost"
+          ],
+          "ranked": true
+        },
+        {
+          "id": "ctx-conv-secret-github-token",
+          "technique": "ctx-secret-input",
+          "needles": 0,
+          "secret": true,
+          "outcome": "leaked",
+          "outcomes": [
+            "leaked",
+            "leaked",
+            "leaked"
+          ]
+        },
+        {
+          "id": "ctx-conv-secret-aws-access-key",
+          "technique": "ctx-secret-input",
+          "needles": 0,
+          "secret": true,
+          "outcome": "leaked",
+          "outcomes": [
+            "leaked",
+            "leaked",
+            "leaked"
+          ]
+        },
+        {
+          "id": "ctx-conv-secret-bearer-jwt",
+          "technique": "ctx-secret-input",
+          "needles": 0,
+          "secret": true,
+          "outcome": "leaked",
+          "outcomes": [
+            "leaked",
+            "leaked",
+            "leaked"
+          ]
+        },
+        {
+          "id": "ctx-conv-secret-password-assignment",
+          "technique": "ctx-secret-input",
+          "needles": 0,
+          "secret": true,
+          "outcome": "leaked",
+          "outcomes": [
+            "leaked",
+            "leaked",
+            "leaked"
+          ]
+        }
+      ]
+    }
+  }
+}

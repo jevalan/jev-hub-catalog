@@ -1,0 +1,219 @@
+{
+  "repo": "ibrahemid/jevprune",
+  "date": "2026-11-01",
+  "scope": "directo: se ejecuta el CLI del especialista, sin pasar por el hub de jevalan",
+  "environment": {
+    "node": "v24.8.0",
+    "specialist": "0.2.0",
+    "keys": "inventada («clave-inventada-de-pruebas»), válida solo contra un proveedor simulado nuestro en 127.0.0.1; ninguna petición sale de la máquina y ninguna clave real entra en el entorno"
+  },
+  "measured": [
+    "el camino sin clave: cae a reglas (cabeza, cola y errores con contexto), conserva el error y lo declara en el pie",
+    "con un proveedor simulado nuestro (NO es Jev): una pregunta binaria por línea, qué se manda (tarea, comando, clave por Authorization), qué líneas no se mandan, el umbral por defecto y `--threshold`",
+    "lo conservado son líneas originales y en su orden; la marca de líneas descartadas; stdin; `run` y su código de salida",
+    "documentos que pasan enteros y sin petición; 500 y cuerpo que no es JSON caen a reglas y lo dicen",
+    "observación: un token de GitHub en una línea del registro no activa la protección y viaja al proveedor",
+    "huella en disco del sandbox (~/.jevprune)"
+  ],
+  "not_measured": [
+    "lo que Jev contesta de verdad con el proveedor simulado: lo dicta una marca en la tarea",
+    "el plugin de Claude Code (hooks de función), la librería (`pruneOutput`, `pruneStream`) y `gain`",
+    "entradas de más de 16 MiB, UTF-8 inválido y la recuperación de líneas con `show <id>`"
+  ],
+  "footprint": [
+    ".jevprune/gain.jsonl",
+    ".jevprune/runs/mvxjv6mz-8af7.json",
+    ".jevprune/runs/mvxjv6mz-8af7.log",
+    ".jevprune/runs/mvxjv6p9-8b76.json",
+    ".jevprune/runs/mvxjv6p9-8b76.log",
+    ".jevprune/runs/mvxjv6rm-ce84.json",
+    ".jevprune/runs/mvxjv6rm-ce84.log",
+    ".jevprune/runs/mvxjv6v6-8f46.json",
+    ".jevprune/runs/mvxjv6v6-8f46.log",
+    ".jevprune/runs/mvxjv6yp-2adb.json",
+    ".jevprune/runs/mvxjv6yp-2adb.log",
+    ".jevprune/runs/mvxjv725-bf52.json",
+    ".jevprune/runs/mvxjv725-bf52.log",
+    ".jevprune/runs/mvxjv75o-47d8.json",
+    ".jevprune/runs/mvxjv75o-47d8.log",
+    ".jevprune/runs/mvxjv793-55bb.json",
+    ".jevprune/runs/mvxjv793-55bb.log",
+    ".jevprune/runs/mvxjv7ce-0e98.json",
+    ".jevprune/runs/mvxjv7ce-0e98.log",
+    ".jevprune/runs/mvxjv7fs-0fb3.json",
+    ".jevprune/runs/mvxjv7fs-0fb3.log",
+    ".jevprune/runs/mvxjv7i6-0499.json",
+    ".jevprune/runs/mvxjv7i6-0499.log",
+    ".jevprune/runs/mvxjv7rw-a024.json",
+    ".jevprune/runs/mvxjv7rw-a024.log",
+    ".jevprune/runs/mvxjv7v3-9f9a.json",
+    ".jevprune/runs/mvxjv7v3-9f9a.log",
+    ".jevprune/runs/mvxjv80a-18b2.json",
+    ".jevprune/runs/mvxjv80a-18b2.log",
+    "doc.json",
+    "github-token.log",
+    "npm-test.log"
+  ],
+  "cases": [
+    {
+      "id": "version",
+      "why": "`--version` imprime la versión del paquete.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "help",
+      "why": "`--help` lista `run`, `select`, `show` y `gain`.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "unknown-command",
+      "why": "Un comando desconocido es un error de uso, no un éxito.",
+      "pass": true,
+      "problems": [],
+      "exit": 2,
+      "observed": {
+        "exit": 2,
+        "stderr": "jevprune: unknown command \"zumbido\"\n"
+      }
+    },
+    {
+      "id": "no-key-falls-back-to-rules",
+      "why": "Sin clave no hay petición: cae a reglas (cabeza, cola y errores con contexto), conserva el error y lo declara en el pie.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "lines_out": 87,
+        "footer": "jevprune: fallback (Jev unavailable: API key not set), 200 → 89 lines, full output ~…"
+      }
+    },
+    {
+      "id": "fallback-keeps-head-and-tail",
+      "why": "El recorte por reglas conserva el principio y el final y descarta el medio sin relación con un error.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "jev-asks-one-yes-no-question-per-line",
+      "why": "Con clave pregunta una vez, una pregunta binaria por línea candidata, con la tarea y el comando en el estado.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "questions": 153,
+        "lines_in_log": 200,
+        "model_sent": "jev-latest"
+      }
+    },
+    {
+      "id": "lines-the-rules-keep-are-not-sent",
+      "why": "Las líneas que las reglas ya conservan no se mandan al proveedor: se pregunta por menos líneas que las del registro.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "high-scores-keep-everything",
+      "why": "Con la probabilidad por encima del umbral se conserva todo y el pie lo cuenta (200 → 200).",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "low-scores-drop-noise-but-keep-the-error",
+      "why": "Con la probabilidad bajo el umbral descarta el ruido, deja una marca del rango descartado y conserva la línea del error.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "lines_out": 47,
+        "footer": "jevprune: 200 → 49 lines, full output ~…"
+      }
+    },
+    {
+      "id": "kept-lines-are-verbatim-and-in-order",
+      "why": "Las líneas conservadas son las originales, sin reescribir, y siguen en su orden.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "threshold-flag-raises-the-bar",
+      "why": "`--threshold` sube el listón: con 0,9 de puntuación y umbral 0,95 se descarta lo que con el umbral por defecto se conservaba.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "stdin-works-like-a-file",
+      "why": "Sin `--file` lee stdin.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "documents-pass-through-without-a-request",
+      "why": "Un documento (JSON, Markdown, diff…) pasa entero y sin petición, y el pie dice por qué.",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "server-error-falls-back-and-says-why",
+      "why": "Un 500 se reintenta una vez y cae a reglas declarándolo, sin fallar el comando.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "requests_sent": 2
+      }
+    },
+    {
+      "id": "non-json-body-falls-back",
+      "why": "Un cuerpo que no es JSON cae a reglas declarando «invalid response».",
+      "pass": true,
+      "problems": [],
+      "exit": 0
+    },
+    {
+      "id": "run-passes-the-exit-code-through",
+      "why": "`run` ejecuta el comando, imprime su salida y sale con el código del propio comando.",
+      "pass": true,
+      "problems": [],
+      "exit": 3
+    },
+    {
+      "id": "show-unknown-run-fails",
+      "why": "`show` de un identificador que no existe es un error.",
+      "pass": true,
+      "problems": [],
+      "exit": 1,
+      "observed": {
+        "exit": 1
+      }
+    },
+    {
+      "id": "github-token-in-output-reaches-the-provider",
+      "why": "Observación: un token de GitHub en una línea del registro NO activa la protección de credenciales y viaja al proveedor.",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "requests": 1,
+        "token_sent": true
+      }
+    },
+    {
+      "id": "footprint-stays-in-sandbox",
+      "why": "Lo que el CLI deja en disco queda dentro del sandbox y dentro de lo que su documentación declara.",
+      "pass": true,
+      "problems": []
+    }
+  ],
+  "pass": true
+}
