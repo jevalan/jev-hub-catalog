@@ -227,7 +227,59 @@ ${readList(s, r.reads, r.read)}
 ${evidence(run)}`;
 }
 
-const SECTIONS = { context: contextSection, gates: gatesSection, "install-scripts": gatesSection, review: reviewSection, "prose-lint": reviewSection, "code-reach": reviewSection, routing: routingSection };
+// — supervision: qué frena y qué deja pasar un supervisor en sus tres puntos de enganche —
+
+/** Menos filtradas, luego menos inseguras (lo que no se perdona), luego menos fricción. */
+const orderSupervision = (a, b) =>
+  a[1].summary.leaked - b[1].summary.leaked ||
+  a[1].summary.unsafe - b[1].summary.unsafe ||
+  a[1].summary.friction - b[1].summary.friction ||
+  a[0].localeCompare(b[0]);
+
+function supervisionSection(run, s) {
+  const r = s.frontierSupervision;
+  const projects = Object.entries(run.projects).sort(orderSupervision);
+  const techniques = [...new Set(projects.flatMap(([, p]) => Object.keys(p.summary.byTechnique)))];
+  const head = `<tr>${r.cols.map((c) => `<th>${esc(c)}</th>`).join("")}</tr>`;
+  const rows = projects
+    .map(([repo, p]) => {
+      const m = p.summary;
+      return `<tr><td>${link(repo, p)}</td><td class="num">${m.correct}/${m.total}</td><td class="num m-${m.unsafe ? "bad" : "ok"}">${m.unsafe}</td><td class="num">${m.friction}</td><td class="num m-${m.leaked ? "bad" : "ok"}">${m.leaked}</td><td class="num">${m.unstable}</td></tr>`;
+    })
+    .join("\n");
+  const cell = (c) => {
+    if (!c) return `<td class="num">—</td>`;
+    const cls = c.unsafe || c.leaked ? "bad" : c.correct < c.total ? "meh" : "ok";
+    return `<td class="num m-${cls}">${esc(r.cell(c))}</td>`;
+  };
+  const matrix = `<table><thead><tr><th></th>${projects.map(([repo]) => `<th>${esc(repo.split("/")[1])}</th>`).join("")}</tr></thead><tbody>
+${techniques.map((k) => `<tr><td>${esc(s.techniques[k] ?? k)}</td>${projects.map(([, p]) => cell(p.summary.byTechnique[k])).join("")}</tr>`).join("\n")}
+</tbody></table>`;
+  const serves = projects
+    .map(([repo, p]) => {
+      const lines = r.verdict(p.summary).map((l) => `<li>${esc(l)}</li>`).join("");
+      const name = (k) => s.techniques[k] ?? k;
+      const unsafe = techniquesWith(p, "unsafe");
+      const leaked = techniquesWith(p, "leaked");
+      const t1 = unsafe.length ? r.unsafe(unsafe.map(name).join(", ")) : r.noUnsafe;
+      const t2 = leaked.length ? r.leaked(leaked.map(name).join(", ")) : r.noLeaked;
+      return `<h4>${esc(repo)}</h4><ul>${lines}<li>${esc(t1)}</li><li>${esc(t2)}</li></ul>`;
+    })
+    .join("\n");
+  return `<h3>${esc(r.group(run.group, run.corpus.size, projects.length))}</h3>
+<p class="note">${esc(r.warn)}</p>
+<table><thead>${head}</thead><tbody>
+${rows}
+</tbody></table>
+<h3>${esc(r.matrix)}</h3>
+${matrix}
+<h3>${esc(s.frontierServes)}</h3>
+${serves}
+${readList(s, r.reads, r.read)}
+${evidence(run)}`;
+}
+
+const SECTIONS = { supervision: supervisionSection, context: contextSection, gates: gatesSection, "install-scripts": gatesSection, review: reviewSection, "prose-lint": reviewSection, "code-reach": reviewSection, routing: routingSection };
 
 /** `runs` son los frontier.json ya leídos; cada grupo se pinta con su propia sección. */
 export function buildFrontierPage(runs, lang = "es") {

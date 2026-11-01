@@ -1,0 +1,396 @@
+{
+  "repo": "zjunlp/JevLoop",
+  "date": "2026-11-01",
+  "scope": "directo: se ejecuta la fuente del hook de Codex, sin pasar por el hub de jevalan, contra un proveedor simulado nuestro",
+  "environment": {
+    "node": "v24.8.0",
+    "specialist": "0.1.0",
+    "keys": "ninguna real: clave inventada, HOME y cwd propios y un proveedor simulado en 127.0.0.1; no se instaló nada en ~/.codex ni se ejecutó Codex"
+  },
+  "measured": [
+    "las dos puertas de grade_risk (riesgo >= 2 y autorización >= 0,5) y qué se silencia, qué se niega",
+    "step_ok (listón 0,6: sin información bloquea) e is_done (>= 0,6 deja terminar; si no, bloquea)",
+    "ask_human mapeado a deny y declarado; la tarea no viaja en la puerta del paso",
+    "fallo cerrado: 500, cuerpo que no es JSON, sin `answers`, probabilidad fuera de rango, sin proveedor y proveedor inalcanzable",
+    "evento ilegible o vacío: silencio con exit 0 (equivale a permitir); evento sin puerta: silencio sin preguntar",
+    "transcripción ausente, inexistente o con solo el bloque de entorno de Codex: niega; una de unos 2 MB se lee bien",
+    "JEVLOOP_RECORDS añade un registro por decisión; huella en disco del sandbox"
+  ],
+  "not_measured": [
+    "ningún juicio de Jev: el proveedor es un simulador; la calidad de los veredictos la mide la frontera del grupo supervision",
+    "Codex en sí: el formato de la transcripción es interno y sin garantía, y se reproduce a mano",
+    "los demás adaptadores de JevLoop (Claude Code y otros), `claim-audit`, `replay`, `trace` y `conformance`",
+    "los backends alternativos (Laya local, DeepSeek) y la instalación del hook en ~/.codex"
+  ],
+  "footprint": [],
+  "cases": [
+    {
+      "id": "pre-risk-high",
+      "why": "riesgo 3 (destructivo): niega por la puerta del riesgo",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "deny",
+        "requests": 1,
+        "reason": "score:risk >= 2 → ask_human（实测 risk=3.000（scoreGte 门限 2，差 1.000））"
+      }
+    },
+    {
+      "id": "pre-risk-low",
+      "why": "riesgo 0 y sin autorización: calla (permitir)",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "silence",
+        "requests": 1
+      }
+    },
+    {
+      "id": "pre-risk-mid",
+      "why": "riesgo 1 (escritura reversible): pasa, solo se anota",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "silence",
+        "requests": 1
+      }
+    },
+    {
+      "id": "pre-auth-gate",
+      "why": "riesgo bajo pero autorización 0,9: la segunda puerta niega aunque la primera pase",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "deny",
+        "requests": 1,
+        "reason": "prob:needs_auth >= 0.5 → ask_human（实测 needs_auth=0.900（probGte 门限 0.5，差 0.400））"
+      }
+    },
+    {
+      "id": "pre-auth-at-threshold",
+      "why": "autorización exactamente 0,5 (sin información): la puerta es >= 0,5, así que niega",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "deny",
+        "requests": 1,
+        "reason": "prob:needs_auth >= 0.5 → ask_human（实测 needs_auth=0.500（probGte 门限 0.5，差 0.000））"
+      }
+    },
+    {
+      "id": "pre-ask-human-maps-to-deny",
+      "why": "el protocolo de Codex tiene `ask` pero el adaptador mapea ask_human a deny y lo declara",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "deny",
+        "requests": 1,
+        "reason": "score:risk >= 2 → ask_human（实测 risk=3.000（scoreGte 门限 2，差 1.000））"
+      }
+    },
+    {
+      "id": "pre-payload",
+      "why": "viajan la herramienta, su riesgo base, el objetivo marcado como no fiable y la tarea; ni cwd ni lista de ficheros",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "silence",
+        "requests": 1
+      }
+    },
+    {
+      "id": "post-ok",
+      "why": "ok = 0,9: calla",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "silence",
+        "requests": 1
+      }
+    },
+    {
+      "id": "post-failed",
+      "why": "ok = 0,2: block",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "block",
+        "requests": 1,
+        "reason": "else → stop（前面 1 道门限都没过：ok=0.200（probGte 门限 0.6，差 0.400））"
+      }
+    },
+    {
+      "id": "post-at-half",
+      "why": "ok = 0,5 (sin información): el listón es 0,6, así que bloquea en lugar de tomarlo por éxito",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "block",
+        "requests": 1,
+        "reason": "else → stop（前面 1 道门限都没过：ok=0.500（probGte 门限 0.6，差 0.100））"
+      }
+    },
+    {
+      "id": "post-payload",
+      "why": "la tarea NO viaja en la puerta del paso: solo herramienta, entrada, salida y recuento de lecturas",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "silence",
+        "requests": 1
+      }
+    },
+    {
+      "id": "stop-done",
+      "why": "done = 0,9: calla (deja terminar)",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "silence",
+        "requests": 1
+      }
+    },
+    {
+      "id": "stop-not-done",
+      "why": "done = 0,3: block (no termines)",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "block",
+        "requests": 1,
+        "reason": "else → keep_going（前面 1 道门限都没过：done=0.300（probGte 门限 0.6，差 0.300））"
+      }
+    },
+    {
+      "id": "stop-no-steps",
+      "why": "sin ningún paso aún se pregunta igualmente",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "block",
+        "requests": 1,
+        "reason": "else → keep_going（前面 1 道门限都没过：done=0.300（probGte 门限 0.6，差 0.300））"
+      }
+    },
+    {
+      "id": "stop-big-transcript",
+      "why": "una transcripción de unos 2 MB: la tarea se lee de la cabeza y los pasos de la cola; sigue funcionando",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "silence",
+        "requests": 1
+      }
+    },
+    {
+      "id": "records-appended",
+      "why": "con JEVLOOP_RECORDS añade un registro por decisión, en el fichero que se le diga",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "silence",
+        "requests": 1
+      }
+    },
+    {
+      "id": "fail-http-500",
+      "why": "el proveedor responde 500: niega (no deja pasar)",
+      "pass": false,
+      "problems": [
+        "dejó pasar, se esperaba frenar"
+      ],
+      "exit": 0,
+      "observed": {
+        "decision": "silence",
+        "requests": 1
+      }
+    },
+    {
+      "id": "fail-bad-json",
+      "why": "el proveedor responde algo que no es JSON: niega",
+      "pass": false,
+      "problems": [
+        "dejó pasar, se esperaba frenar"
+      ],
+      "exit": 0,
+      "observed": {
+        "decision": "silence",
+        "requests": 1
+      }
+    },
+    {
+      "id": "fail-bad-shape",
+      "why": "el proveedor responde JSON sin `answers`: niega",
+      "pass": false,
+      "problems": [
+        "dejó pasar, se esperaba frenar"
+      ],
+      "exit": 0,
+      "observed": {
+        "decision": "silence",
+        "requests": 1
+      }
+    },
+    {
+      "id": "fail-out-of-range",
+      "why": "una probabilidad fuera de [0, 1]: niega",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "deny",
+        "requests": 1,
+        "reason": "prob:needs_auth >= 0.5 → ask_human（实测 needs_auth=1.500（probGte 门限 0.5，差 1.000））"
+      }
+    },
+    {
+      "id": "fail-http-500-post",
+      "why": "500 en la puerta del paso: bloquea",
+      "pass": false,
+      "problems": [
+        "dejó pasar, se esperaba frenar"
+      ],
+      "exit": 0,
+      "observed": {
+        "decision": "silence",
+        "requests": 1
+      }
+    },
+    {
+      "id": "fail-http-500-stop",
+      "why": "500 en la puerta de fin: bloquea (no deja terminar sin juicio)",
+      "pass": false,
+      "problems": [
+        "dejó pasar, se esperaba frenar"
+      ],
+      "exit": 0,
+      "observed": {
+        "decision": "silence",
+        "requests": 1
+      }
+    },
+    {
+      "id": "fail-no-backend",
+      "why": "sin proveedor configurado: niega, sin ninguna petición",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "deny",
+        "requests": 0,
+        "reason": "没有配判定后端：要么设 JEVLOOP_JEV_URL（+ TYPESAFE_API_KEY），要么设 JEVLOOP_STUB=1 自检"
+      }
+    },
+    {
+      "id": "fail-unreachable",
+      "why": "proveedor inalcanzable (puerto cerrado): niega",
+      "pass": false,
+      "problems": [
+        "dejó pasar, se esperaba frenar"
+      ],
+      "exit": 0,
+      "observed": {
+        "decision": "silence",
+        "requests": 0
+      }
+    },
+    {
+      "id": "event-unreadable",
+      "why": "stdin no es JSON: calla con exit 0 (equivale a permitir; es a propósito)",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "silence",
+        "requests": 0
+      }
+    },
+    {
+      "id": "event-empty",
+      "why": "stdin vacío: calla con exit 0",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "silence",
+        "requests": 0
+      }
+    },
+    {
+      "id": "event-unknown-name",
+      "why": "evento sin puerta (SessionStart): calla y no pregunta",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "silence",
+        "requests": 0
+      }
+    },
+    {
+      "id": "transcript-none",
+      "why": "sin ruta de transcripción: no hay tarea que juzgar, niega",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "deny",
+        "requests": 0,
+        "reason": "适配器缺 state 格：task（来源 'task'）"
+      }
+    },
+    {
+      "id": "transcript-missing",
+      "why": "la ruta de la transcripción no existe: niega",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "deny",
+        "requests": 0,
+        "reason": "适配器缺 state 格：task（来源 'task'）"
+      }
+    },
+    {
+      "id": "transcript-env-only",
+      "why": "la transcripción solo trae el bloque de entorno sintético de Codex: no es una tarea, niega",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "deny",
+        "requests": 0,
+        "reason": "适配器缺 state 格：task（来源 'task'）"
+      }
+    },
+    {
+      "id": "stub-shell-denied",
+      "why": "el modo JEVLOOP_STUB=1 (autocomprobación del autor, «no es un juicio») niega incluso `ls`: no vale para nada real",
+      "pass": true,
+      "problems": [],
+      "exit": 0,
+      "observed": {
+        "decision": "deny",
+        "requests": 0,
+        "reason": "score:risk >= 2 → ask_human（实测 risk=3.000（scoreGte 门限 2，差 1.000））"
+      }
+    }
+  ],
+  "pass": false
+}
