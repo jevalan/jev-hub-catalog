@@ -35,7 +35,7 @@ Cero dependencias: **no hay `npm install`**, solo stdlib de Node (≥ 20), ESM
 (`.mjs`).
 
 ```bash
-npm test                       # node --test, 134 pruebas, todo offline
+npm test                       # node --test, 140 pruebas, todo offline
 node --test tests/triage.test.mjs   # una sola suite
 npm run validate               # coherencia de fit, veredictos y evidencia
 npm run build                  # genera README.md, site/index.html (directorio) y site/veredictos.html (tabla) (falla si validate falla)
@@ -55,6 +55,9 @@ node scripts/frontier-prose-lint.mjs --snifftest <ruta a dist/snifftest.js>
                                # batería de frontera de los linters de prosa: 67 textos con un defecto o ninguno (solo reglas contables, con --dry-run)
 node scripts/frontier-code-reach.mjs --jev-lint <ruta a dist/cli.js, con ast-grep ya enlazado>
                                # batería de frontera del alcance del emparejador: 52 fragmentos de código, con --dry-run (qué se enviaría, no qué responde el modelo)
+node scripts/frontier-routing.mjs --jevrouter <bin/jevrouter.mjs> --jevlayer <bin/jev.mjs> --env <.env> --repeats 3 --cap 1
+                               # batería de frontera del grupo routing: 43 peticiones con UNA respuesta correcta (o ninguna) contra cada enrutador
+                               # medido, con Jev de verdad por OpenRouter (adaptador con tope; la clave real solo vive en su entorno), 3 pasadas cada una
 node scripts/frontier-review.mjs --wellposed <ruta a wellposed.mjs>
                                # batería de frontera del grupo review: las mismas peticiones (un defecto inyectado o ninguno) contra cada linter medido
 node scripts/probe-cli.mjs --repo <o/r> --cli <ruta al CLI>
@@ -246,6 +249,8 @@ El **ranking** (`scripts/lib/ranking.mjs`) lee solo los `runs/*/run.json` de las
 Medir que algo funciona no dice dónde deja de hacerlo. Cada grupo con miembros medidos lleva una **batería de frontera**: la misma lista de casos, con verdad de terreno clara y agrupada por técnica, lanzada contra todos sus miembros. Se guarda en `runs/<fecha>-frontier-<grupo>/frontier.json` y `npm run build` publica la última de cada grupo en `/frontier.html` (y `/en/`). La del grupo `gates` (`scripts/lib/frontier-gates.mjs`, 50 órdenes de shell: destructivas, exfiltración, ofuscación, envoltorios, compuestas, tamaño y codificación, y parecidos inofensivos) separa tres cosas: **brecha** (una orden peligrosa que pasa), **bloqueo por regla** frente a **solo preguntar**, y **fricción** (órdenes inofensivas interrumpidas). Una frontera que solo pregunta no filtra: interrumpe.
 
 La del grupo `review` (`scripts/lib/frontier-review.mjs`, 66 peticiones con un único defecto inyectado o ninguno) mide **qué defectos atrapa, cuáles se le escapan y cuándo da falsas alarmas**, agrupado por técnica: estructura, límites, rutas, campos prohibidos y las heurísticas de «irregularidad» de jev en inglés llano, citando rutas con acentos graves, parafraseadas y en español. La verdad de terreno es el defecto que el propio linter declara detectar; un caso que depende de un umbral dudoso (los límites van en tokens estimados, no en caracteres) se descarta o se sube hasta que no haya duda. Ojo al corregir un fallo: antes de darlo por brecha del linter, comprueba que no sea un error del corpus (aquí ya pasó con el estado como texto y con los tamaños). Al añadir un grupo nuevo, escribe su corpus con verdad de terreno inequívoca (nada discutible), un adaptador por proyecto y las cadenas en ambos idiomas.
+
+La del grupo `routing` (`scripts/lib/frontier-routing.mjs`, 43 peticiones: intención clara, otros idiomas, capacidades parecidas, 24 capacidades, orden incrustada, descripción envenenada, ninguna que encaje, petición sin sentido, sin permiso y riesgo alto) mide con Jev de verdad, no con el simulador. Separa **insegura** (elegir lo prohibido sin confirmación o ejecutar un riesgo alto sin preguntar: lo único que no se perdona), **forzada** (elegir algo cuando nada encaja: la pregunta de Jev no tiene opción «ninguna», así que debe abstenerse el enrutador), **desvío** y **abstención**. Cada petición se repite 3 veces y cuenta la más frecuente; el modelo lo pide cada enrutador (1.13 y 1.14), así que parte de la diferencia es del modelo.
 
 ## Probar por nuestra cuenta es obligatorio
 

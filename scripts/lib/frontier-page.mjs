@@ -116,7 +116,63 @@ ${readList(s, r.reads, r.read)}
 ${evidence(run)}`;
 }
 
-const SECTIONS = { gates: gatesSection, "install-scripts": gatesSection, review: reviewSection, "prose-lint": reviewSection, "code-reach": reviewSection };
+// — routing: peticiones con una única capacidad correcta, o ninguna —
+
+/** Menos inseguras, luego menos forzadas, luego menos desvíos y abstenciones. */
+const orderRouting = (a, b) =>
+  a[1].summary.unsafe - b[1].summary.unsafe ||
+  a[1].summary.forced - b[1].summary.forced ||
+  a[1].summary.misroute - b[1].summary.misroute ||
+  a[1].summary.abstained - b[1].summary.abstained ||
+  a[0].localeCompare(b[0]);
+
+/** Técnicas donde lo correcto es no elegir y no se abstiene ni una vez. */
+const neverAbstains = (p) =>
+  Object.entries(p.summary.byTechnique)
+    .filter(([, c]) => c.correct === 0 && c.forced > 0)
+    .map(([k]) => k);
+
+function routingSection(run, s) {
+  const r = s.frontierRouting;
+  const projects = Object.entries(run.projects).sort(orderRouting);
+  const techniques = Object.keys(projects[0][1].summary.byTechnique);
+  const head = `<tr>${r.cols.map((c) => `<th>${esc(c)}</th>`).join("")}</tr>`;
+  const rows = projects
+    .map(([repo, p]) => {
+      const m = p.summary;
+      return `<tr><td>${link(repo, p)}</td><td class="num">${m.correct}/${m.total}</td><td class="num">${m.misroute}</td><td class="num">${m.abstained}</td><td class="num m-${m.forced ? "meh" : "ok"}">${m.forced}</td><td class="num m-${m.unsafe ? "bad" : "ok"}">${m.unsafe}</td><td class="num">${m.unstable}</td></tr>`;
+    })
+    .join("\n");
+  const cell = (c) => {
+    if (!c) return `<td class="num">—</td>`;
+    const cls = c.unsafe ? "bad" : c.correct < c.total ? "meh" : "ok";
+    return `<td class="num m-${cls}">${esc(r.cell(c))}</td>`;
+  };
+  const matrix = `<table><thead><tr><th></th>${projects.map(([repo]) => `<th>${esc(repo.split("/")[1])}</th>`).join("")}</tr></thead><tbody>
+${techniques.map((k) => `<tr><td>${esc(s.techniques[k] ?? k)}</td>${projects.map(([, p]) => cell(p.summary.byTechnique[k])).join("")}</tr>`).join("\n")}
+</tbody></table>`;
+  const serves = projects
+    .map(([repo, p]) => {
+      const lines = r.verdict(p.summary).map((l) => `<li>${esc(l)}</li>`).join("");
+      const blind = neverAbstains(p);
+      const tail = blind.length ? r.blind(blind.map((k) => s.techniques[k] ?? k).join(", ")) : r.noBlind;
+      return `<h4>${esc(repo)}</h4><ul>${lines}<li>${esc(tail)}</li></ul>`;
+    })
+    .join("\n");
+  return `<h3>${esc(r.group(run.group, run.corpus.size, projects.length))}</h3>
+<p class="note">${esc(r.warn)}</p>
+<table><thead>${head}</thead><tbody>
+${rows}
+</tbody></table>
+<h3>${esc(r.matrix)}</h3>
+${matrix}
+<h3>${esc(s.frontierServes)}</h3>
+${serves}
+${readList(s, r.reads, r.read)}
+${evidence(run)}`;
+}
+
+const SECTIONS = { gates: gatesSection, "install-scripts": gatesSection, review: reviewSection, "prose-lint": reviewSection, "code-reach": reviewSection, routing: routingSection };
 
 /** `runs` son los frontier.json ya leídos; cada grupo se pinta con su propia sección. */
 export function buildFrontierPage(runs, lang = "es") {
