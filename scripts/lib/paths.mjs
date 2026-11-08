@@ -11,6 +11,7 @@ export const EXAMPLES = resolve(ROOT, "data", "examples.json");
 export const I18N_EN = resolve(ROOT, "data", "i18n-en.json");
 export const DIRECTORY = resolve(ROOT, "site", "index.html");
 export const README = resolve(ROOT, "README.md");
+export const README_ES = resolve(ROOT, "README.es.md");
 export const SITE = resolve(ROOT, "site", "veredictos.html");
 export const TEMPLATE = resolve(ROOT, "scripts", "template.html");
 

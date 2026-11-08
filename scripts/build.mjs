@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { readJson } from "./lib/json.mjs";
-import { ASSESSMENTS, CATALOG, DIRECTORY, EXAMPLES, FIT, I18N_EN, ROOT, README, SHELF, SITE, TEMPLATE } from "./lib/paths.mjs";
+import { ASSESSMENTS, CATALOG, DIRECTORY, EXAMPLES, FIT, I18N_EN, ROOT, README, README_ES, SHELF, SITE, TEMPLATE } from "./lib/paths.mjs";
 import { buildDirectory } from "./lib/directory.mjs";
 import { rankRuns } from "./lib/ranking.mjs";
 import { buildRankingPage } from "./lib/ranking-page.mjs";
@@ -91,6 +91,21 @@ export function buildReadme(assessments, catalog, shelf = { categories: [] }) {
 
 Qué proyectos del ecosistema Jev puede servir el hub de jevalan, con qué forma y a qué coste.
 Generado desde \`data/assessments.json\`. Snapshot del universo: ${catalog.updated} (${catalog.source}).
+[English](README.md)
+
+## Cómo encaja
+
+~~~mermaid
+flowchart LR
+  C[Cliente / agente] -->|petición de decisión| H[Jevalan: hub + contrato]
+  H -->|elige capacidad| A[Adaptador, si hace falta]
+  A --> T[Herramienta de terceros]
+  T -->|resultado tipado| H
+  H -->|respuesta validada| C
+  D[jev-hub-catalog] -.->|mapea forma, coste y evidencia| H
+~~~
+
+Jevalan conserva el contrato común: descubre capacidades, enruta la petición y valida la respuesta. La herramienta aporta la decisión especializada; un adaptador la conecta cuando su interfaz no encaja directamente. Este catálogo ayuda a elegir qué integrar, cuánto trabajo y qué dependencias implica, y distingue lo leído de lo ejecutado por nosotros. **Estar en el catálogo no significa que una herramienta ya esté integrada ni que su decisión sea fiable:** cada ficha indica su estado y evidencia.
 
 ## Cobertura
 
@@ -107,7 +122,96 @@ Un veredicto **triado** sale de leer el código; uno **medido** sale de ejecutar
 | Proyecto | Decisión | Forma | Invocable | Coste | Evidencia | Veredicto |
 | --- | --- | --- | --- | --- | --- | --- |
 ${rows}
-${shelfSection(shelf, catalog)}`;
+${shelfSection(shelf, catalog)}
+
+## Agradecimientos
+
+Gracias especialmente a [jev-awesome](https://github.com/jev/awesome-jev) por mantener el mapa que hace posible descubrir este ecosistema. Gracias también a los proyectos y repositorios incluidos en el catálogo, por compartir su trabajo y hacerlo accesible para su evaluación. Y gracias a toda la comunidad open source: este trabajo se apoya en vuestra generosidad, colaboración y conocimiento compartido.`;
+}
+function buildReadmeEnglishLegacy(assessments, catalog, shelf = { categories: [] }) {
+  return buildReadme(assessments, catalog, shelf)
+    .replace("Qué proyectos del ecosistema Jev puede servir el hub de jevalan, con qué forma y a qué coste.", "Which Jev ecosystem projects can jevalan's hub serve, in what form, and at what cost?")
+    .replace("Generado desde", "Generated from").replace("Snapshot del universo", "Universe snapshot")
+    .replace("## Cómo encaja", "## How it fits")
+    .replace("C[Cliente / agente] -->|petición de decisión| H[Jevalan: hub + contrato]", "C[Client / agent] -->|decision request| H[Jevalan: hub + contract]")
+    .replace("H -->|elige capacidad| A[Adaptador, si hace falta]", "H -->|selects capability| A[Adapter, if needed]")
+    .replace("A --> T[Herramienta de terceros]", "A --> T[Third-party tool]")
+    .replace("T -->|resultado tipado| H", "T -->|typed result| H").replace("H -->|respuesta validada| C", "H -->|validated response| C")
+    .replace("D[jev-hub-catalog] -.->|mapea forma, coste y evidencia| H", "D[jev-hub-catalog] -.->|maps interface, cost, and evidence| H")
+    .replace("Jevalan conserva el contrato común: descubre capacidades, enruta la petición y valida la respuesta. La herramienta aporta la decisión especializada; un adaptador la conecta cuando su interfaz no encaja directamente. Este catálogo ayuda a elegir qué integrar, cuánto trabajo y qué dependencias implica, y distingue lo leído de lo ejecutado por nosotros. **Estar en el catálogo no significa que una herramienta ya esté integrada ni que su decisión sea fiable:** cada ficha indica su estado y evidencia.", "Jevalan keeps the shared contract: it discovers capabilities, routes requests, and validates responses. The tool provides the specialized decision; an adapter connects it when its interface does not fit directly. This catalog helps choose what to integrate, estimate the work and dependencies, and distinguish code we have read from tools we have run. **Being listed does not mean a tool is integrated or its decisions are reliable:** each entry shows its status and evidence. Verdicts remain in Spanish.")
+    .replace("## Cobertura", "## Coverage").replace("triadas ·", "screened ·").replace("evaluadas (", "evaluated (").replace(" de las ", " of ").replace(" analizadas están en el catálogo) · ", " analyzed projects are in the catalog) · ").replace(" sin tocar, de ", " untouched, out of ").replace(" entradas visibles del catálogo.", " visible catalog entries.")
+    .replace("Un veredicto **triado** sale de leer el código; uno **medido** sale de ejecutarlo. No son lo mismo y aquí no se presentan como si lo fueran.", "A **screened** verdict comes from reading code; a **measured** verdict comes from running it. They are different kinds of evidence.")
+    .replace("## Cohortes", "## Cohorts").replace("**A — referencia fija:** los 13 clones analizados a mano. Es el banco de calibración del detector.", "**A — fixed baseline:** 13 manually analyzed clones, used to calibrate the detector.")
+    .replace("**B — por fit:** los candidatos de los grupos con decisión (routing, revisión, contexto, gates, supervisión).", "**B — by fit:** candidates in decision groups (routing, review, context, gates, supervision).")
+    .replace("**C — resto:** el catálogo por metadata, sin veredicto profundo.", "**C — remaining projects:** catalog metadata only, without a detailed verdict.")
+    .replace("| Proyecto | Decisión | Forma | Invocable | Coste | Evidencia | Veredicto |", "| Project | Decision | Form | Callable | Cost | Evidence | Verdict |")
+    .replace("| estático |", "| static |").replace("| medido |", "| measured |")
+    .replace("[English](README.md)", "[Español](README.es.md)")
+    .replace(/## Aparcado[\s\S]*$/, englishShelfSection(shelf, catalog));
+}
+function englishShelfSection(shelf, catalog) {
+  const translations = {
+    games: ["Mostly environments where Jev plays: they consume decisions at each step instead of offering one.", "If jevalan adds simulation or rule-based evaluation capabilities. High potential: review this category first."],
+    demos: ["Demos and playgrounds illustrate Jev, but rarely expose a stable callable interface.", "If real use cases or reusable capability patterns are needed."],
+    articles: ["Articles and threads are not software, and few link to a repository.", "If decision patterns from the literature are needed to design capabilities."],
+    lists: ["Other awesome lists help discover projects; they are not capabilities themselves.", "When expanding beyond projects already listed by awesome-jev."],
+    official: ["TypeSafe documentation and resources provide context, not callable capabilities.", "If the model contract changes or new primitives appear that the hub should support."],
+    sdks: ["SDKs and clients transport requests to Jev; they do not provide decisions.", "If jevalan needs clients in more languages or wants to reuse their error and retry handling."],
+  };
+  const rows = shelfSummary(shelf, catalog);
+  const parked = rows.filter((r) => r.status === "parked");
+  const candidates = rows.filter((r) => r.status === "candidate");
+  if (!parked.length && !candidates.length) return "";
+  return `## Parked\nParking is not rejection: these categories do not currently fit the hub, with reasons and conditions for revisiting.\n| Category | Entries | Why it does not fit today | Revisit when |\n| --- | --- | --- | --- |\n${parked.map((r) => `| \`${r.category}\` | ${r.count} | ${translations[r.category]?.[0] ?? "Does not currently provide a suitable capability for the hub."} | ${translations[r.category]?.[1] ?? "Revisit when its projects expose a stable, useful decision capability."} |`).join("\n")}\nCandidates awaiting review: ${candidates.map((r) => `\`${r.category}\` (${r.count})`).join(", ")}.\n`;
+}
+
+export function buildReadmeEnglish(assessments, catalog, shelf = { categories: [] }, i18n = {}) {
+  const c = coverage(assessments, catalog);
+  const missingEnglish = assessments.filter((a) => !i18n[a.repo]);
+  if (missingEnglish.length) throw new Error(`missing English summaries: ${missingEnglish.map((a) => a.repo).join(", ")}`);
+  const rows = [...assessments].sort(byCohortThenStars).map((a) =>
+    `| \`${a.repo}\` | ${a.decision} | ${a.form} | ${a.callable.join(", ")} | ${costLabel(a.cost)} | ${a.evidence === "static" ? "static" : "measured"} | ${i18n[a.repo]} |`,
+  ).join("\n");
+  return `# jev hub catalog
+
+Which Jev ecosystem projects can jevalan's hub serve, in what form, and at what cost?
+Generated from \`data/assessments.json\`. Universe snapshot: ${catalog.updated} (${catalog.source}).
+[Español](README.es.md)
+
+## How it fits
+
+~~~mermaid
+flowchart LR
+  C[Client / agent] -->|decision request| H[Jevalan: hub + contract]
+  H -->|selects capability| A[Adapter, if needed]
+  A --> T[Third-party tool]
+  T -->|typed result| H
+  H -->|validated response| C
+  D[jev-hub-catalog] -.->|maps interface, cost, and evidence| H
+~~~
+
+Jevalan keeps the shared contract: it discovers capabilities, routes requests, and validates responses. The tool provides the specialized decision; an adapter connects it when needed. This catalog helps assess integration effort, dependencies, and evidence. **Being listed does not mean a tool is integrated or its decisions are reliable.**
+
+## Coverage
+
+${c.triaged} screened · ${c.evaluated} evaluated (${c.inCatalog} of ${c.triaged + c.evaluated} analyzed projects are in the catalog) · ${c.untouched} untouched, out of ${c.total} visible catalog entries.
+
+A **screened** verdict comes from reading code; a **measured** verdict comes from running it. They are different kinds of evidence.
+
+## Cohorts
+
+- **A — fixed baseline:** 13 manually analyzed clones, used to calibrate the detector.
+- **B — by fit:** candidates in decision groups (routing, review, context, gates, supervision).
+- **C — remaining projects:** catalog metadata only, without a detailed verdict.
+
+| Project | Decision | Form | Callable | Cost | Evidence | Verdict |
+| --- | --- | --- | --- | --- | --- | --- |
+${rows}
+${englishShelfSection(shelf, catalog)}
+
+## Acknowledgements
+
+Special thanks to [jev-awesome](https://github.com/jev/awesome-jev) for maintaining the map that makes this ecosystem discoverable. Thanks to the projects and repositories in this catalog for sharing their work and making it available for evaluation. And thanks to the entire open source community: this work builds on your generosity, collaboration, and shared knowledge.`;
 }
 
 export function buildSite(assessments, catalog, template) {
@@ -134,12 +238,13 @@ if (process.argv[1] && process.argv[1].endsWith("build.mjs")) {
   const catalog = readJson(CATALOG);
   const shelf = readJson(SHELF);
   assertPublishable({ assessments, fit, catalog, hasRun, shelf });
-  writeFileSync(README, buildReadme(assessments, catalog, shelf));
+  const i18n = existsSync(I18N_EN) ? readJson(I18N_EN) : {};
+  writeFileSync(README, buildReadmeEnglish(assessments, catalog, shelf, i18n));
+  writeFileSync(README_ES, buildReadme(assessments, catalog, shelf));
   mkdirSync(dirname(SITE), { recursive: true });
   writeFileSync(SITE, buildSite(assessments, catalog, readFileSync(TEMPLATE, "utf8")));
   // Los ejemplos son opcionales: sin `npm run examples` el directorio sale igual, solo sin desplegables.
   const examples = existsSync(EXAMPLES) ? readJson(EXAMPLES) : { entries: {} };
-  const i18n = existsSync(I18N_EN) ? readJson(I18N_EN) : {};
   const generated = new Date().toISOString().slice(0, 10);
   // Solo puntúa lo que tiene prueba nuestra: el ranking lee los run.json, no los veredictos.
   const measured = assessments.filter((a) => a.evidence === "measured");
